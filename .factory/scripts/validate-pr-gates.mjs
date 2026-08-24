@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-import { readFile } from "node:fs/promises";
-import { readdir } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import process from "node:process";
 
 const trustedAssociations = new Set(["OWNER", "MEMBER", "COLLABORATOR"]);
@@ -51,16 +50,6 @@ function requirementId(issueNumber) {
   return `REQ-${String(issueNumber).padStart(3, "0")}`;
 }
 
-function reviewDecision(review) {
-  if (review.state === "APPROVED") return "approved";
-  if (review.state === "CHANGES_REQUESTED") return "changes-requested";
-  if (review.state !== "COMMENTED") return null;
-  const firstLine = (review.body ?? "").trim().split("\n")[0];
-  if (firstLine === "方案通过") return "approved";
-  if (firstLine === "需要修改" || firstLine.startsWith("需要修改：")) return "changes-requested";
-  return null;
-}
-
 function pathMatches(pattern, path) {
   let source = "^";
   for (let index = 0; index < pattern.length; index += 1) {
@@ -79,7 +68,7 @@ function pathMatches(pattern, path) {
 
 export function validateGateContext(context) {
   const errors = [];
-  const { pr, issue, issueComments, prComments, reviews, openLinkedPrs, comparisons, spec } = context;
+  const { pr, issue, issueComments, prComments, specTransitions, openLinkedPrs, comparisons, spec } = context;
 
   if (pr.state !== "OPEN") errors.push("pr:not-open");
   if (openLinkedPrs.length !== 1 || openLinkedPrs[0] !== pr.number) errors.push("pr:not-unique-open");
@@ -101,25 +90,27 @@ export function validateGateContext(context) {
       if (!spec.allowedPaths.some((pattern) => pathMatches(pattern, path))) errors.push(`scope:not-allowed:${path}`);
     }
 
-    if (spec.humanGates.includes("spec-review")) {
-      const review = reviews
-        .filter((item) => trusted(item) && reviewDecision(item))
-        .sort((a, b) => new Date(a.submittedAt) - new Date(b.submittedAt))
+    if (spec.humanGates.includes("spec-ready")) {
+      const transition = specTransitions
+        .filter((item) => ["ready_for_review", "convert_to_draft"].includes(item.event))
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
         .at(-1);
-      if (!review) {
-        errors.push("spec-review:missing");
-      } else if (reviewDecision(review) !== "approved") {
-        errors.push("spec-review:changes-requested");
-      } else if (!isFullSha(review.commitId)) {
-        errors.push("spec-review:invalid-sha");
-      } else if (!review.url) {
-        errors.push("spec-review:missing-source");
+      if (!transition) {
+        errors.push("spec-ready:missing");
+      } else if (transition.event === "convert_to_draft" || pr.isDraft) {
+        errors.push("spec-ready:pr-is-draft");
+      } else if (!trusted(transition)) {
+        errors.push("spec-ready:untrusted-actor");
+      } else if (!isFullSha(transition.commitId)) {
+        errors.push("spec-ready:invalid-sha");
+      } else if (!transition.url) {
+        errors.push("spec-ready:missing-source");
       } else {
-        const comparison = comparisons[review.commitId];
+        const comparison = comparisons[transition.commitId];
         if (!comparison || !comparison.ancestorOfHead) {
-          errors.push("spec-review:sha-not-in-pr-history");
+          errors.push("spec-ready:sha-not-in-pr-history");
         } else if (comparison.changedFiles.some((path) => protectedPlanPaths.some((pattern) => pattern.test(path)))) {
-          errors.push("spec-review:spec-drift");
+          errors.push("spec-ready:spec-drift");
         }
       }
     }
@@ -174,11 +165,11 @@ async function liveContext(event, token, repository) {
   const issueNumber = linkedIssueNumber(pr.body ?? "");
   if (!issueNumber) throw new Error("PR 正文缺少 Closes #<issue>");
 
-  const [issue, issueComments, prComments, reviews, prFiles, openPulls] = await Promise.all([
+  const [issue, issueComments, prComments, timeline, prFiles, openPulls] = await Promise.all([
     github(`${apiRoot}/issues/${issueNumber}`, token),
     paginate(`${apiRoot}/issues/${issueNumber}/comments`, token),
     paginate(`${apiRoot}/issues/${prNumber}/comments`, token),
-    paginate(`${apiRoot}/pulls/${prNumber}/reviews`, token),
+    paginate(`${apiRoot}/issues/${prNumber}/timeline`, token),
     paginate(`${apiRoot}/pulls/${prNumber}/files`, token),
     paginate(`${apiRoot}/pulls?state=open`, token),
   ]);
@@ -186,9 +177,10 @@ async function liveContext(event, token, repository) {
     .filter((candidate) => linkedIssueNumber(candidate.body ?? "") === issueNumber)
     .map((candidate) => candidate.number);
 
-  const reviewShas = reviews.map((review) => review.commit_id).filter(isFullSha);
+  const rawTransitions = timeline.filter((item) => ["ready_for_review", "convert_to_draft"].includes(item.event));
+  const transitionShas = rawTransitions.map((item) => item.commit_id).filter(isFullSha);
   const comparisons = {};
-  for (const sha of new Set(reviewShas)) {
+  for (const sha of new Set(transitionShas)) {
     const comparison = await github(`${apiRoot}/compare/${sha}...${pr.head.sha}`, token);
     comparisons[sha] = {
       ancestorOfHead: ["identical", "ahead"].includes(comparison.status),
@@ -214,6 +206,7 @@ async function liveContext(event, token, repository) {
     pr: {
       number: pr.number,
       state: pr.state.toUpperCase(),
+      isDraft: pr.draft,
       headSha: pr.head.sha,
       labels: pr.labels.map((label) => label.name),
       changedFiles: prFiles.map((file) => file.filename),
@@ -221,13 +214,12 @@ async function liveContext(event, token, repository) {
     issue: { number: issue.number },
     issueComments: issueComments.map(normalizeComment),
     prComments: prComments.map(normalizeComment),
-    reviews: reviews.map((review) => ({
-      body: review.body,
-      state: review.state,
-      commitId: review.commit_id,
-      authorAssociation: review.author_association,
-      submittedAt: review.submitted_at,
-      url: review.html_url,
+    specTransitions: rawTransitions.map((transition) => ({
+      event: transition.event,
+      commitId: transition.commit_id,
+      authorAssociation: transition.actor?.login === owner ? "OWNER" : "NONE",
+      createdAt: transition.created_at,
+      url: transition.url,
     })),
     openLinkedPrs,
     comparisons,

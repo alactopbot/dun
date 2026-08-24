@@ -16,14 +16,13 @@ function comment(body, overrides = {}) {
   };
 }
 
-function review(state = "APPROVED", overrides = {}) {
+function transition(event = "ready_for_review", overrides = {}) {
   return {
-    body: "",
-    state,
+    event,
     commitId: specSha,
     authorAssociation: "OWNER",
-    submittedAt: "2026-08-24T00:00:00Z",
-    url: "https://github.com/example/dun/pull/8#pullrequestreview-1",
+    createdAt: "2026-08-24T00:00:00Z",
+    url: "https://api.github.com/repos/example/dun/issues/events/1",
     ...overrides,
   };
 }
@@ -37,6 +36,7 @@ function validContext() {
     pr: {
       number: 8,
       state: "OPEN",
+      isDraft: false,
       headSha,
       labels: ["factory:verified"],
       changedFiles: ["app/exhibits/page.tsx", "docs/requirements/REQ-007-animal/delivery.md"],
@@ -44,7 +44,7 @@ function validContext() {
     issue: { number: 7 },
     issueComments: [comment("<!-- factory-handoff:v2 -->\nrequirement: REQ-007\nreview_pr: 8")],
     prComments: [verification()],
-    reviews: [review()],
+    specTransitions: [transition()],
     openLinkedPrs: [8],
     comparisons: { [specSha]: { ancestorOfHead: true, changedFiles: ["app/exhibits/page.tsx"] } },
     spec: {
@@ -53,52 +53,56 @@ function validContext() {
       mode: "supervised",
       pattern: "animal-exhibit-v1",
       reviewPr: 8,
-      humanGates: ["spec-review", "merge"],
+      humanGates: ["spec-ready", "merge"],
       allowedPaths: ["app/**", "docs/requirements/REQ-007-animal/**"],
       gateLevel: "deep",
     },
   };
 }
 
-test("标准 Approve Review 绑定 Spec 提交并允许实现继续", () => {
+test("Ready for review 事件绑定 Spec 提交并允许实现继续", () => {
   assert.deepEqual(validateGateContext(validContext()), { ok: true, errors: [] });
 });
 
-test("同账号可以用带提交绑定的 Comment Review 表达方案通过", () => {
+test("Draft 状态表示方案尚未通过", () => {
   const context = validContext();
-  context.reviews = [review("COMMENTED", { body: "方案通过\n\n设计与范围没有问题。" })];
+  context.pr.isDraft = true;
+  context.specTransitions = [];
+  assert.ok(validateGateContext(context).errors.includes("spec-ready:missing"));
+});
+
+test("Convert to draft 会撤销更早的方案通过", () => {
+  const context = validContext();
+  context.pr.isDraft = true;
+  context.specTransitions.push(transition("convert_to_draft", { createdAt: "2026-08-24T00:01:00Z" }));
+  assert.ok(validateGateContext(context).errors.includes("spec-ready:pr-is-draft"));
+});
+
+test("Convert 后再次 Ready 会以最新提交重新通过", () => {
+  const context = validContext();
+  context.specTransitions.push(
+    transition("convert_to_draft", { createdAt: "2026-08-24T00:01:00Z" }),
+    transition("ready_for_review", { createdAt: "2026-08-24T00:02:00Z" }),
+  );
   assert.equal(validateGateContext(context).ok, true);
 });
 
-test("Request changes 或更晚的需要修改会阻止进入实现", () => {
-  const nativeRejection = validContext();
-  nativeRejection.reviews.push(review("CHANGES_REQUESTED", { submittedAt: "2026-08-24T00:01:00Z" }));
-  assert.ok(validateGateContext(nativeRejection).errors.includes("spec-review:changes-requested"));
-
-  const commentRejection = validContext();
-  commentRejection.reviews.push(review("COMMENTED", {
-    body: "需要修改：补充回退方案",
-    submittedAt: "2026-08-24T00:01:00Z",
-  }));
-  assert.ok(validateGateContext(commentRejection).errors.includes("spec-review:changes-requested"));
-});
-
-test("拒绝非可信 Review、错误 SHA、缺失来源和 Spec 漂移", () => {
+test("拒绝非可信 Ready 操作者、错误 SHA、缺失来源和 Spec 漂移", () => {
   const untrusted = validContext();
-  untrusted.reviews[0].authorAssociation = "NONE";
-  assert.ok(validateGateContext(untrusted).errors.includes("spec-review:missing"));
+  untrusted.specTransitions[0].authorAssociation = "NONE";
+  assert.ok(validateGateContext(untrusted).errors.includes("spec-ready:untrusted-actor"));
 
   const shortSha = validContext();
-  shortSha.reviews[0].commitId = "abc123";
-  assert.ok(validateGateContext(shortSha).errors.includes("spec-review:invalid-sha"));
+  shortSha.specTransitions[0].commitId = "abc123";
+  assert.ok(validateGateContext(shortSha).errors.includes("spec-ready:invalid-sha"));
 
   const noSource = validContext();
-  noSource.reviews[0].url = "";
-  assert.ok(validateGateContext(noSource).errors.includes("spec-review:missing-source"));
+  noSource.specTransitions[0].url = "";
+  assert.ok(validateGateContext(noSource).errors.includes("spec-ready:missing-source"));
 
   const drift = validContext();
   drift.comparisons[specSha].changedFiles = ["docs/requirements/REQ-007-animal/design.md"];
-  assert.ok(validateGateContext(drift).errors.includes("spec-review:spec-drift"));
+  assert.ok(validateGateContext(drift).errors.includes("spec-ready:spec-drift"));
 });
 
 test("机读 Spec 清单约束唯一 PR 与全部变更路径", () => {
@@ -144,6 +148,7 @@ test("Trusted Pattern 可以自动通过 Spec，但仍需要独立验证与人�
   const context = validContext();
   context.spec.mode = "trusted";
   context.spec.humanGates = ["merge"];
-  context.reviews = [];
+  context.specTransitions = [];
+  context.pr.isDraft = false;
   assert.equal(validateGateContext(context).ok, true);
 });

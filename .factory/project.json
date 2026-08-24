@@ -12,9 +12,9 @@
   "humanPolicy": {
     "merge": "always",
     "gateChannel": "github-pr",
-    "specDecision": "github-review",
+    "specDecision": "draft-ready",
     "productAcceptance": "merge",
-    "existingTestChange": "github-spec-review",
+    "existingTestChange": "github-spec-ready",
     "newDependency": "always",
     "outsidePattern": "always"
   },

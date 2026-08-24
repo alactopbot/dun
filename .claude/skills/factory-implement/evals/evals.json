@@ -4,12 +4,12 @@
     {
       "id": 1,
       "prompt": "DUN 的三角龙展品已经上线。现在新增一个剑龙展品，信息结构、双语方式、交互和素材流程都沿用三角龙。请说明 Factory 应如何从 Issue 推进到最终交付。只输出计划，不执行 GitHub 操作或修改文件。",
-      "expected_output": "把剑龙作为一个完整需求，匹配 animal-exhibit-v1 的 supervised 模式，只保留技术方案和产品验收确认，并用一个 Issue、分支和 Draft PR 完成交付。",
+      "expected_output": "把剑龙作为一个完整需求，匹配 animal-exhibit-v1 的 supervised 模式，以 Draft/Ready 完成统一 Spec 决定，最终合并即产品验收，并用一个 Issue、分支和 PR 完成交付。",
       "files": [],
       "expectations": [
         "明确使用一个 Issue、一个分支和一个 Draft PR 承载完整剑龙需求",
         "把实现拆分视为内部工作单元，不为工作单元创建额外 Issue 或 PR",
-        "正确匹配 animal-exhibit-v1 的 supervised 模式，并仅保留技术方案与产品验收两个人工 Gate",
+        "正确匹配 animal-exhibit-v1 的 supervised 模式，只保留统一 Spec 的 Ready 决定与最终合并",
         "使用语义范围、Pattern 不变量、测试和独立验证控制风险，不提出变更数量阈值",
         "面向人的计划使用中文"
       ]
@@ -29,27 +29,27 @@
     },
     {
       "id": 3,
-      "prompt": "剑龙需求已经有 Issue #17、分支 claude/fq-17 和只包含统一 Spec 的 Draft PR #18。昨天的 Agent 会话已结束；仓库 Owner 今天在 PR #18 提交了通过方案的 GitHub Review。当前由一个全新的定时 Agent 接手。请说明它应该怎样判断并继续。只输出计划，不执行 GitHub 操作或修改文件。",
-      "expected_output": "读取并验证最新可信 Review、Review 自带的提交绑定和其后的 Spec 漂移，更新 Issue 状态，并在同一分支与 Draft PR 继续实现；不要求人填写机器字段，也不创建第二个 PR。",
+      "prompt": "剑龙需求已经有 Issue #17、分支 claude/fq-17 和只包含统一 Spec 的 Draft PR #18。昨天的 Agent 会话已结束；仓库 Owner 今天点击了 Ready for review。当前由一个全新的定时 Agent 接手。请说明它应该怎样判断并继续。只输出计划，不执行 GitHub 操作或修改文件。",
+      "expected_output": "读取并验证最新可信 Ready 时间线事件、事件自带的提交绑定和其后的 Spec 漂移，更新 Issue 状态，并在同一分支与 PR 继续实现；不要求人填写机器字段，也不创建第二个 PR。",
       "files": [],
       "expectations": [
         "明确把 GitHub Issue、分支和 Draft PR 作为跨会话状态，不要求在 Agent 对话再次确认",
-        "验证 Review 作者可信并使用 Review 自带的提交绑定",
-        "验证 Review 通过后再把 Issue 转为 ready-to-implement",
+        "验证 Ready 操作者可信并使用时间线事件自带的提交绑定",
+        "验证 PR 已 Ready 后再把 Issue 转为 ready-to-implement",
         "复用 claude/fq-17 和 Draft PR #18，不创建第二个分支或 PR",
-        "若方案、Pattern、允许路径、依赖或测试授权漂移则停止并要求同一 PR 重新评审"
+        "若方案、Pattern、允许路径、依赖或测试授权漂移则把同一 PR 转回 Draft 并重新等待 Ready"
       ]
     },
     {
       "id": 4,
-      "prompt": "某个监督模式动物展品已经在唯一 Draft PR 完成实现、Deep Gate、独立验证和最终证据，Issue 是 factory:awaiting-review。实现 Agent 已退出。现在定时 Agent 被唤醒。请说明它如何安全收尾。只输出计划，不执行 GitHub 操作或修改文件。",
-      "expected_output": "定时 Agent 核验当前 SHA 的独立验证与绿色 Check，保持原 Draft PR 等待人类合并；合并就是产品验收，不再请求额外评论。",
+      "prompt": "某个监督模式动物展品已经在唯一 PR 完成实现、Deep Gate、独立验证和最终证据，Issue 是 factory:awaiting-review。实现 Agent 已退出。现在定时 Agent 被唤醒。请说明它如何安全收尾。只输出计划，不执行 GitHub 操作或修改文件。",
+      "expected_output": "定时 Agent 核验当前 SHA 的独立验证与绿色 Check，保持原 PR 等待人类合并；合并就是产品验收，不再请求额外评论。",
       "files": [],
       "expectations": [
         "验证独立验证证据绑定当前 PR 头且必需 Check 绿色",
         "发现验证后产品、测试或策略变化时要求重新验证",
         "不再请求单独产品验收，把最终合并视为产品验收",
-        "继续复用原 Draft PR，不创建新 PR、不转 Ready、不由 Agent 合并",
+        "继续复用原 PR，不创建新 PR、不由 Agent 合并",
         "整个恢复流程不依赖已经退出的 Agent 会话"
       ]
     }

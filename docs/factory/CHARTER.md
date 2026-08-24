@@ -2,7 +2,7 @@
 
 本文件承载人类确认过的项目边界。执行规则见 `docs/factory/CONTRACT.md`，可机读配置见
 `.factory/project.json`。Agent 可以根据 GitHub Issue 在唯一 Draft PR 提议修改本文件或 Factory
-自身规则；只有该 PR 上可信、绑定 SHA 的人类决定才能批准提议，聊天记录不构成授权。
+自身规则；只有可信人类把该 PR 标为 Ready for review 才能批准提议，聊天记录不构成授权。
 
 ```
 CHARTER_STATUS: ready
@@ -36,7 +36,7 @@ LOAD_BEARING:
 TESTS_ARE_LOAD_BEARING: true
 ```
 
-既有测试的语义变化必须写入统一 Spec，并由同一 GitHub Draft PR 的可信 Review 接受；成熟
+既有测试的语义变化必须写入统一 Spec，并由可信人类将同一 GitHub Draft PR 标为 Ready；成熟
 Pattern 明确允许的机械迁移可自动通过。聊天记录不作为授权来源。新增测试文件不受
 此限制，但仍需证明它能够在旧行为上失败。
 
@@ -74,7 +74,7 @@ NEVER_AUTOMATE:
 DONE:
   - 规定等级的 gates.sh 最终报告 FACTORY_GATES status=GREEN
   - 行为变化具有能在旧实现上失败的测试或等价证据
-  - 既有测试的修改已写入并通过 GitHub Spec Review
+  - 既有测试的修改已写入 Spec 并由可信人类将 PR 标为 Ready
   - 完整需求已实现，且没有越出交接与 Pattern 允许范围
   - Pattern 的全部不变量得到验证
   - 全新上下文的独立验证器已接受
@@ -109,7 +109,7 @@ STOP_IF:
 ## Pattern 校准
 
 - 新模式以 `bootstrap` 运行，首个完整需求用于建立规范和验收基线。
-- `supervised` 模式只保留统一 Spec Review；最终合并同时代表产品验收。
+- `supervised` 模式只保留统一 Spec 的 Draft/Ready 决定；最终合并同时代表产品验收。
 - 达到 Pattern 的连续干净执行条件后可晋级 `trusted`。
 - `autonomous` 是可机读的未来级别，当前项目禁用，不能由 Agent 自行启用。
 - 任何拒绝、人工纠正、逃逸缺陷、越界或 Pattern 升版都会触发降级评估。

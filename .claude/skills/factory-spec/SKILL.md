@@ -1,6 +1,6 @@
 ---
 name: factory-spec
-description: 把一个完整 Issue 的产品、技术、素材、风险、测试和验收上下文整合成统一 Spec，并在同一个 GitHub Draft PR 上通过标准 Review 迭代。用于新模式、监督模式、Review 要求修改或范围变化。
+description: 把一个完整 Issue 的产品、技术、素材、风险、测试和验收上下文整合成统一 Spec，并用同一个 GitHub Draft PR 的 Draft/Ready 状态迭代。用于新模式、监督模式、方案反馈或范围变化。
 ---
 
 # Factory Spec
@@ -18,35 +18,36 @@ Spec 阶段交付一个可执行的完整方案，不把需求拆成更多 Issue
 推送分支并创建该需求唯一 Draft PR。`bootstrap` 和 `supervised` 加 `factory:plan-review`，Issue 改为
 `factory:wait-to-implement`，然后停止；不在 Agent 会话等待批准。
 
-## 人工 Review
+## 人工决定
 
-人类只使用 GitHub 标准 Review：
+Draft 状态就是方案阶段：
 
-- 没问题：**Approve**。PR 作者与人类账号相同时，用 **Comment** Review，第一行写 `方案通过`。
-- 有问题：**Request changes** 并写要求。同账号时用 **Comment** Review，第一行写 `需要修改`，
-  后续正文写反馈。
+- 有问题：保持 Draft，直接留下普通 PR 评论。后续 Agent 把评论作为新的 Spec 输入，在同一 PR 修改。
+- 没问题：点击 **Ready for review**，表示 Spec 通过并允许进入实现。
+- 已经 Ready 后需要撤销：点击 **Convert to draft** 并留下评论。
 
-GitHub Review 自带提交 SHA、作者和时间，Factory 自动读取。人类不填写 SHA、摘要或结构化字段；
-Agent 不替人提交 Review。
+GitHub 时间线事件自带操作者、提交 SHA 和时间，Factory 自动读取。人类不填写关键词、SHA、摘要或
+结构化字段。Agent 可以因 Spec 漂移撤回到 Draft，但不得替人点击 Ready for review。
 
-## Review 后恢复
+## 状态恢复
 
-后续 Agent 读取最新可信且有明确决定的 Review：
+后续 Agent 读取 PR 状态、最新可信 Ready/Convert 事件和 Draft 期间新增的普通评论：
 
-- `CHANGES_REQUESTED` 或 `需要修改`：把反馈当作新的 Spec 输入，更新同一个 `design.md`、
-  `factory.json`、分支和 PR，再请求 Review。不得创建第二个 PR。
-- `APPROVED` 或 `方案通过`：验证 Review 提交属于 PR 历史，且之后没有修改 `design.md`、
+- PR 仍是 Draft：处理新反馈并更新同一个 `design.md`、`factory.json`、分支和 PR，继续等待；不得
+  创建第二个 PR。
+- 最新可信事件是 Ready for review：验证事件提交属于 PR 历史，且之后没有修改 `design.md`、
   `factory.json`、Pattern 或项目策略；随后移除 `factory:plan-review`，把 Issue 改为
   `factory:ready-to-implement`。
+- 最新事件是 Convert to draft：撤销之前的通过，回到方案阶段。
 
-若批准后仅增加实现代码，Spec Review 继续有效；若产品、技术、依赖、既有测试语义或允许范围
-变化，先更新 Spec 并重新 Review。
+Ready 后仅增加实现代码时，Spec 通过继续有效；若产品、技术、依赖、既有测试语义或允许范围变化，
+先把 PR 转回 Draft、更新 Spec，并重新等待人类点击 Ready for review。
 
 ## 成熟度
 
 - `bootstrap`：人工审阅完整 Spec。
 - `supervised`：人工审阅相对 Pattern 的差异 Spec。
-- `trusted`：Pattern 自动通过 Spec，仍生成精简 `design.md` 和 `factory.json`，不等待人工 Review。
+- `trusted`：Pattern 自动通过 Spec，仍生成精简 `design.md` 和 `factory.json`，不等待人工操作。
 - `autonomous`：只有项目配置开启时可用；DUN 当前禁用。
 
 最终合并就是产品验收，不再设置独立 `product-acceptance` 确认。

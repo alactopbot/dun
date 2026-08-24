@@ -17,9 +17,9 @@
       "properties": {
         "merge": { "const": "always" },
         "gateChannel": { "const": "github-pr" },
-        "specDecision": { "const": "github-review" },
+        "specDecision": { "const": "draft-ready" },
         "productAcceptance": { "const": "merge" },
-        "existingTestChange": { "const": "github-spec-review" },
+        "existingTestChange": { "const": "github-spec-ready" },
         "newDependency": { "const": "always" },
         "outsidePattern": { "const": "always" }
       },

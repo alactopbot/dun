@@ -5,7 +5,7 @@
   "mode": "bootstrap",
   "pattern": "new",
   "reviewPr": 22,
-  "humanGates": ["spec-review", "merge"],
+  "humanGates": ["spec-ready", "merge"],
   "allowedPaths": [
     ".factory/**",
     ".github/workflows/**",

@@ -11,6 +11,6 @@ Codex 使用 `.agents/skills/` 中的适配器，实际流程以 `.claude/skills
 
 仓库 Hook 只是纵深保护，GitHub 规则与人工合并仍是最终边界。
 
-需要人工 Spec 决策时，只认该需求唯一 GitHub Draft PR 上的可信 Review。GitHub 自动绑定提交；
-人类不填写机器字段，Agent 不替人 Review。会话可以中断或更换，不作为流程状态来源。最终合并
-同时代表产品验收。
+需要人工 Spec 决策时，Draft 表示仍在修改：人类有问题就留普通 PR 评论，没有问题就点击 Ready for
+review。GitHub 时间线自动绑定提交；人类不填写机器字段，Agent 不替人点击 Ready。会话可以中断或
+更换，不作为流程状态来源。最终合并同时代表产品验收。

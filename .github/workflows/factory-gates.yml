@@ -3,8 +3,6 @@ name: Factory Gates
 on:
   pull_request:
     types: [opened, synchronize, reopened, edited, labeled, unlabeled, ready_for_review, converted_to_draft]
-  pull_request_review:
-    types: [submitted, dismissed]
 
 permissions:
   contents: read

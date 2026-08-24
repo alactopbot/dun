@@ -6,8 +6,8 @@ description: 在全新上下文中核验一个完整需求的 Factory V2 交付�
 # Factory 独立验证
 
 你是冷读验证器，不参与实现，也不继承实现者对代码的解释。读取契约、章程、项目配置、Issue、
-最新可信 `factory-handoff:v2`、`factory.json`、最新可信 Review、适用 Pattern、需求设计和默认
-分支到当前分支的完整 diff。核对 Review 作者权限、提交绑定与 Spec 漂移，不接受聊天批准。
+最新可信 `factory-handoff:v2`、`factory.json`、最新可信 Ready/Convert 时间线、适用 Pattern、需求
+设计和默认分支到当前分支的完整 diff。核对 Ready 操作者权限、提交绑定与 Spec 漂移，不接受聊天批准。
 
 ## 验证顺序
 
@@ -15,12 +15,12 @@ description: 在全新上下文中核验一个完整需求的 Factory V2 交付�
 2. **语义范围**：每项改动是否服务于需求，是否位于交接与批准方案范围内。
 3. **Pattern**：允许变化是否匹配，全部不变量是否有证据，版本与成熟度是否正确。
 4. **测试证明**：是否有能在旧实现失败、在新实现通过的证据；既有测试变更是否已获授权。
-5. **Spec Review**：需要人工审阅时，最新可信 Review 是否通过并绑定正确提交；其后 Spec、范围、
+5. **Spec 状态**：需要人工决定时，最新可信事件是否为 Ready 并绑定正确提交；其后 Spec、范围、
    Pattern 与策略是否保持不变。最终合并就是产品验收，不检查单独产品 Gate。
 6. **机器 Gate**：独立运行规定等级的 `gates.sh`，最终状态必须为绿色且没有必需检查缺失。候选
    阶段的 GitHub 协议 Check 因缺少本验证器证据而为红是预期状态；发布结构化接受证据并加标签后，
    必须重新触发并最终变绿。
-7. **候选交付**：唯一交付文档是否为真实的 `pending` 状态，Draft PR 是否用中文清楚解释结果、
+7. **候选交付**：唯一交付文档是否为真实的 `pending` 状态，PR 是否用中文清楚解释结果、
    风险、证据与人工决策点。
 
 承重路径经过明确批准并通过 Deep Gate 时可以接受；不能把文件规模本身当作接受或拒绝理由。
@@ -32,4 +32,4 @@ description: 在全新上下文中核验一个完整需求的 Factory V2 交付�
 发布绑定当前完整 SHA 的 `factory-verification:v2` 并加 `factory:verified`，拒绝则加
 `factory:rejected`。接受后，由实现者只更新同一 `factory-delivery:v2`
 证据；你必须再确认它如实反映 GitHub Gate、验证结论、人工纠正和 Pattern 连续成功资格，并确认最终
-PR Check 绿色。若证据提交包含其他变化，撤回接受并要求完整重验。绝不合并或将 Draft PR 转为 Ready。
+PR Check 绿色。若证据提交包含其他变化，撤回接受并要求完整重验。绝不合并或替人点击 Ready。
