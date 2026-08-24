@@ -101,12 +101,15 @@ export function validateGateContext(context) {
         errors.push("spec-ready:pr-is-draft");
       } else if (!trusted(transition)) {
         errors.push("spec-ready:untrusted-actor");
-      } else if (!isFullSha(transition.commitId ?? handoff.fields.approved_plan_sha)) {
+      } else if (!isFullSha(transition.commitId ?? transition.runHeadSha)) {
         errors.push("spec-ready:invalid-sha");
-      } else if (!transition.url) {
+      } else if (!transition.url || (!transition.commitId && !transition.runUrl)) {
         errors.push("spec-ready:missing-source");
       } else {
-        const approvedSha = transition.commitId ?? handoff.fields.approved_plan_sha;
+        const approvedSha = transition.commitId ?? transition.runHeadSha;
+        if (handoff.fields.approved_plan_sha !== approvedSha) {
+          errors.push("handoff:approved-plan-sha-mismatch");
+        }
         const comparison = comparisons[approvedSha];
         if (!comparison || !comparison.ancestorOfHead) {
           errors.push("spec-ready:sha-not-in-pr-history");
@@ -147,9 +150,29 @@ async function github(path, token) {
   return response.json();
 }
 
-async function paginate(path, token) {
+export async function paginate(path, token, collectionKey) {
   const separator = path.includes("?") ? "&" : "?";
-  return github(`${path}${separator}per_page=100`, token);
+  const items = [];
+  for (let page = 1; ; page += 1) {
+    const data = await github(`${path}${separator}per_page=100&page=${page}`, token);
+    const pageItems = collectionKey ? data[collectionKey] : data;
+    if (!Array.isArray(pageItems)) throw new Error(`GitHub API 分页响应不是数组: ${path}`);
+    items.push(...pageItems);
+    if (pageItems.length < 100) return items;
+  }
+}
+
+export function readyRunForTransition(transition, workflowRuns, prNumber) {
+  const transitionTime = new Date(transition.created_at).getTime();
+  return workflowRuns
+    .filter((item) => item.name === "Factory Gates" && item.event === "pull_request")
+    .filter((item) => item.pull_requests?.some((pull) => pull.number === prNumber))
+    .filter((item) => {
+      const runTime = new Date(item.created_at).getTime();
+      return runTime >= transitionTime && runTime - transitionTime <= 5 * 60 * 1000;
+    })
+    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+    .at(0);
 }
 
 function linkedIssueNumber(body) {
@@ -166,29 +189,32 @@ async function liveContext(event, token, repository) {
   const issueNumber = linkedIssueNumber(pr.body ?? "");
   if (!issueNumber) throw new Error("PR 正文缺少 Closes #<issue>");
 
-  const [issue, issueComments, prComments, timeline, prFiles, openPulls] = await Promise.all([
+  const [issue, issueComments, prComments, timeline, prFiles, openPulls, workflowRuns] = await Promise.all([
     github(`${apiRoot}/issues/${issueNumber}`, token),
     paginate(`${apiRoot}/issues/${issueNumber}/comments`, token),
     paginate(`${apiRoot}/issues/${prNumber}/comments`, token),
     paginate(`${apiRoot}/issues/${prNumber}/timeline`, token),
     paginate(`${apiRoot}/pulls/${prNumber}/files`, token),
     paginate(`${apiRoot}/pulls?state=open`, token),
+    paginate(
+      `${apiRoot}/actions/runs?event=pull_request&branch=${encodeURIComponent(pr.head.ref)}`,
+      token,
+      "workflow_runs",
+    ),
   ]);
   const openLinkedPrs = openPulls
     .filter((candidate) => linkedIssueNumber(candidate.body ?? "") === issueNumber)
     .map((candidate) => candidate.number);
 
   const rawTransitions = timeline.filter((item) => ["ready_for_review", "convert_to_draft"].includes(item.event));
-  const latestHandoff = latestMarker(issueComments.map((comment) => ({
-    body: comment.body,
-    authorAssociation: comment.author_association,
-    createdAt: comment.created_at,
-    url: comment.html_url,
-  })), "factory-handoff:v2");
-  const handoffApprovedSha = latestHandoff?.fields.approved_plan_sha;
+  const readyRuns = new Map();
+  for (const transition of rawTransitions.filter((item) => item.event === "ready_for_review")) {
+    const run = readyRunForTransition(transition, workflowRuns, prNumber);
+    if (run) readyRuns.set(transition.id, run);
+  }
   const transitionShas = [
     ...rawTransitions.map((item) => item.commit_id),
-    handoffApprovedSha,
+    ...[...readyRuns.values()].map((run) => run.head_sha),
   ].filter(isFullSha);
   const comparisons = {};
   for (const sha of new Set(transitionShas)) {
@@ -228,6 +254,8 @@ async function liveContext(event, token, repository) {
     specTransitions: rawTransitions.map((transition) => ({
       event: transition.event,
       commitId: transition.commit_id,
+      runHeadSha: readyRuns.get(transition.id)?.head_sha,
+      runUrl: readyRuns.get(transition.id)?.html_url,
       authorAssociation: transition.actor?.login === owner ? "OWNER" : "NONE",
       createdAt: transition.created_at,
       url: transition.url,

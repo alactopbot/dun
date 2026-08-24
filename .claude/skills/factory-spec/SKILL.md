@@ -26,9 +26,9 @@ Draft 状态就是方案阶段：
 - 没问题：点击 **Ready for review**，表示 Spec 通过并允许进入实现。
 - 已经 Ready 后需要撤销：点击 **Convert to draft** 并留下评论。
 
-GitHub 时间线事件记录操作者和时间；后续 Agent 在进入实现前把当时 PR 头写入交接，Factory 自动
-校验。人类不填写关键词、SHA、摘要或结构化字段。Agent 可以因 Spec 漂移撤回到 Draft，但不得替人
-点击 Ready for review。
+GitHub 时间线事件记录操作者和时间，对应 Factory Gates Actions 运行记录不可变地保存当时 PR 头；
+后续 Agent 只把该值镜像到交接，Factory 以运行记录为准。人类不填写关键词、SHA、摘要或结构化
+字段。Agent 可以因 Spec 漂移撤回到 Draft，但不得替人点击 Ready for review。
 
 ## 状态恢复
 

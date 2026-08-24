@@ -1,7 +1,11 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { validateGateContext } from "../.factory/scripts/validate-pr-gates.mjs";
+import {
+  paginate,
+  readyRunForTransition,
+  validateGateContext,
+} from "../.factory/scripts/validate-pr-gates.mjs";
 
 const specSha = "1".repeat(40);
 const headSha = "2".repeat(40);
@@ -64,10 +68,24 @@ test("Ready for review 事件绑定 Spec 提交并允许实现继续", () => {
   assert.deepEqual(validateGateContext(validContext()), { ok: true, errors: [] });
 });
 
-test("GitHub Ready 事件缺少 commit_id 时使用 Agent 记录的当时 PR 头", () => {
+test("GitHub Ready 事件缺少 commit_id 时使用 Actions 运行记录的不可变 PR 头", () => {
   const context = validContext();
   context.specTransitions[0].commitId = null;
+  context.specTransitions[0].runHeadSha = specSha;
+  context.specTransitions[0].runUrl = "https://github.com/example/dun/actions/runs/1";
   assert.equal(validateGateContext(context).ok, true);
+});
+
+test("可编辑 handoff 不能把 Ready 批准移动到 Spec 漂移后的新头", () => {
+  const context = validContext();
+  context.specTransitions[0].commitId = null;
+  context.specTransitions[0].runHeadSha = specSha;
+  context.specTransitions[0].runUrl = "https://github.com/example/dun/actions/runs/1";
+  context.issueComments[0] = comment(`<!-- factory-handoff:v2 -->\nrequirement: REQ-007\nreview_pr: 8\napproved_plan_sha: ${headSha}`);
+  context.comparisons[specSha].changedFiles = ["docs/requirements/REQ-007-animal/design.md"];
+  const result = validateGateContext(context);
+  assert.ok(result.errors.includes("handoff:approved-plan-sha-mismatch"));
+  assert.ok(result.errors.includes("spec-ready:spec-drift"));
 });
 
 test("Draft 状态表示方案尚未通过", () => {
@@ -157,4 +175,35 @@ test("Trusted Pattern 可以自动通过 Spec，但仍需要独立验证与人�
   context.specTransitions = [];
   context.pr.isDraft = false;
   assert.equal(validateGateContext(context).ok, true);
+});
+
+test("GitHub 分页读取第 101 项及后续页面", async () => {
+  const originalFetch = globalThis.fetch;
+  const firstPage = Array.from({ length: 100 }, (_, index) => ({ id: index + 1 }));
+  globalThis.fetch = async (url) => {
+    const page = new URL(url).searchParams.get("page");
+    return new Response(JSON.stringify(page === "1" ? firstPage : [{ id: 101 }]), {
+      status: 200,
+      headers: { "content-type": "application/json" },
+    });
+  };
+  try {
+    const result = await paginate("/repos/example/dun/pulls/8/files", "token");
+    assert.equal(result.length, 101);
+    assert.equal(result.at(-1).id, 101);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("Ready 只绑定事件之后最早的同 PR Factory Gates 运行头", () => {
+  const transition = { created_at: "2026-08-24T00:00:00Z" };
+  const runs = [
+    { name: "Factory Gates", event: "pull_request", created_at: "2026-08-23T23:59:59Z", head_sha: "old", pull_requests: [{ number: 8 }] },
+    { name: "Other", event: "pull_request", created_at: "2026-08-24T00:00:01Z", head_sha: "other", pull_requests: [{ number: 8 }] },
+    { name: "Factory Gates", event: "pull_request", created_at: "2026-08-24T00:00:02Z", head_sha: specSha, pull_requests: [{ number: 8 }] },
+    { name: "Factory Gates", event: "pull_request", created_at: "2026-08-24T00:00:03Z", head_sha: headSha, pull_requests: [{ number: 8 }] },
+    { name: "Factory Gates", event: "pull_request", created_at: "2026-08-24T00:00:01Z", head_sha: "wrong-pr", pull_requests: [{ number: 9 }] },
+  ];
+  assert.equal(readyRunForTransition(transition, runs, 8).head_sha, specSha);
 });

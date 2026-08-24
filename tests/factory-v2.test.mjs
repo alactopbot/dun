@@ -89,6 +89,7 @@ test("Factory V2 使用需求与成熟 Pattern 驱动渐进自治", async () => 
 
   const workflow = await read(".github/workflows/factory-gates.yml");
   assert.match(workflow, /pull_request:/);
+  assert.match(workflow, /actions: read/);
   assert.match(workflow, /ready_for_review/);
   assert.match(workflow, /converted_to_draft/);
   assert.match(workflow, /gates\.sh deep/);

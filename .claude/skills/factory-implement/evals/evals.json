@@ -30,11 +30,11 @@
     {
       "id": 3,
       "prompt": "剑龙需求已经有 Issue #17、分支 claude/fq-17 和只包含统一 Spec 的 Draft PR #18。昨天的 Agent 会话已结束；仓库 Owner 今天点击了 Ready for review。当前由一个全新的定时 Agent 接手。请说明它应该怎样判断并继续。只输出计划，不执行 GitHub 操作或修改文件。",
-      "expected_output": "读取并验证最新可信 Ready 时间线事件，自动记录当时 PR 头并验证其后的 Spec 漂移，更新 Issue 状态，并在同一分支与 PR 继续实现；不要求人填写机器字段，也不创建第二个 PR。",
+      "expected_output": "读取并验证最新可信 Ready 时间线事件及对应 Actions 运行头，验证其后的 Spec 漂移，更新 Issue 状态，并在同一分支与 PR 继续实现；不要求人填写机器字段，也不创建第二个 PR。",
       "files": [],
       "expectations": [
         "明确把 GitHub Issue、分支和 Draft PR 作为跨会话状态，不要求在 Agent 对话再次确认",
-        "验证 Ready 操作者可信并自动记录当时 PR 头",
+        "验证 Ready 操作者可信并使用对应 Actions 运行记录的不可变 PR 头",
         "验证 PR 已 Ready 后再把 Issue 转为 ready-to-implement",
         "复用 claude/fq-17 和 Draft PR #18，不创建第二个分支或 PR",
         "若方案、Pattern、允许路径、依赖或测试授权漂移则把同一 PR 转回 Draft 并重新等待 Ready"

@@ -41,9 +41,9 @@ Issue 交接只用于发现与恢复状态，不能扩大 `factory.json` 的权�
    - 已经 Ready 后需要撤销：点击 **Convert to draft** 并留下评论。
 4. 后续 Agent 读取 PR 状态与最新可信时间线事件。Draft 时处理反馈并继续等待；Ready 时移除
    `factory:plan-review`，把 Issue 设为 `factory:ready-to-implement`。
-5. Ready 时间线事件记录可信操作者和时间；后续 Agent 在进入实现前把当时 PR 头记录为
-   `approved_plan_sha`。Factory 校验该完整 SHA 的祖先关系与其后 diff。`design.md`、`factory.json`、
-   Pattern 或项目策略在 Ready 后变化会自动使通过失效；普通实现提交不会。
+5. Ready 时间线事件记录可信操作者和时间，对应 Factory Gates Actions 运行记录不可变地保存当时
+   PR 头。Agent 只把该值镜像为 `approved_plan_sha`；Gate 以 Actions 记录为准并要求两者一致，再
+   校验祖先关系与其后 diff。Spec 或策略在 Ready 后变化会自动使通过失效；普通实现提交不会。
 
 人工只审阅产品和技术内容，不填写关键词、SHA、摘要或结构化协议。Agent 可以因 Spec 漂移把 PR
 转回 Draft，但不得替人点击 Ready for review。
@@ -95,7 +95,7 @@ load_bearing: true | false
 gate_level: fast | full | deep
 human_gates: spec-ready=required | automatic, merge=required
 review_pr: <唯一 PR 编号>
-approved_plan_sha: <Agent 在 Ready 后记录的完整 PR 头 | automatic | pending>
+approved_plan_sha: <Actions Ready 运行头的只读镜像 | automatic | pending>
 created_at: <UTC timestamp>
 ```
 
