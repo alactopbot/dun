@@ -25,7 +25,8 @@
   "humanGates": {
     "bootstrap": ["product-intent", "technical-plan", "product-acceptance"],
     "supervised": ["technical-plan", "product-acceptance"],
-    "trusted": []
+    "trusted": [],
+    "autonomous": []
   },
   "promotion": {
     "consecutiveCleanRuns": 3,
@@ -37,6 +38,10 @@
       "no-escaped-defect",
       "within-pattern-boundary"
     ]
+  },
+  "autonomousEligibility": {
+    "enabled": false,
+    "requiresProjectApproval": true
   },
   "demoteOn": [
     "verifier-rejected",

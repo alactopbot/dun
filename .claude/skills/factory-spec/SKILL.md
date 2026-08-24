@@ -37,6 +37,11 @@ Pattern，不要求重新确认。
 需求完全落在成熟 Pattern 内时，方案与产品验收自动通过。Agent 仍需写出精简设计、执行全部
 证据与独立验证；任何越界或不确定性立即退回 `supervised` 或新模式。
 
+### autonomous
+
+只有 `.factory/project.json` 显式开启时才可使用；DUN 当前禁用。禁用状态下不得用它绕过任何
+项目级人工策略，尤其不能自动合并或发布。
+
 ## 内部 work units
 
 将实现拆成可以顺序验证和恢复的内部 work units。每项说明行为结果、预期路径、失败证据和完成
@@ -62,7 +67,7 @@ Pattern，不要求重新确认。
 <!-- factory-handoff:v2 -->
 requirement: REQ-<issue-number>
 disposition: ready-to-implement
-mode: bootstrap | supervised | trusted
+mode: bootstrap | supervised | trusted | autonomous
 pattern: <pattern-id | new>
 pattern_version: <number | pending>
 done_when: <完整且可验证的产品结果>

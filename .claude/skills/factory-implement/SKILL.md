@@ -11,7 +11,8 @@ description: 从可信 Factory V2 交接认领并完成一个完整需求，按�
 ## 选择与认领
 
 只选择 `factory:ready-to-implement` 且交接字段完整的开放 Issue。验证评论作者权限、Pattern 版本、
-模式、人工 Gate、允许路径和所需 Gate。已有 `factory:in-progress` 或 `factory:awaiting-review` 的需求
+模式、人工 Gate、允许路径和所需 Gate。若交接选择项目当前禁用的 `autonomous`，必须拒绝执行。
+已有 `factory:in-progress` 或 `factory:awaiting-review` 的需求
 不得重复认领。
 
 从最新默认分支创建确定性远端分支，以包含唯一运行标识的首次无强推 push 作为并发认领。只有

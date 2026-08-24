@@ -25,10 +25,11 @@
 - `bootstrap`：第一次建立模式，允许按产品意图、技术方案和产品验收逐步校准。
 - `supervised`：复用已验证模式，只保留 Pattern 声明的人工 Gate。
 - `trusted`：连续满足 Pattern 晋级条件后，技术方案和产品验收自动通过。
+- `autonomous`：为未来扩大自动执行边界保留的级别，只有项目策略显式开启后才可选择。
 
 Pattern 只对其明确允许的变化生效，并且必须保持全部不变量。若独立验证失败、人工修改方案或
 验收结论、出现逃逸缺陷、越出 Pattern 边界或 Pattern 升版，立即降级。项目配置当前始终要求
-人工合并，且不启用自动部署。
+人工合并，且不启用自动部署。DUN 当前禁用 `autonomous`，因此最高有效级别是 `trusted`。
 
 ## GitHub 状态协议
 
@@ -50,7 +51,7 @@ Pattern 只对其明确允许的变化生效，并且必须保持全部不变量
 <!-- factory-handoff:v2 -->
 requirement: REQ-<issue-number>
 disposition: ready-to-implement
-mode: bootstrap | supervised | trusted
+mode: bootstrap | supervised | trusted | autonomous
 pattern: <pattern-id | new>
 pattern_version: <number | pending>
 done_when: <可验证的完整产品结果>

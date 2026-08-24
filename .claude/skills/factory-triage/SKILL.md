@@ -36,7 +36,8 @@ work units，不创建额外 Issue 或 PR。
 - GitHub 中最近的 `factory-delivery:v2` 是否触发降级。
 
 完全匹配时使用该 Pattern 的当前成熟度：首个模式为 `bootstrap`，校准期为 `supervised`，达到
-连续干净执行条件后为 `trusted`。只要越出边界或无法确认，就按新模式进入方案阶段，不得勉强
+连续干净执行条件后为 `trusted`。只有项目策略显式启用时才允许选择 `autonomous`，DUN 当前禁用。
+只要越出边界或无法确认，就按新模式进入方案阶段，不得勉强
 套用成熟 Pattern。
 
 ## 分类
@@ -59,7 +60,7 @@ work units，不创建额外 Issue 或 PR。
 <!-- factory-handoff:v2 -->
 requirement: REQ-<issue-number>
 disposition: ready-to-implement
-mode: bootstrap | supervised | trusted
+mode: bootstrap | supervised | trusted | autonomous
 pattern: <pattern-id | new>
 pattern_version: <number | pending>
 done_when: <完整且可验证的产品结果>

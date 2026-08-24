@@ -109,6 +109,7 @@ STOP_IF:
 - 新模式以 `bootstrap` 运行，首个完整需求用于建立规范和验收基线。
 - `supervised` 模式只保留 Pattern 声明的方案与产品验收 Gate。
 - 达到 Pattern 的连续干净执行条件后可晋级 `trusted`。
+- `autonomous` 是可机读的未来级别，当前项目禁用，不能由 Agent 自行启用。
 - 任何拒绝、人工纠正、逃逸缺陷、越界或 Pattern 升版都会触发降级评估。
 - 自治等级不改变项目级人工合并规则。
 

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "DUN Factory project policy",
   "type": "object",
-  "required": ["factoryVersion", "project", "tier", "language", "humanPolicy", "automation", "evidence"],
+  "required": ["factoryVersion", "project", "tier", "language", "humanPolicy", "maturity", "automation", "evidence"],
   "properties": {
     "factoryVersion": { "const": 2 },
     "project": { "type": "string", "minLength": 1 },
@@ -12,6 +12,10 @@
       "required": ["workflow", "productPrimary", "productSecondary", "code"]
     },
     "humanPolicy": { "type": "object" },
+    "maturity": {
+      "type": "object",
+      "required": ["levels", "autonomousEnabled"]
+    },
     "automation": {
       "type": "object",
       "required": ["autoMerge", "autoDeploy"]

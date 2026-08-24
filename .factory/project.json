@@ -15,6 +15,10 @@
     "newDependency": "always",
     "outsidePattern": "always"
   },
+  "maturity": {
+    "levels": ["bootstrap", "supervised", "trusted", "autonomous"],
+    "autonomousEnabled": false
+  },
   "automation": {
     "autoMerge": false,
     "autoDeploy": false

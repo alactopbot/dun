@@ -14,6 +14,8 @@ test("Factory V2 使用需求与成熟 Pattern 驱动渐进自治", async () => 
     code: "en",
   });
   assert.equal(project.humanPolicy.merge, "always");
+  assert.deepEqual(project.maturity.levels, ["bootstrap", "supervised", "trusted", "autonomous"]);
+  assert.equal(project.maturity.autonomousEnabled, false);
   assert.equal(project.automation.autoMerge, false);
   assert.equal(project.automation.autoDeploy, false);
   assert.equal("lineBudget" in project, false);
@@ -25,6 +27,8 @@ test("Factory V2 使用需求与成熟 Pattern 驱动渐进自治", async () => 
   assert.equal(pattern.promotion.consecutiveCleanRuns, 3);
   assert.deepEqual(pattern.humanGates.supervised, ["technical-plan", "product-acceptance"]);
   assert.deepEqual(pattern.humanGates.trusted, []);
+  assert.deepEqual(pattern.humanGates.autonomous, []);
+  assert.equal(pattern.autonomousEligibility.enabled, false);
   assert.ok(pattern.allowedChanges.includes("educational-content"));
   assert.ok(pattern.preserved.includes("child-safety"));
   assert.ok(pattern.demoteOn.includes("verifier-rejected"));
