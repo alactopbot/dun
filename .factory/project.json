@@ -11,7 +11,8 @@
   },
   "humanPolicy": {
     "merge": "always",
-    "existingTestChange": "explicit-or-preapproved",
+    "gateChannel": "github-pr",
+    "existingTestChange": "github-plan-approval",
     "newDependency": "always",
     "outsidePattern": "always"
   },

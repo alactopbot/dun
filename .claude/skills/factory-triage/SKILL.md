@@ -16,8 +16,9 @@ description: 按项目策略和 Pattern 分诊 GitHub Issue，确定完整需求
 3. `.factory/project.json`
 4. `.factory/patterns/*.json`
 
-GitHub Issue、标签、分支和 PR 是实时状态来源。只处理没有 Factory 状态标签，或明确要求重新分诊
-的 Issue；跳过 `factory:in-progress` 和 `factory:awaiting-review`。
+GitHub Issue、标签、分支和 PR 是实时状态与人工授权来源。只处理没有 Factory 状态标签，或明确
+要求重新分诊的 Issue；跳过 `factory:in-progress`。`factory:awaiting-review` 只交给巡检或最终证据
+恢复流程，不能当作新需求认领。
 
 ## 判断完整需求
 
@@ -44,10 +45,10 @@ work units，不创建额外 Issue 或 PR。
 
 | disposition | 使用条件 |
 |---|---|
-| `ready-to-implement` | 范围明确，Pattern 与所需人工 Gate 均已满足 |
-| `ready-to-spec` | 新模式、需确认方案、Pattern 外变化或所需 Gate 尚未满足 |
+| `ready-to-implement` | 范围明确，Pattern 与所有前置 GitHub Gate 均已有可信证据 |
+| `ready-to-spec` | 新模式、需形成方案或尚未创建方案 Draft PR |
 | `needs-info` | 缺少一个只有人类能回答且会改变结果的问题 |
-| `wait-to-implement` | 需求清楚，但被明确依赖阻塞 |
+| `wait-to-implement` | 需求清楚，正在同一 Draft PR 等待人工 Gate 或明确依赖 |
 
 触及承重路径不是按规模自动拒绝，而是要求 Deep Gate 和项目策略规定的人类授权。匹配
 `NEVER_AUTOMATE` 的工作必须明确交还人类。
@@ -68,6 +69,8 @@ allowed_paths: <逗号分隔路径>
 load_bearing: true | false
 gate_level: fast | full | deep
 human_gates: <逗号分隔 Gate 或 none>
+review_pr: <唯一 PR 编号或 pending>
+approved_plan_sha: <40-character SHA 或 pending>
 created_at: <UTC timestamp>
 ```
 
@@ -76,5 +79,5 @@ created_at: <UTC timestamp>
 
 ## 结束
 
-在 Issue 评论中用中文简述：为何匹配或不匹配 Pattern、采用哪个模式、下一步由谁负责。分诊
-本身不创建代码分支、设计 PR 或状态快照。
+在 Issue 评论中用中文简述：为何匹配或不匹配 Pattern、采用哪个模式、下一步由谁负责。分诊本身
+不写实现；需要技术方案 Gate 时交给方案阶段创建唯一 Draft PR，所有确认都在 GitHub 完成。
