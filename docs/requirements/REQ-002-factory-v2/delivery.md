@@ -1,17 +1,17 @@
-# REQ-002 候选交付
+# REQ-002 最终交付
 
 ```
 <!-- factory-delivery:v2 -->
 requirement: REQ-002
-outcome: pending
+outcome: corrected
 pattern: new
 pattern_version: pending
 gates: deep GREEN
-verifier: pending
+verifier: accepted
 human_plan_change: true
 human_product_change: false
-eligible_clean_run: pending
-completed_at: pending
+eligible_clean_run: false
+completed_at: 2026-08-24T08:51:56Z
 ```
 
 ## 产品结果
@@ -33,8 +33,12 @@ completed_at: pending
 - 新旧 Skill 对照评测：V2 通过 10/10 条断言，V1 基线通过 4/10 条。
 - Doctor 配置检查无失败；GitHub 已要求 PR 和 `factory-gates`，并启用合并后删除分支。
 
-## 待完成
+## 独立验证结论
 
-- 全新上下文验证器冷读 Draft PR、完整差异并复跑证据。
-- 验证接受后仅更新本文件中的结果字段和完成时间，再确认最终 PR Check。
+- `VERDICT: ACCEPTED`，阻塞项为无。
+- 验证器独立复跑 Deep Gate 与反向证明，并确认 GitHub `factory-gates` 成功。
+- 验证前发现并修正了 Draft PR、候选交付与独立验证之间的循环依赖，因此结果记为 `corrected`，
+  不计入任何 Pattern 的连续干净执行。
+- 契约测试只证明规则升级；必须用下一个真实动物需求完成端到端业务验证。在此之前
+  `animal-exhibit-v1` 保持 `supervised`。
 - 最终合并由人类决定。
