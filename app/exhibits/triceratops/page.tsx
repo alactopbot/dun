@@ -51,9 +51,9 @@ export default function TriceratopsPage() {
             <details data-fact-id={fact.id} key={fact.id}>
               <summary>看看第 {index + 1} 张事实卡片</summary>
               <p>{fact.text.zh}</p><p lang="en">{fact.text.en}</p>
-              <p>{fact.sourceIds.map((id) => {
+              <p>{fact.sourceIds.map((id, index) => {
                 const source = exhibit.sources.find((item) => item.id === id);
-                return source ? <a data-source-link href={source.url} target="_blank" rel="noreferrer" key={id}>{source.publisher}</a> : null;
+                return source ? <span key={id}>{index > 0 ? " · " : null}<a data-source-link data-source-id={id} href={source.url} target="_blank" rel="noreferrer" lang="en">{source.publisher}</a></span> : null;
               })}</p>
             </details>
           ))}
@@ -62,7 +62,7 @@ export default function TriceratopsPage() {
         <details data-source-credit>
           <summary>来源与创作说明</summary>
           <ul>{exhibit.sources.map((source) => <li key={source.id}>
-            <cite>{source.title}</cite> · {source.publisher}<br />定位：{source.locator}<br />查阅日期：{source.accessedOn}<br />{source.supports}<br />
+            <cite lang="en">{source.title}</cite> · <span lang="en">{source.publisher}</span><br />定位：<span lang="en">{source.locator}</span><br />查阅日期：{source.accessedOn}<br />{source.supports}<br />
             <a data-source-link href={source.url} target="_blank" rel="noreferrer">查看机构原页</a>
           </li>)}</ul>
           <p>图像：{media.creator} · CC BY-SA 4.0</p>

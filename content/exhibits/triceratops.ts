@@ -17,7 +17,7 @@ export const triceratopsSources = [
     publisher: "Natural History Museum",
     url: "https://www.nhm.ac.uk/discover/dino-directory/triceratops.html",
     accessedOn: "2026-08-24",
-    locator: "Name meaning; directory summary; What did Triceratops eat?",
+    locator: "Name meaning; introductory anatomy; directory summary; What did Triceratops eat?",
     supports: "支持名称含义、三只面角与大颈盾、植物食性、喙与后排牙齿、四足行走和 6800 万至 6600 万年前的年代。",
   },
   {
@@ -121,7 +121,7 @@ export function validateTriceratopsExhibit(exhibit: TriceratopsExhibit): readonl
   const sourceIds = new Set(exhibit.sources.map(({ id }) => id));
   if (exhibit.sources.some((source) => !source.url.startsWith("https://") || !/^\d{4}-\d{2}-\d{2}$/.test(source.accessedOn) || !source.locator.trim() || !source.supports.trim())) errors.push("来源记录不完整");
   if (exhibit.facts.some((fact) => !fact.sourceIds.length || fact.sourceIds.some((id) => !sourceIds.has(id)) || fact.evidence === "hypothesis")) errors.push("事实来源或证据级别无效");
-  if (exhibit.media.some((media) => media.width <= 0 || media.height <= 0 || media.license !== "CC-BY-SA-4.0")) errors.push("媒体记录无效");
+  if (exhibit.media.some((media) => media.width <= 0 || media.height <= 0 || !media.creator.trim() || media.license !== "CC-BY-SA-4.0")) errors.push("媒体记录无效");
   return errors;
 }
 

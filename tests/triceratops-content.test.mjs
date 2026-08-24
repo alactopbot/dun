@@ -24,11 +24,17 @@ test("三角龙展品渲染经过核实的双语内容、来源和原创媒体",
     "Triceratops ate plants; its beak and back teeth helped cut plant material.",
     "它用四条腿行走，生活在约 6800 万至 6600 万年前的晚白垩世。",
     "It walked on four legs and lived about 68–66 million years ago in the Late Cretaceous.",
+    "你看到了哪些形状？", "What shapes can you see?",
+    "它的身体哪里最特别？为什么？", "Which part looks most special to you? Why?",
+    "如果能问它一个问题，你会问什么？", "If you could ask it one question, what would you ask?",
+    "不用立刻告诉孩子答案。先听听孩子怎么说。",
+    "You do not need to give the answer yet. Listen to what your child notices first.",
   ]) assert.match(body, new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 
   for (const text of ["Natural History Museum", "American Museum of Natural History",
     "Smithsonian National Museum of Natural History", "Name meaning", "Teeth, Footprints, and Feathers",
-    "A Glimpse Back in Time", "2026-08-24", "CC BY-SA 4.0", "复原想象", "artist’s reconstruction",
+    "A Glimpse Back in Time", "introductory anatomy", "2026-08-24", "DUN 项目（使用 OpenAI 图像生成工具创作）",
+    "CC BY-SA 4.0", "复原想象", "artist’s reconstruction",
     "离开屏幕后，找一找身边的圆形、尖角和扇形。"])
     assert.match(body, new RegExp(text));
 
@@ -38,11 +44,20 @@ test("三角龙展品渲染经过核实的双语内容、来源和原创媒体",
   assert.match(image, /height="1024"/i);
   assert.match(image, /alt="[^"]+"/i);
   assert.equal([...body.matchAll(/data-fact-id=/g)].length, 3);
+  for (const [factId, sourceIds] of [["three-horned-face", ["nhm-triceratops"]],
+    ["plant-eater", ["nhm-triceratops", "amnh-dinosaur-facts"]],
+    ["four-legs-late-cretaceous", ["nhm-triceratops", "smithsonian-last-american-dinosaurs"]]]) {
+    const fact = body.match(new RegExp(`<details[^>]*data-fact-id="${factId}"[\\s\\S]*?<\\/details>`))?.[0] ?? "";
+    for (const sourceId of sourceIds) assert.match(fact, new RegExp(`data-source-id="${sourceId}"`));
+  }
   assert.doesNotMatch(body, /data-fact-placeholder/i);
   assert.ok([...body.matchAll(/data-source-link=/g)].length >= 3);
   for (const link of body.matchAll(/<a\b[^>]*data-source-link[^>]*>/gi)) {
     assert.match(link[0], /target="_blank"/i);
     assert.match(link[0], /rel="noreferrer"/i);
   }
+  for (const link of body.matchAll(/<a\b[^>]*data-source-id[^>]*>/gi)) assert.match(link[0], /lang="en"/i);
+  for (const value of ["Triceratops", "Natural History Museum", "Dinosaur Facts", "introductory anatomy"])
+    assert.match(body, new RegExp(`lang="en"[^>]*>[^<]*${value}`));
   assert.doesNotMatch(body, /审核中|under review/i);
 });
