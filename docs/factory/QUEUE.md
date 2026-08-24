@@ -50,26 +50,27 @@ The corresponding live labels use the `factory:` prefix, for example
 
 ## FQ-5：添加经过核实的中英双语三角龙内容与原创插画
 
-- disposition: ready-to-implement
+- disposition: done
 - source: https://github.com/alactopbot/dun/issues/5
 - last_triaged: 2026-08-24
 - files_expected: content/exhibits/triceratops.ts, app/exhibits/triceratops/page.tsx, public/media/triceratops/exhibit.webp, tests/triceratops-content.test.mjs
 - load_bearing: true
 - gate_level: deep
 - done_when: 已批准的三条有来源事实、双语提示、来源记录、同步校验和有署名的原创复原图替换所有内容与媒体占位；内容测试证明替换有效；Deep gates 为绿色
-- confidence: medium
-- notes: 这是唯一 ready 项。内容和媒体属于承重路径，实现需要人工明确授权，并由人阅读草稿 PR。
+- confidence: high
+- notes: 已由人工在 2026-08-24 合并 PR #12 完成。
 
 ## FQ-6：应用安静、响应式的三角龙展品视觉样式
 
-- disposition: wait-to-implement
+- disposition: ready-to-implement
 - source: https://github.com/alactopbot/dun/issues/6
 - last_triaged: 2026-08-24
+- repro: not-attempted（视觉切片依据已批准规格，不是缺陷复现）
 - files_expected: app/exhibits/triceratops/page.module.css, app/exhibits/triceratops/page.tsx, tests/triceratops-style.test.mjs
 - load_bearing: false
 - gate_level: full
 - done_when: 页面在不改变事实、来源、媒体和行为的情况下应用已批准的安静响应式视觉契约；样式契约测试证明变更有效；现有路由和内容测试保持绿色；Full gates 为绿色
 - confidence: medium
-- blocker: FQ-5 必须先由人工合并。
+- notes: FQ-5 已由人工合并，唯一依赖已解除；这是当前唯一 ready 项，草稿 PR 仍须人工完成触控与键盘检查。
 
 ---
