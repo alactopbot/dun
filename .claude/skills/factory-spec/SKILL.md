@@ -1,41 +1,57 @@
 ---
 name: factory-spec
-description: 为一个完整需求形成与其 Pattern 成熟度相适应的中文方案，并在同一 Issue 内完成必要的人类确认。用于新模式、监督模式需求或范围发生变化时。
+description: 为一个完整需求形成与其 Pattern 成熟度相适应的中文方案，并在同一个 GitHub Draft PR 上建立可跨 Agent 会话恢复的人工 Gate。用于新模式、监督模式需求或范围发生变化时。
 ---
 
 # Factory 需求方案
 
-方案阶段的输出是一个完整需求的可执行设计，不是把需求变成更多 Issue。
+方案阶段形成一个完整需求的可执行设计，不把需求拆成更多 Issue。GitHub Issue、分支和 PR 是跨
+会话状态；Agent 对话可以随时结束，不能承载流程授权。
 
 ## 前置读取
 
 读取契约、章程、项目配置、适用 Pattern、Issue 全文和最新可信 `factory-handoff:v2`。在
-`docs/requirements/REQ-<issue-number>-<名称>/design.md` 中维护一份设计；同一需求的补充与批准
-继续更新该文件和 Issue，不建立多套并行状态。
+`docs/requirements/REQ-<issue-number>-<名称>/design.md` 中维护一份设计，同一需求的补充继续更新
+该文件。设计定稿后推送需求分支，并创建该需求唯一 Draft PR；这一步发生在任何人工批准之前。
+
+## GitHub Gate
+
+所有人工决定都在该 Draft PR 上完成，并规范化为 `factory-gate:v2`。只接受仓库 Owner、Member
+或 Collaborator 的 PR 评论或 Review；聊天、运行转录和 Agent 自述都不是授权。Gate 必须记录
+决定所绑定的完整提交 SHA，后续 Agent 先核对批准者权限、SHA 与方案是否漂移，再改变 Issue 状态。
+
+Agent 不能替人生成 `approved`。它可以在读取到可信的人类决定后补写结构化评论：
+
+```text
+<!-- factory-gate:v2 -->
+requirement: REQ-<issue-number>
+gate: technical-plan | product-acceptance | existing-test-change | dependency
+decision: approved | rejected
+approved_sha: <40-character commit SHA>
+approved_by: <GitHub login>
+approved_at: <UTC timestamp>
+```
 
 ## 按成熟度选择确认深度
 
 ### bootstrap
 
-用于第一次建立新 Pattern。依次确认：
-
-1. 产品意图：用户问题、成功标准、完成后的产品表述、明确不做什么。
-2. 技术方案：现有模块、数据与调用流、依赖、承重路径、风险与回退。
-3. 执行设计：准确路径、接口约定、测试证明、最不确定的决策。
-4. 产品验收：从用户视角确认完整结果，并沉淀可复用 Pattern。
-
-只有人类明确批准当前阶段后才继续，但这些确认都属于同一个 Issue 和最终 PR。
+用于第一次建立新 Pattern。产品意图、技术方案、执行设计和产品验收可以分阶段讨论，但都使用
+同一 Issue、分支和 Draft PR。每个需要人工决定的阶段都绑定当时 SHA；方案或授权范围变化后，
+原技术方案 Gate 失效并在同一 PR 重新评审。
 
 ### supervised
 
-Pattern 已经建立。把产品差异、技术影响、内部 work units、测试与验收标准合并为一份技术方案，
-只在 `technical-plan` 和最终 `product-acceptance` 停止等待。重复性的产品意图和架构选择直接引用
-Pattern，不要求重新确认。
+Pattern 已建立。把产品差异、技术影响、内部 work units、测试与验收标准合并成一份技术方案。
+PR 加 `factory:plan-review`，Issue 设为 `factory:wait-to-implement`，由人在 GitHub PR 批准技术方案。
+批准证据有效后移除该 PR 标签，把 Issue 设为 `factory:ready-to-implement`。最终实现仍在同一 PR
+进行，完成后再进入 `product-acceptance`。
 
 ### trusted
 
-需求完全落在成熟 Pattern 内时，方案与产品验收自动通过。Agent 仍需写出精简设计、执行全部
-证据与独立验证；任何越界或不确定性立即退回 `supervised` 或新模式。
+需求完全落在成熟 Pattern 内时，方案与产品验收自动通过。Agent 仍写精简设计、执行全部证据与
+独立验证；任何越界或不确定性立即退回 `supervised` 或新模式。没有前置人工 Gate 时可以到候选
+交付阶段才创建唯一 Draft PR。
 
 ### autonomous
 
@@ -44,8 +60,8 @@ Pattern，不要求重新确认。
 
 ## 内部 work units
 
-将实现拆成可以顺序验证和恢复的内部 work units。每项说明行为结果、预期路径、失败证据和完成
-证据。它们可以对应提交或 PR checklist，但不得各自创建 GitHub Issue、分支、PR 或人工 Gate。
+将实现拆成可顺序验证和恢复的内部 work units。每项说明行为结果、预期路径、失败证据和完成
+证据。它们可以对应提交或 PR checklist，但不各自创建 GitHub Issue、分支、PR 或人工 Gate。
 工作单元可以小，完整需求不能因此被切碎。
 
 ## 设计文档最少内容
@@ -57,16 +73,16 @@ Pattern，不要求重新确认。
 - 内部 work units 与测试证明
 - 产品验收场景
 - 明确不做的内容和已知风险
-- 已获得的人类授权，包括既有测试、依赖和承重路径
+- 需要或已经取得的人类授权，包括既有测试、依赖和承重路径
 
 ## 交回执行
 
-所需确认完成后，更新同一条可信交接评论为：
+方案已推送且唯一 Draft PR 已建立后，更新同一条可信交接评论：
 
 ```text
 <!-- factory-handoff:v2 -->
 requirement: REQ-<issue-number>
-disposition: ready-to-implement
+disposition: ready-to-implement | wait-to-implement
 mode: bootstrap | supervised | trusted | autonomous
 pattern: <pattern-id | new>
 pattern_version: <number | pending>
@@ -74,8 +90,11 @@ done_when: <完整且可验证的产品结果>
 allowed_paths: <逗号分隔路径>
 load_bearing: true | false
 gate_level: fast | full | deep
-human_gates: <已完成或 none>
+human_gates: <Gate 状态或 none>
+review_pr: <唯一 PR 编号>
+approved_plan_sha: <40-character SHA | pending>
 created_at: <UTC timestamp>
 ```
 
-把 Issue 状态改为 `factory:ready-to-implement`。不创建中间 PR；设计与实现最终进入同一个 Draft PR。
+需要人工方案 Gate 时保持 `wait-to-implement`，直到可信 GitHub 证据出现；不需要或证据有效时改为
+`ready-to-implement`。实现阶段复用交接中的分支和 PR，不创建第二个 PR。

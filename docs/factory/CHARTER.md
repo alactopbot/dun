@@ -1,7 +1,8 @@
 # DUN Factory 章程
 
 本文件承载人类确认过的项目边界。执行规则见 `docs/factory/CONTRACT.md`，可机读配置见
-`.factory/project.json`。未经当前会话中的人类明确授权，Agent 不得修改本文件或 Factory 自身规则。
+`.factory/project.json`。Agent 可以根据 GitHub Issue 在唯一 Draft PR 提议修改本文件或 Factory
+自身规则；只有该 PR 上可信、绑定 SHA 的人类决定才能批准提议，聊天记录不构成授权。
 
 ```
 CHARTER_STATUS: ready
@@ -35,7 +36,8 @@ LOAD_BEARING:
 TESTS_ARE_LOAD_BEARING: true
 ```
 
-既有测试只能在当前会话明确批准，或在已经批准的技术方案中预先授权时修改。新增测试文件不受
+既有测试只能在 GitHub Draft PR 的已批准技术方案中预先授权，或由可信 `factory-gate:v2`
+明确批准时修改。聊天记录不作为授权来源。新增测试文件不受
 此限制，但仍需证明它能够在旧行为上失败。
 
 ## 可自动处理的工作
@@ -72,7 +74,7 @@ NEVER_AUTOMATE:
 DONE:
   - 规定等级的 gates.sh 最终报告 FACTORY_GATES status=GREEN
   - 行为变化具有能在旧实现上失败的测试或等价证据
-  - 既有测试的修改已获明确批准或在批准方案中预授权
+  - 既有测试的修改已在 GitHub 技术方案或可信 Gate 中授权
   - 完整需求已实现，且没有越出交接与 Pattern 允许范围
   - Pattern 的全部不变量得到验证
   - 全新上下文的独立验证器已接受

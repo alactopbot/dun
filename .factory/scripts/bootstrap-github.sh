@@ -16,22 +16,24 @@ gh auth status >/dev/null 2>&1 || {
 }
 
 labels=(
-  "factory:ready-to-implement|0E8A16|Eligible for one implementation run"
-  "factory:ready-to-spec|FBCA04|Needs interactive product or design decisions"
-  "factory:needs-info|D93F0B|Blocked on a named question"
-  "factory:wait-to-implement|C5DEF5|Understood but blocked on a dependency"
-  "factory:in-progress|1D76DB|Claimed by an implementation run"
-  "factory:awaiting-review|5319E7|Pull request open; human decision required"
-  "factory:verified|0E8A16|Independent verification accepted"
-  "factory:rejected|B60205|Independent verification found a blocker"
-  "factory:monitor|BFDADC|Filed by the factory monitor"
+  "factory:ready-to-implement|0E8A16|前置 Gate 已满足，可以执行"
+  "factory:ready-to-spec|FBCA04|需要形成产品或技术方案"
+  "factory:needs-info|D93F0B|等待一个明确问题的答案"
+  "factory:wait-to-implement|C5DEF5|等待 GitHub Gate 或明确依赖"
+  "factory:in-progress|1D76DB|需求分支正在实现或验证"
+  "factory:awaiting-review|5319E7|Draft PR 等待产品验收或合并"
+  "factory:verified|0E8A16|独立验证已接受"
+  "factory:rejected|B60205|独立验证发现阻塞项"
+  "factory:monitor|BFDADC|由 Factory 巡检创建"
+  "factory:plan-review|7057FF|Draft PR 等待 GitHub 技术方案确认"
+  "factory:product-review|D876E3|Draft PR 等待 GitHub 产品验收"
 )
 
 if [ "$APPLY" -eq 0 ]; then
-  echo "Would create or update these labels:"
+  echo "将创建或更新以下标签："
   printf '  %s\n' "${labels[@]%%|*}"
   echo
-  echo "Re-run with --apply to write them."
+  echo "确认后使用 --apply 执行。"
   exit 0
 fi
 
@@ -40,4 +42,4 @@ for entry in "${labels[@]}"; do
   gh label create "$name" --color "$color" --description "$description" --force
 done
 
-echo "Factory labels are ready."
+echo "Factory 标签已就绪。"

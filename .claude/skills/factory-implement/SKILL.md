@@ -1,65 +1,71 @@
 ---
 name: factory-implement
-description: 从可信 Factory V2 交接认领并完成一个完整需求，按内部工作单元测试驱动实现、独立验证，最后创建一个中文 Draft PR。用于执行 ready-to-implement 的 GitHub Issue。
+description: 从可信 Factory V2 交接恢复并完成一个完整需求，校验 GitHub PR Gate，按内部工作单元测试驱动实现、独立验证，并持续复用唯一中文 Draft PR。
 ---
 
 # Factory 实现
 
-一次运行只完成一个完整需求，并为它创建一个分支和一个 Draft PR。读取契约、章程、项目配置、
-适用 Pattern、需求设计和最新可信 `factory-handoff:v2` 后再行动。
+一次运行只推进一个完整需求。读取契约、章程、项目配置、适用 Pattern、需求设计、Issue、唯一
+Draft PR 和最新可信 `factory-handoff:v2` 后再行动。Agent 会话不是状态来源。
 
-## 选择与认领
+## 选择与恢复
 
-只选择 `factory:ready-to-implement` 且交接字段完整的开放 Issue。验证评论作者权限、Pattern 版本、
-模式、人工 Gate、允许路径和所需 Gate。若交接选择项目当前禁用的 `autonomous`，必须拒绝执行。
-已有 `factory:in-progress` 或 `factory:awaiting-review` 的需求
-不得重复认领。
+通常选择 `factory:ready-to-implement` 的开放 Issue。若需求已有分支与 PR，验证它们属于同一 Issue，
+校验 `review_pr`、分支头 SHA、批准者权限与所需 `factory-gate:v2`，然后复用已有 Draft PR。技术方案
+Gate 绑定设计提交；实现提交本身不会使它失效，但设计、Pattern、允许路径、依赖或测试授权变化会
+使它失效，此时回到同一 PR 请求重新评审。
 
-从最新默认分支创建确定性远端分支，以包含唯一运行标识的首次无强推 push 作为并发认领。只有
-首次成功者继续；随后把 Issue 状态改为 `factory:in-progress`。认领后若无法交付，先安全释放远端
-分支，再恢复正确状态；若释放失败，保留 `in-progress` 并明确报告。
+没有前置人工 Gate 的 `trusted` 需求才从最新默认分支建立确定性远端分支，以首次无强推 push 完成
+认领。已有 `factory:in-progress` 的需求不得重复认领。`factory:awaiting-review` 只有在同一 PR 已出现
+有效产品验收 Gate 时，才能由恢复运行进入最终证据步骤。
+
+开始实现时把 Issue 设为 `factory:in-progress`。无法安全恢复或 Gate 证据有歧义时停止并在 GitHub
+报告，不把聊天回复当作流程决定。
 
 ## 执行完整需求
 
 按设计中的内部 work units 顺序推进：
 
-1. 先增加或运行能够在旧行为上失败的测试或等价证据。
+1. 先增加或运行能在旧行为上失败的测试或等价证据。
 2. 实现让该证据通过的最小完整行为。
-3. 运行相关检查，提交一个可恢复的语义节点。
-4. 继续下一个工作单元，直到完整需求的产品验收标准全部成立。
+3. 运行相关检查，提交可恢复的语义节点并推送同一分支。
+4. 继续下一个工作单元，直到完整产品验收标准成立。
 
-内部工作单元不产生额外 Issue、分支、PR 或人工 Gate。不能因为执行过程较长就缩减用户已批准的
-完整结果；应利用提交、测试和 checklist 恢复上下文。
+内部工作单元不产生额外 Issue、分支、PR 或人工 Gate。执行较长时依靠提交、测试和 PR checklist
+恢复上下文，不缩减完整需求。
 
 ## 变更控制
 
-- 所有修改必须服务于 `done_when`，并位于允许路径或已批准方案内。
-- 必须保持 Pattern 的全部不变量。
-- 既有测试只有在当前会话明确批准，或批准方案已预授权时才能修改。
-- 新依赖、未经批准的承重路径、Pattern 外产品变化或架构决定立即交还人类。
+- 所有修改服务于 `done_when`，并位于允许路径或 GitHub 已批准方案内。
+- 保持 Pattern 的全部不变量。
+- 既有测试只能由已批准技术方案或专门的 GitHub Gate 授权。
+- 新依赖、未经批准的承重路径、Pattern 外产品变化或架构决定回到同一 PR 请求新 Gate。
 - 范围根据语义、风险和证据判断，不用变更数量替代判断。
 
-## Gate、候选交付与独立验证
+## 候选交付与独立验证
 
-先运行相关快速检查，再在完整需求结束时运行交接规定等级的 Gate。任何必需检查缺失、被跳过或
-配置错误都不算绿色。同一需求连续两次失败则停止并报告两个不同尝试的证据。
+先运行相关快速检查，完整需求结束时运行交接规定等级的 Gate。缺失、跳过或配置错误都不算绿色；
+同一需求连续两次失败则停止并在 GitHub 报告两次不同尝试的证据。
 
-Gate 绿色后先写唯一的候选交付文档，其中 `outcome`、`verifier` 和 `eligible_clean_run` 均为
-`pending`。推送同一分支并创建唯一中文 Draft PR，PR 明确写“独立验证待完成”，但此时不写最终
-Issue 交付评论，也不把需求标记为等待人类合并。
+Gate 绿色后写唯一候选 `delivery.md`，其中 `outcome`、`verifier` 和 `eligible_clean_run` 均为
+`pending`。推送同一分支。监督或启动模式继续使用方案阶段的 PR；没有前置 PR 的可信模式此时
+创建唯一中文 Draft PR。PR 明确写“独立验证待完成”，此时不写最终 Issue 交付评论。
 
-随后启动全新上下文的验证器，冷读 Issue、可信交接、Pattern、需求设计、Draft PR、完整 diff 和
-测试输出。实现者不得提示验证器接受，也不得自行替代验证器。被拒绝时按意见修正并重新执行 Gate
-与完整验证；连续两次拒绝则停止。
+随后启动全新上下文的验证器，冷读 Issue、可信交接、所有 GitHub Gate、Pattern、设计、Draft PR、
+完整 diff 和测试输出。实现者不能提示验证器接受，也不能自行替代验证器。拒绝时按意见修正并重新
+执行 Gate 与完整验证；连续两次拒绝则停止。
 
-## 单一交付
+## 产品验收与最终证据
 
-接受后：
+验证器接受候选后：
 
-1. 只更新同一 `delivery.md` 的验证结果、Pattern 资格和完成时间，不夹带产品、测试或策略变化。
-2. 推送证据提交，由原验证上下文确认转录准确且 PR Check 最终绿色。
-3. 将 Issue 状态改为 `factory:awaiting-review`。
-4. 创建或更新一条最终评论：
+1. 若 Pattern 要求 `product-acceptance`，给同一 PR 加 `factory:product-review`，把 Issue 设为
+   `factory:awaiting-review`，等待可信 GitHub 人类决定绑定当前候选 SHA，然后结束本次运行。
+2. 后续运行核对批准者权限、候选 SHA 与其后 diff；产品、测试或策略发生变化时 Gate 失效并重新验证。
+3. 产品验收不需要，或有效 Gate 已存在时，只更新同一 `delivery.md` 的验证结果、Pattern 资格和完成
+   时间，不夹带产品、测试或策略变化。
+4. 推送证据提交，由原验证上下文确认转录准确且 PR Check 最终绿色。
+5. 创建或更新一条最终 Issue 评论：
 
 ```text
 <!-- factory-delivery:v2 -->
@@ -75,5 +81,5 @@ eligible_clean_run: true | false
 completed_at: <UTC timestamp>
 ```
 
-只有全程未被人工纠正、未越界、Gate 全绿且独立验证接受，才标记为可计入连续干净执行。Agent
-到 Draft PR 为止，合并始终由人类决定。
+只有全程未被人工纠正、未越界、Gate 全绿且独立验证接受，才计入连续干净执行。最终仍保持 Draft；
+Agent 不转 Ready、不合并，合并由人类在 GitHub 决定。

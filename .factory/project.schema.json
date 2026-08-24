@@ -11,7 +11,18 @@
       "type": "object",
       "required": ["workflow", "productPrimary", "productSecondary", "code"]
     },
-    "humanPolicy": { "type": "object" },
+    "humanPolicy": {
+      "type": "object",
+      "required": ["merge", "gateChannel", "existingTestChange", "newDependency", "outsidePattern"],
+      "properties": {
+        "merge": { "const": "always" },
+        "gateChannel": { "const": "github-pr" },
+        "existingTestChange": { "enum": ["github-plan-approval", "github-explicit-gate"] },
+        "newDependency": { "const": "always" },
+        "outsidePattern": { "const": "always" }
+      },
+      "additionalProperties": false
+    },
     "maturity": {
       "type": "object",
       "required": ["levels", "autonomousEnabled"]
