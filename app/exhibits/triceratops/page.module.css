@@ -1,0 +1,115 @@
+.page {
+  --forest:#21362f; --moss:#526d59; --cream:#f4f0e5; --paper:#fbfaf5;
+  --clay:#bd6d4b; --line:rgba(33,54,47,.18);
+  min-height:100%; padding-bottom:72px; background:var(--cream); color:var(--forest);
+}
+.page a,.page summary { min-height:44px; }
+.page a {
+  display:inline-flex; align-items:center; text-decoration-thickness:1px;
+  text-underline-offset:4px;
+}
+.page :focus-visible { outline:3px solid var(--clay); outline-offset:4px; border-radius:3px; }
+.page [lang="en"] { color:var(--moss); font-size:.88em; line-height:1.65; }
+
+.skipLink {
+  position:absolute; z-index:10; top:12px; left:12px; padding:0 16px;
+  background:var(--forest); color:var(--paper); transform:translateY(-160%);
+  transition:transform 160ms ease;
+}
+.skipLink:focus { transform:translateY(0); }
+.topbar {
+  display:flex; align-items:center; min-height:76px;
+  padding:12px max(24px,calc((100% - 1120px)/2)); border-bottom:1px solid var(--line);
+}
+.returnLink {
+  padding:0 6px; font-size:.92rem; font-weight:650; text-decoration:underline;
+}
+.exhibit { width:min(1120px,calc(100% - 48px)); margin:0 auto; }
+.hero { padding:72px 0 44px; text-align:center; }
+.eyebrow {
+  margin-bottom:14px; color:var(--clay); font-size:.76rem; font-weight:750;
+  letter-spacing:.2em;
+}
+.title {
+  margin-bottom:10px; font:400 clamp(4rem,10vw,7rem)/.95 Georgia,"Noto Serif SC",serif;
+  letter-spacing:-.06em;
+}
+.scientificName { margin:0; letter-spacing:.08em; }
+
+.figure {
+  margin:0; overflow:hidden; border:1px solid var(--line); border-radius:24px;
+  background:#ded8c4; box-shadow:0 22px 60px rgba(33,54,47,.12);
+}
+.image { display:block; width:100%; height:auto; }
+.caption {
+  padding:14px 20px; border-top:1px solid var(--line); background:var(--paper);
+  font-size:.84rem; text-align:right;
+}
+.section { padding:84px 0 0; }
+.heading {
+  margin-bottom:22px; font:400 clamp(2rem,5vw,3.5rem)/1.15 Georgia,"Noto Serif SC",serif;
+  letter-spacing:-.04em;
+}
+.lead { max-width:680px; font-size:1.12rem; line-height:1.9; }
+
+.promptGrid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:16px;
+  margin:38px 0 20px; padding:0; list-style:none;
+}
+.promptCard {
+  padding:26px; border:1px solid var(--line); border-radius:16px;
+  background:rgba(251,250,245,.72);
+}
+.promptCard p:first-child {
+  min-height:3.2em; font-size:1.08rem; font-weight:700; line-height:1.6;
+}
+.promptCard p:last-child,.adultNote p:last-child { margin-bottom:0; }
+.adultNote {
+  padding:20px 24px; border-left:4px solid var(--clay); background:var(--paper);
+}
+
+.factCard,.sourcePanel {
+  margin-top:14px; border:1px solid var(--line); border-radius:14px;
+  background:var(--paper);
+}
+.factCard summary,.sourcePanel summary {
+  display:flex; align-items:center; padding:14px 20px; cursor:pointer; font-weight:750;
+}
+.factCard[open] summary,.sourcePanel[open] summary {
+  border-bottom:1px solid var(--line); color:var(--clay);
+}
+.factCard > p,.sourcePanel > p,.sourceList { margin:20px; line-height:1.8; }
+.factSources a,.sourceList a {
+  color:var(--moss); font-weight:650; text-decoration:underline;
+}
+.sourcePanel { margin-top:72px; }
+.sourceList { padding-left:20px; }
+.sourceList li + li { margin-top:22px; }
+
+.closing {
+  margin-top:72px; padding:54px; border-radius:24px;
+  background:var(--forest); color:var(--paper); text-align:center;
+}
+.closing [lang="en"] { color:#c5d0ca; }
+.closing .returnLink {
+  justify-content:center; margin-top:18px; color:var(--paper);
+}
+
+@media (max-width:720px) {
+  .page { padding-bottom:32px; }
+  .topbar { min-height:64px; padding-inline:18px; }
+  .exhibit { width:min(calc(100% - 28px),1120px); }
+  .hero { padding:52px 0 32px; }
+  .title { font-size:clamp(3.6rem,20vw,5.5rem); }
+  .figure,.closing { border-radius:16px; }
+  .section { padding-top:62px; }
+  .promptGrid { grid-template-columns:1fr; }
+  .promptCard p:first-child { min-height:auto; }
+  .closing { margin-top:56px; padding:38px 20px; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .page *,.page *::before,.page *::after {
+    scroll-behavior:auto; transition:none !important;
+  }
+}
