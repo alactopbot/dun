@@ -5,14 +5,15 @@ description: 用 GitHub 实时状态展示 DUN Factory 控制台，突出当前�
 
 # Factory 控制台
 
-读取契约、章程、项目配置、Pattern，并查询开放 Issue、分支、Draft PR、Review、Checks、最新
-`factory-gate:v2` 与 `factory-delivery:v2` 评论。只报告，不替人批准、不合并、不关闭。
+读取契约、章程、项目配置、Pattern，并查询开放 Issue、分支、Draft PR、Ready/Convert 时间线、
+普通评论、Checks、`factory-verification:v2` 与 `factory-delivery:v2` 评论。只报告，不替人点击
+Ready、不合并、不关闭。
 
 支持：`status`（默认）、`next`、`queue`、`stuck` 或指定 Issue 编号。
 
 报告按以下顺序使用中文输出：
 
-1. 当前需要人在 GitHub PR 完成的技术方案、产品验收、既有测试、依赖、承重路径或合并决定。
+1. 当前需要人在 GitHub PR 留下的 Spec 修改反馈、Ready for review 或最终合并决定。
 2. 等待人工决定的开放需求数量与章程背压状态。
 3. 正在执行、可执行、待方案、待信息、待依赖和待评审的需求数量与链接。
 4. 默认分支和开放 PR 的 Gate 健康状态。

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "requirement": "REQ-021",
+  "issue": 21,
+  "mode": "bootstrap",
+  "pattern": "new",
+  "reviewPr": 22,
+  "humanGates": ["spec-ready", "merge"],
+  "allowedPaths": [
+    ".factory/**",
+    ".github/workflows/**",
+    ".claude/**",
+    ".agents/**",
+    "CLAUDE.md",
+    "AGENTS.md",
+    "docs/factory/**",
+    "docs/requirements/REQ-019-github-gates/**",
+    "docs/requirements/REQ-021-gate-enforcement/**",
+    "tests/factory-*.test.mjs"
+  ],
+  "gateLevel": "deep"
+}

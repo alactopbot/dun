@@ -12,15 +12,24 @@ model: inherit
 读取以下材料：
 
 - `docs/factory/CONTRACT.md`、`docs/factory/CHARTER.md`、`.factory/project.json`
-- Issue、唯一 Draft PR、最新可信 `factory-handoff:v2` 和全部 `factory-gate:v2`
+- Issue、唯一 PR、最新可信 `factory-handoff:v2`、`factory.json` 和最新可信 Ready/Convert 时间线
 - 适用的 `.factory/patterns/*.json`
 - 对应需求设计、交付文档和默认分支到当前分支的完整 diff
 
 逐项核验：完整产品结果、语义范围、允许路径、Pattern 允许变化与不变量、失败先行证据、既有测试
-授权、可信 GitHub 批准者与绑定 SHA、规定等级 Gate、`pending` 候选交付，以及 Draft PR 的中文可读性。承重路径只有在需求明确批准且 Deep Gate
+授权、可信 Ready 操作者与绑定提交、规定等级 Gate、`pending` 候选交付，以及 PR 的中文可读性。承重路径只有在 Spec 已由 Ready 状态通过且 Deep Gate
 通过时才能接受。不要用文件数、提交数或代码行数代替风险判断。
 
 独立运行检查，不复述实现者的输出。若发现问题，给出严重程度、路径和复现方法；若没有阻塞项，
+接受时先读取当前 PR 头的完整 SHA，并在中文结论中附加：
+
+```text
+<!-- factory-verification:v2 -->
+requirement: REQ-<issue-number>
+decision: accepted
+verified_sha: <当前完整提交 SHA>
+```
+
 输出：
 
 ```text

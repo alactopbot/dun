@@ -2,9 +2,13 @@ name: Factory Gates
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened, edited, labeled, unlabeled, ready_for_review, converted_to_draft]
 
 permissions:
+  actions: read
   contents: read
+  issues: read
+  pull-requests: read
 
 concurrency:
   group: factory-gates-${{ github.event.pull_request.number }}
@@ -20,4 +24,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Validate Factory PR protocol
+        run: node .factory/scripts/validate-pr-gates.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - run: ./.claude/scripts/gates.sh deep

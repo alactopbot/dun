@@ -1,100 +1,59 @@
 ---
 name: factory-spec
-description: 为一个完整需求形成与其 Pattern 成熟度相适应的中文方案，并在同一个 GitHub Draft PR 上建立可跨 Agent 会话恢复的人工 Gate。用于新模式、监督模式需求或范围发生变化时。
+description: 把一个完整 Issue 的产品、技术、素材、风险、测试和验收上下文整合成统一 Spec，并用同一个 GitHub Draft PR 的 Draft/Ready 状态迭代。用于新模式、监督模式、方案反馈或范围变化。
 ---
 
-# Factory 需求方案
+# Factory Spec
 
-方案阶段形成一个完整需求的可执行设计，不把需求拆成更多 Issue。GitHub Issue、分支和 PR 是跨
-会话状态；Agent 对话可以随时结束，不能承载流程授权。
+Spec 阶段交付一个可执行的完整方案，不把需求拆成更多 Issue，也不让人处理机器协议。
 
-## 前置读取
+## 创建 Spec 候选
 
-读取契约、章程、项目配置、适用 Pattern、Issue 全文和最新可信 `factory-handoff:v2`。在
-`docs/requirements/REQ-<issue-number>-<名称>/design.md` 中维护一份设计，同一需求的补充继续更新
-该文件。设计定稿后推送需求分支，并创建该需求唯一 Draft PR；这一步发生在任何人工批准之前。
+读取契约、章程、项目配置、Issue 和适用 Pattern。在同一需求分支创建：
 
-## GitHub Gate
+- `docs/requirements/REQ-<编号>-<名称>/design.md`：产品目标、体验、技术方案、数据或素材、影响范围、
+  不变量、内部 work units、测试、验收、风险与明确不做的内容。
+- 同目录 `factory.json`：需求编号、Issue、模式、Pattern、唯一 PR、人工 Gate、允许路径与 Gate 等级。
 
-所有人工决定都在该 Draft PR 上完成，并规范化为 `factory-gate:v2`。只接受仓库 Owner、Member
-或 Collaborator 的 PR 评论或 Review；聊天、运行转录和 Agent 自述都不是授权。Gate 必须记录
-决定所绑定的完整提交 SHA，后续 Agent 先核对批准者权限、SHA 与方案是否漂移，再改变 Issue 状态。
+推送分支并创建该需求唯一 Draft PR。`bootstrap` 和 `supervised` 加 `factory:plan-review`，Issue 改为
+`factory:wait-to-implement`，然后停止；不在 Agent 会话等待批准。
 
-Agent 不能替人生成 `approved`。它可以在读取到可信的人类决定后补写结构化评论：
+## 人工决定
 
-```text
-<!-- factory-gate:v2 -->
-requirement: REQ-<issue-number>
-gate: technical-plan | product-acceptance | existing-test-change | dependency
-decision: approved | rejected
-approved_sha: <40-character commit SHA>
-approved_by: <GitHub login>
-approved_at: <UTC timestamp>
-```
+Draft 状态就是方案阶段：
 
-## 按成熟度选择确认深度
+- 有问题：保持 Draft，直接留下普通 PR 评论。后续 Agent 把评论作为新的 Spec 输入，在同一 PR 修改。
+- 没问题：点击 **Ready for review**，表示 Spec 通过并允许进入实现。
+- 已经 Ready 后需要撤销：点击 **Convert to draft** 并留下评论。
 
-### bootstrap
+GitHub 时间线事件记录操作者和时间，对应 Factory Gates Actions 运行记录不可变地保存当时 PR 头；
+后续 Agent 只把该值镜像到交接，Factory 以运行记录为准。人类不填写关键词、SHA、摘要或结构化
+字段。Agent 可以因 Spec 漂移撤回到 Draft，但不得替人点击 Ready for review。
 
-用于第一次建立新 Pattern。产品意图、技术方案、执行设计和产品验收可以分阶段讨论，但都使用
-同一 Issue、分支和 Draft PR。每个需要人工决定的阶段都绑定当时 SHA；方案或授权范围变化后，
-原技术方案 Gate 失效并在同一 PR 重新评审。
+## 状态恢复
 
-### supervised
+后续 Agent 读取 PR 状态、最新可信 Ready/Convert 事件和 Draft 期间新增的普通评论：
 
-Pattern 已建立。把产品差异、技术影响、内部 work units、测试与验收标准合并成一份技术方案。
-PR 加 `factory:plan-review`，Issue 设为 `factory:wait-to-implement`，由人在 GitHub PR 批准技术方案。
-批准证据有效后移除该 PR 标签，把 Issue 设为 `factory:ready-to-implement`。最终实现仍在同一 PR
-进行，完成后再进入 `product-acceptance`。
+- PR 仍是 Draft：处理新反馈并更新同一个 `design.md`、`factory.json`、分支和 PR，继续等待；不得
+  创建第二个 PR。
+- 最新可信事件是 Ready for review：验证事件提交属于 PR 历史，且之后没有修改 `design.md`、
+  `factory.json`、Pattern 或项目策略；随后移除 `factory:plan-review`，把 Issue 改为
+  `factory:ready-to-implement`。
+- 最新事件是 Convert to draft：撤销之前的通过，回到方案阶段。
 
-### trusted
+Ready 后仅增加实现代码时，Spec 通过继续有效；若产品、技术、依赖、既有测试语义或允许范围变化，
+先把 PR 转回 Draft、更新 Spec，并重新等待人类点击 Ready for review。
 
-需求完全落在成熟 Pattern 内时，方案与产品验收自动通过。Agent 仍写精简设计、执行全部证据与
-独立验证；任何越界或不确定性立即退回 `supervised` 或新模式。没有前置人工 Gate 时可以到候选
-交付阶段才创建唯一 Draft PR。
+## 成熟度
 
-### autonomous
+- `bootstrap`：人工审阅完整 Spec。
+- `supervised`：人工审阅相对 Pattern 的差异 Spec。
+- `trusted`：Pattern 自动通过 Spec，仍生成精简 `design.md` 和 `factory.json`，不等待人工操作。
+- `autonomous`：只有项目配置开启时可用；DUN 当前禁用。
 
-只有 `.factory/project.json` 显式开启时才可使用；DUN 当前禁用。禁用状态下不得用它绕过任何
-项目级人工策略，尤其不能自动合并或发布。
+最终合并就是产品验收，不再设置独立 `product-acceptance` 确认。
 
 ## 内部 work units
 
-将实现拆成可顺序验证和恢复的内部 work units。每项说明行为结果、预期路径、失败证据和完成
-证据。它们可以对应提交或 PR checklist，但不各自创建 GitHub Issue、分支、PR 或人工 Gate。
-工作单元可以小，完整需求不能因此被切碎。
-
-## 设计文档最少内容
-
-- 需求与成功标准
-- Pattern、版本、模式及匹配理由
-- 本次允许变化与必须保持的不变量
-- 技术方案、影响路径和依赖决定
-- 内部 work units 与测试证明
-- 产品验收场景
-- 明确不做的内容和已知风险
-- 需要或已经取得的人类授权，包括既有测试、依赖和承重路径
-
-## 交回执行
-
-方案已推送且唯一 Draft PR 已建立后，更新同一条可信交接评论：
-
-```text
-<!-- factory-handoff:v2 -->
-requirement: REQ-<issue-number>
-disposition: ready-to-implement | wait-to-implement
-mode: bootstrap | supervised | trusted | autonomous
-pattern: <pattern-id | new>
-pattern_version: <number | pending>
-done_when: <完整且可验证的产品结果>
-allowed_paths: <逗号分隔路径>
-load_bearing: true | false
-gate_level: fast | full | deep
-human_gates: <Gate 状态或 none>
-review_pr: <唯一 PR 编号>
-approved_plan_sha: <40-character SHA | pending>
-created_at: <UTC timestamp>
-```
-
-需要人工方案 Gate 时保持 `wait-to-implement`，直到可信 GitHub 证据出现；不需要或证据有效时改为
-`ready-to-implement`。实现阶段复用交接中的分支和 PR，不创建第二个 PR。
+实现步骤只作为 Spec 内部 work units，每项写行为结果、路径、失败证据和完成证据。它们可以对应
+提交或 PR checklist，但不创建额外 Issue、分支、PR 或人工 Gate。

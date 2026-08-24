@@ -23,6 +23,7 @@ required_files=(
   .factory/patterns/animal-exhibit-v1.json
   .factory/gates.conf
   .factory/scripts/prove-test.sh
+  .factory/scripts/validate-pr-gates.mjs
   .claude/scripts/gates.sh
   .claude/settings.json
   .claude/hooks/block-merge.sh
@@ -88,7 +89,7 @@ if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
   pass "GitHub CLI authenticated"
   missing_labels=0
   factory_label_names="$(gh label list --repo alactopbot/dun --limit 100 --json name --jq '.[].name' 2>/dev/null)"
-  for label in factory:ready-to-implement factory:ready-to-spec factory:needs-info factory:wait-to-implement factory:in-progress factory:awaiting-review factory:plan-review factory:product-review; do
+  for label in factory:ready-to-implement factory:ready-to-spec factory:needs-info factory:wait-to-implement factory:in-progress factory:awaiting-review factory:plan-review; do
     grep -Fxq "$label" <<<"$factory_label_names" || missing_labels=$((missing_labels + 1))
   done
   [ "$missing_labels" -eq 0 ] && pass "Factory Issue 与 PR 状态标签存在" || warn "$missing_labels 个 Factory 状态标签缺失；运行 ./.factory/scripts/bootstrap-github.sh --apply"

@@ -1,49 +1,56 @@
 # GitHub 控制面
 
-GitHub 承载 Factory 的实时状态、并发认领、PR Gate 和最终机器证据。
+GitHub 承载 Factory 的实时状态、Spec Draft/Ready 决定、并发认领、PR Gate 和最终机器证据。
+
+## 人工体验
+
+一个完整需求只使用一个 Issue、一个分支和一个 Draft PR。Agent 在 PR 一次性提交产品、技术、素材、
+风险、测试与验收的统一 Spec。
+
+人类只使用最直接的 PR 操作：
+
+- 方案有问题：保持 Draft，留下普通 PR 评论。
+- 方案没问题：点击 **Ready for review**。
+- 已经 Ready 后需要撤销：点击 **Convert to draft**，再留下普通评论。
+
+Agent 根据 Draft/Ready 状态和评论在同一 PR 重做 Spec 或进入实现。人类不填写关键词、SHA、摘要
+和结构化协议。最终
+实现通过独立验证后，人工合并同时代表产品验收，不再增加一次确认。
+
+## 机读 Spec 与协议检查
+
+每个需求的 `factory.json` 和 `design.md` 一起进入 Draft PR。GitHub Ready/Convert 时间线记录操作者、
+时间和 URL，对应 Actions 运行记录不可变地保存当时 PR 头；验证器自动读取并校验：
+
+- PR 仍开放，同一 Issue 只有一个开放 PR；
+- `factory.json` 与 Issue、PR、模式、Pattern 和 Gate 一致；
+- 完整 diff 的每个路径都属于 `allowedPaths`；
+- PR 已由仓库 Owner 标为 Ready，且之后没有被转回 Draft；
+- Ready 事件之后 Spec、机读范围、Pattern 和项目策略没有漂移；
+- 独立验证证据绑定当前 PR 头，`factory:verified` 与 `factory:rejected` 不冲突。
+
+Spec 等待 Ready 或候选等待验证时，Check 为红是正常的合并保护。PR Ready 后 Agent 更新状态，
+验证器接受后添加证据和标签，各自触发重检。
 
 ## 标签
 
-运行 `./.factory/scripts/bootstrap-github.sh` 预览，确认仓库后增加 `--apply`。Issue 状态标签互斥；
-`factory:monitor` 可作为来源标签共存。PR 使用 `factory:plan-review`、`factory:product-review`、
-`factory:verified` 与 `factory:rejected` 表达当前阶段，不在 Agent 会话里等待人类确认。
+Issue 状态标签互斥。PR 使用 `factory:plan-review`、`factory:verified` 与 `factory:rejected`。运行：
 
-## 同一 PR 上的人工 Gate
-
-需要方案确认的需求在设计提交推送后就创建唯一 Draft PR。技术方案、依赖、既有测试授权、产品
-验收和最终合并都在该 PR 进行；实现阶段不得另开 PR。
-
-人类用 PR 评论或 Review 作出决定。Factory 只接受仓库 Owner、Member 或 Collaborator，并把经过
-核验的原始决定规范化为：
-
-```text
-<!-- factory-gate:v2 -->
-requirement: REQ-<issue-number>
-gate: technical-plan | product-acceptance | existing-test-change | dependency
-decision: approved | rejected
-approved_sha: <40-character commit SHA>
-approved_by: <GitHub login>
-approved_at: <UTC timestamp>
+```bash
+./.factory/scripts/bootstrap-github.sh --apply
 ```
-
-技术方案批准绑定设计提交；只要设计、Pattern、允许路径、依赖和测试授权未漂移，后续实现提交
-不会使它失效。产品验收绑定经独立验证的候选提交；之后若混入产品、测试或策略变化则必须重验。
-Agent 不得自行构造批准，聊天记录也不能转换成 GitHub 授权。
 
 ## 默认分支保护
 
-为实际默认分支配置规则：
+- 所有变更通过 PR；
+- 禁止强推，Agent 账号不可绕过；
+- `factory-gates` 是必需检查，严格要求最新默认分支；
+- 最终合并始终由人类执行。
 
-- 所有变更通过 PR 进入；
-- 禁止强推，并且不允许 Agent 账号绕过；
-- Factory Gates 成为必需检查；
-- 最终合并由人类执行。
-
-仓库内 Hook 只能覆盖常见本地命令，GitHub 规则才是远端执行边界。
+当前 Agent 与维护者共用 `alactopbot`，所以 Draft/Ready 同时是最自然且可跨会话恢复的方案状态；
+不需要额外 bot 账号，也不要求人类学习特殊评论格式。
 
 ## 认领与清理
 
-没有前置 PR 的可信模式用确定性远端分支完成首次无强推认领，失败者立即停止。已有方案 PR 的
-监督或启动模式验证交接后直接恢复该分支。Draft PR 合并后由 GitHub 关闭
-带有 `Closes #<issue>` 的需求，并由仓库设置自动删除已合并分支。关闭但未合并的 PR 必须把 Issue
-恢复到明确状态；巡检只报告或修复确定的状态漂移，不会抢占仍有效的认领。
+实现运行用确定性远端分支无强推认领。已有 Spec PR 时直接恢复同一分支。合并后 GitHub 关闭带有
+`Closes #<issue>` 的 Issue 并删除分支；关闭但未合并时恢复明确状态。巡检不会抢占有效认领。
