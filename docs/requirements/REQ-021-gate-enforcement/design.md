@@ -7,14 +7,14 @@ PR #20 在独立验证结束前被合并，验证器随后拒绝。机器 Gate �
 
 ## 完整结果
 
-为 PR 增加确定性协议检查。人类必须直接提交含完整 SHA 的 `factory-gate:v2`；Agent 不再规范化
-自然语言批准。独立验证使用绑定当前头的 `factory-verification:v2`。GitHub Check 在任一证据缺失、
-不可信、陈旧或发生禁止漂移时失败。
+为 PR 增加确定性协议检查。人类必须直接提交含完整 SHA 与交接摘要的 `factory-gate:v2`；Agent
+不再规范化自然语言批准。独立验证使用绑定当前头的 `factory-verification:v2`。GitHub Check 在
+任一证据缺失、不可信、陈旧、出现更晚拒绝、交接范围变化或发生禁止漂移时失败。
 
 ## 内部 work units
 
 1. 先新增负向测试，覆盖非可信作者、短或错误 SHA、聊天批准、缺失来源、方案与产品漂移、第二个
-   开放 PR、已合并 PR、待方案状态和陈旧验证。
+   开放 PR、已合并 PR、待方案状态、陈旧验证、更晚拒绝、交接漂移和冲突验证标签。
 2. 实现无第三方依赖的 `.factory/scripts/validate-pr-gates.mjs`，同时支持测试上下文和 GitHub API。
 3. 把协议验证接入 `factory-gates` 工作流，并允许标签状态变化触发重检。
 4. 更新契约、skills 与入口文档，删除 Agent 规范化批准的旧规则。

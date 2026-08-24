@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import process from "node:process";
 
 const trustedAssociations = new Set(["OWNER", "MEMBER", "COLLABORATOR"]);
@@ -45,6 +46,24 @@ function latestMarker(items, marker, predicate = () => true) {
     .at(-1);
 }
 
+const boundHandoffFields = [
+  "requirement",
+  "mode",
+  "pattern",
+  "pattern_version",
+  "done_when",
+  "allowed_paths",
+  "load_bearing",
+  "gate_level",
+  "human_gates",
+  "review_pr",
+];
+
+export function handoffDigest(fields) {
+  const bound = Object.fromEntries(boundHandoffFields.map((field) => [field, fields[field] ?? ""]));
+  return createHash("sha256").update(JSON.stringify(bound)).digest("hex");
+}
+
 function gateError(gate, reason) {
   return `gate:${gate}:${reason}`;
 }
@@ -70,20 +89,28 @@ export function validateGateContext(context) {
   if (Number(handoff.fields.review_pr) !== pr.number) errors.push("handoff:review-pr-mismatch");
 
   const requiredGates = [];
-  if ((handoff.fields.human_gates ?? "").includes("technical-plan")) requiredGates.push("technical-plan");
+  if (["bootstrap", "supervised"].includes(handoff.fields.mode)) requiredGates.push("technical-plan");
   if (pr.labels.includes("factory:product-review")) requiredGates.push("product-acceptance");
 
   for (const gate of requiredGates) {
-    const evidence = latestMarker(
-      prComments,
-      "factory-gate:v2",
-      (fields) => fields.gate === gate && fields.decision === "approved",
-    );
+    const allDecisions = prComments
+      .map((item) => ({ item, fields: parseMarker(item.body ?? "", "factory-gate:v2") }))
+      .filter(({ fields }) => fields?.gate === gate);
+    const evidence = allDecisions
+      .filter(({ item }) => trusted(item))
+      .sort((a, b) => new Date(a.item.createdAt) - new Date(b.item.createdAt))
+      .at(-1);
     if (!evidence) {
-      errors.push(gateError(gate, "missing"));
+      errors.push(gateError(gate, allDecisions.length ? "untrusted-author" : "missing"));
       continue;
     }
-    if (!trusted(evidence.item)) errors.push(gateError(gate, "untrusted-author"));
+    if (evidence.fields.decision !== "approved") {
+      errors.push(gateError(gate, "latest-decision-not-approved"));
+      continue;
+    }
+    if (evidence.fields.handoff_digest !== handoffDigest(handoff.fields)) {
+      errors.push(gateError(gate, "handoff-drift"));
+    }
     if (evidence.fields.requirement !== requirementId(issue.number)) errors.push(gateError(gate, "requirement-mismatch"));
     if (!isFullSha(evidence.fields.approved_sha)) {
       errors.push(gateError(gate, "invalid-sha"));
@@ -105,17 +132,14 @@ export function validateGateContext(context) {
   }
 
   if (pr.labels.includes("factory:plan-review")) errors.push("pr:plan-review-pending");
+  if (pr.labels.includes("factory:rejected")) errors.push("verification:rejected-label-present");
   if (!pr.labels.includes("factory:verified")) errors.push("verification:label-missing");
 
-  const verification = latestMarker(
-    prComments,
-    "factory-verification:v2",
-    (fields) => fields.decision === "accepted",
-  );
+  const verification = latestMarker(prComments, "factory-verification:v2", (_fields, item) => trusted(item));
   if (!verification) {
     errors.push("verification:missing");
   } else {
-    if (!trusted(verification.item)) errors.push("verification:untrusted-author");
+    if (verification.fields.decision !== "accepted") errors.push("verification:latest-decision-not-accepted");
     if (verification.fields.requirement !== requirementId(issue.number)) errors.push("verification:requirement-mismatch");
     if (!isFullSha(verification.fields.verified_sha)) errors.push("verification:invalid-sha");
     if (verification.fields.verified_sha !== pr.headSha) errors.push("verification:stale-sha");

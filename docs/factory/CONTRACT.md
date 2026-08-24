@@ -76,15 +76,20 @@ requirement: REQ-<issue-number>
 gate: technical-plan | product-acceptance | existing-test-change | dependency
 decision: approved | rejected
 approved_sha: <40-character commit SHA>
+handoff_digest: <Agent 提供、由人核对后原样填写的 64-character SHA-256>
 ```
 
 技术方案批准绑定包含设计文档的提交 SHA。后续实现提交不会使它失效，但如果设计文档、Pattern
 版本、允许路径、依赖决定或既有测试授权发生变化，必须重新批准技术方案。产品验收绑定完整实现
 与验证后的候选提交 SHA；该 SHA 后的任何产品、测试或策略变化都会使产品验收失效。
 
-`.factory/scripts/validate-pr-gates.mjs` 必须直接验证原始评论的可信作者、完整 SHA、PR 历史和其后
-漂移。批准技术方案后，把 Issue 改为 `factory:ready-to-implement`；拒绝或要求修改时保持等待状态
-并更新设计。批准产品验收后，只允许完成最终证据，不得夹带实现变化。
+`handoff_digest` 绑定交接中的需求、模式、Pattern、完成标准、允许路径、承重标记、Gate 等级、人工
+Gate 和唯一 PR；状态字段可以变化，范围字段不能静默漂移。Agent 可以计算并展示待评论模板，但只有
+人类亲自在 GitHub 发布才构成授权。
+
+`.factory/scripts/validate-pr-gates.mjs` 必须直接验证最新可信决定、完整 SHA、交接摘要、PR 历史和其后
+漂移；更晚的 `rejected` 撤销旧批准。`bootstrap` 与 `supervised` 必须有技术方案 Gate。批准后把
+Issue 改为 `factory:ready-to-implement`；拒绝时保持等待。批准产品验收后，只允许完成最终证据。
 
 独立验证器接受当前提交时，直接在同一 PR 发布：
 
@@ -95,8 +100,9 @@ decision: accepted
 verified_sha: <当前完整提交 SHA>
 ```
 
-并添加 `factory:verified`。验证证据必须绑定当前 PR 头；最终交付证据提交后，原验证上下文必须重新
-核对并发布绑定新头的验证评论。没有结构化验证、标签或当前 SHA 时，必需 Check 失败。
+并添加 `factory:verified`。更晚的结构化拒绝以及 `factory:rejected` 标签都会阻止通过；接受与拒绝
+标签必须互斥。验证证据必须绑定当前 PR 头；最终交付证据提交后，原验证上下文必须重新核对并发布
+绑定新头的验证评论。没有结构化验证、标签或当前 SHA 时，必需 Check 失败。
 
 ## 执行与验证
 

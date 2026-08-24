@@ -22,11 +22,13 @@ requirement: REQ-<issue-number>
 gate: technical-plan | product-acceptance | existing-test-change | dependency
 decision: approved | rejected
 approved_sha: <40-character commit SHA>
+handoff_digest: <64-character SHA-256>
 ```
 
 技术方案批准绑定设计提交；只要设计、Pattern、允许路径、依赖和测试授权未漂移，后续实现提交
 不会使它失效。产品验收绑定经独立验证的候选提交；之后若混入产品、测试或策略变化则必须重验。
-Agent 不得自行构造批准、替含糊评论选择 SHA，聊天记录也不能转换成 GitHub 授权。
+Agent 可以从当前可信交接计算并展示 `handoff_digest` 与完整评论模板，但不得自行发布批准、替含糊
+评论选择 SHA；聊天记录也不能转换成 GitHub 授权。更晚的可信拒绝会撤销旧批准。
 
 ## 必需 PR 协议检查
 
@@ -35,9 +37,11 @@ Agent 不得自行构造批准、替含糊评论选择 SHA，聊天记录也不�
 - PR 仍开放，且同一 Issue 只有一个开放 PR；
 - 交接来自可信作者，`review_pr` 指向当前 PR；
 - 必需人工 Gate 来自可信原始评论、使用完整 SHA 且属于当前 PR 历史；
+- Gate 的 `handoff_digest` 与当前范围一致，防止批准后扩大允许路径或移除 Gate；
 - 技术方案批准后设计、Pattern、允许范围与策略没有漂移；
 - 产品验收后只允许最终 `delivery.md` 证据变化；
 - `factory:verified` 与 `factory-verification:v2` 均存在并绑定当前 PR 头。
+- `factory:rejected` 不存在，且最新可信验证决定为接受。
 
 方案评审阶段或产品验收等待阶段，Check 为红是正常的合并保护。人类提交 Gate 后，后续 Agent
 更新标签或推送提交触发重检。分支保护必须把 `factory-gates` 设为必需且禁止 Agent 绕过。

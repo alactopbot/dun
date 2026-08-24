@@ -12,7 +12,7 @@ Draft PR 和最新可信 `factory-handoff:v2` 后再行动。Agent 会话不是�
 
 通常选择 `factory:ready-to-implement` 的开放 Issue。若需求已有分支与 PR，验证它们属于同一 Issue，
 运行 `.factory/scripts/validate-pr-gates.mjs` 所定义的同等检查，校验 `review_pr`、分支头 SHA、原始
-评论来源、批准者权限与所需 `factory-gate:v2`，然后复用已有 Draft PR。技术方案
+评论来源、批准者权限、`handoff_digest` 与所需 `factory-gate:v2`，然后复用已有 Draft PR。技术方案
 Gate 绑定设计提交；实现提交本身不会使它失效，但设计、Pattern、允许路径、依赖或测试授权变化会
 使它失效，此时回到同一 PR 请求重新评审。
 

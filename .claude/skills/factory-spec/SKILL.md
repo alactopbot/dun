@@ -27,7 +27,11 @@ requirement: REQ-<issue-number>
 gate: technical-plan | product-acceptance | existing-test-change | dependency
 decision: approved | rejected
 approved_sha: <40-character commit SHA>
+handoff_digest: <当前交接范围的 64-character SHA-256>
 ```
+
+Agent 使用仓库验证程序计算 `handoff_digest` 并把完整模板贴到 PR 供人复制。人类核对方案 SHA 与
+交接范围后亲自发布；Agent 不能代发。`bootstrap` 和 `supervised` 都必须完成技术方案 Gate。
 
 ## 按成熟度选择确认深度
 
