@@ -56,6 +56,12 @@ test("Factory V2 使用需求与成熟 Pattern 驱动渐进自治", async () => 
   assert.match(spec, /内部 work units/);
   assert.doesNotMatch(spec, /one GitHub issue per slice|每个切片[^\n]*Issue/i);
 
+  const implement = await read(".claude/skills/factory-implement/SKILL.md");
+  assert.match(implement, /候选交付/);
+  assert.match(implement, /verifier[\s\S]{0,80}pending/);
+  assert.ok(implement.indexOf("创建唯一中文 Draft PR") < implement.indexOf("启动全新上下文的验证器"));
+  assert.match(implement, /只更新同一 `delivery\.md`/);
+
   const workflow = await read(".github/workflows/factory-gates.yml");
   assert.match(workflow, /pull_request:/);
   assert.match(workflow, /gates\.sh deep/);

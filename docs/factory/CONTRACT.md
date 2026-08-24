@@ -72,31 +72,35 @@ Gate 或绕过 Pattern 不变量。重新分诊时更新现有交接评论，避
 3. 既有测试仅能在当前会话明确批准，或在已批准技术方案中预先授权时修改。
 4. 触及承重路径、新依赖或 Pattern 外变化时，必须按项目策略交还人类决定。
 5. 执行规定等级的 Gate；`MISCONFIGURED` 或必需检查被跳过都不算通过。
-6. 写作者不能给自己验收。必须由全新上下文冷读需求、差异、测试和 Pattern 后独立验证。
-7. 整个需求通过后只创建一个 Draft PR，绝不自行合并。
+6. 写入 `verifier: pending` 的候选交付文档，推送同一分支并创建唯一 Draft PR。
+7. 写作者不能给自己验收。必须由全新上下文冷读需求、Draft PR、差异、测试和 Pattern 后独立验证。
+8. 接受后只把同一交付文档更新为最终证据并写最终评论；原验证上下文确认转录与最终 PR Check。
+9. 不得在独立验证接受后夹带产品或策略变化；如需变化，必须重新执行完整验证。
 
 验证关注语义边界：实现是否完整满足需求、是否只做了允许的事、是否保持 Pattern 不变量、测试
 是否能证明行为，以及变更是否引入未经批准的风险。
 
 ## 最终交付证据
 
-每个需求只在完成时写入一次最终交付评论，并同步一份需求交付文档：
+每个需求只有一份交付文档。Draft PR 创建前它以 `pending` 表示候选状态；独立验证接受后更新同一
+文件，并且只在完成时写入一次最终交付评论：
 
 ```text
 <!-- factory-delivery:v2 -->
 requirement: REQ-<issue-number>
-outcome: clean | corrected | rejected
+outcome: pending | clean | corrected | rejected
 pattern: <pattern-id | new>
 pattern_version: <number | pending>
 gates: <等级与最终状态>
-verifier: accepted | rejected
+verifier: pending | accepted | rejected
 human_plan_change: true | false
 human_product_change: true | false
-eligible_clean_run: true | false
+eligible_clean_run: pending | true | false
 completed_at: <UTC timestamp>
 ```
 
-只有 `eligible_clean_run: true` 才计入 Pattern 的连续成功次数。被更正或拒绝的执行保留证据并触发
+候选状态不得写入 Issue 最终评论，也不得计入 Pattern。只有 `eligible_clean_run: true` 才计入
+连续成功次数。被更正或拒绝的执行保留证据并触发
 降级判断，不得通过改写历史伪装成干净执行。
 
 ## 停止条件

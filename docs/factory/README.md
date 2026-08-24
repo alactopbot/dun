@@ -21,9 +21,9 @@ Factory V2 以完整产品需求和成熟 Pattern 驱动研发。日常运行不
 2. `factory-triage` 匹配 Pattern，决定 `bootstrap`、`supervised` 或 `trusted`。
 3. `factory-spec` 在同一需求内完成该模式要求的确认，并形成一份设计。
 4. `factory-implement` 用一个分支完成全部内部工作单元、测试与 Deep Gate。
-5. 全新上下文的 `factory-verify` 独立验收。
-6. 创建一个中文 Draft PR 和一份最终交付证据，由人类决定是否合并。
-7. `factory-monitor` 根据真实结果统计 Pattern 连续成功或降级信号。
+5. 创建唯一中文 Draft PR 和 `pending` 候选交付。
+6. 全新上下文的 `factory-verify` 独立验收，接受后确认最终证据与 PR Check。
+7. 人类决定是否合并；`factory-monitor` 根据真实结果统计 Pattern 连续成功或降级信号。
 
 当前项目关闭 `autonomous`、自动合并和自动发布。`animal-exhibit-v1` 处于监督模式，同类动物展品需要确认技术
 方案和产品验收；连续 3 次干净执行后才具备晋级条件。
