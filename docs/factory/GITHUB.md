@@ -19,8 +19,8 @@ Agent 根据 Draft/Ready 状态和评论在同一 PR 重做 Spec 或进入实现
 
 ## 机读 Spec 与协议检查
 
-每个需求的 `factory.json` 和 `design.md` 一起进入 Draft PR。GitHub Ready/Convert 时间线事件自带
-操作者、提交 SHA、时间和 URL；`.factory/scripts/validate-pr-gates.mjs` 自动验证：
+每个需求的 `factory.json` 和 `design.md` 一起进入 Draft PR。GitHub Ready/Convert 时间线记录操作者、
+时间和 URL；后续 Agent 自动记录当时 PR 头，`.factory/scripts/validate-pr-gates.mjs` 自动验证：
 
 - PR 仍开放，同一 Issue 只有一个开放 PR；
 - `factory.json` 与 Issue、PR、模式、Pattern 和 Gate 一致；

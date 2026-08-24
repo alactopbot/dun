@@ -101,12 +101,13 @@ export function validateGateContext(context) {
         errors.push("spec-ready:pr-is-draft");
       } else if (!trusted(transition)) {
         errors.push("spec-ready:untrusted-actor");
-      } else if (!isFullSha(transition.commitId)) {
+      } else if (!isFullSha(transition.commitId ?? handoff.fields.approved_plan_sha)) {
         errors.push("spec-ready:invalid-sha");
       } else if (!transition.url) {
         errors.push("spec-ready:missing-source");
       } else {
-        const comparison = comparisons[transition.commitId];
+        const approvedSha = transition.commitId ?? handoff.fields.approved_plan_sha;
+        const comparison = comparisons[approvedSha];
         if (!comparison || !comparison.ancestorOfHead) {
           errors.push("spec-ready:sha-not-in-pr-history");
         } else if (comparison.changedFiles.some((path) => protectedPlanPaths.some((pattern) => pattern.test(path)))) {
@@ -178,7 +179,17 @@ async function liveContext(event, token, repository) {
     .map((candidate) => candidate.number);
 
   const rawTransitions = timeline.filter((item) => ["ready_for_review", "convert_to_draft"].includes(item.event));
-  const transitionShas = rawTransitions.map((item) => item.commit_id).filter(isFullSha);
+  const latestHandoff = latestMarker(issueComments.map((comment) => ({
+    body: comment.body,
+    authorAssociation: comment.author_association,
+    createdAt: comment.created_at,
+    url: comment.html_url,
+  })), "factory-handoff:v2");
+  const handoffApprovedSha = latestHandoff?.fields.approved_plan_sha;
+  const transitionShas = [
+    ...rawTransitions.map((item) => item.commit_id),
+    handoffApprovedSha,
+  ].filter(isFullSha);
   const comparisons = {};
   for (const sha of new Set(transitionShas)) {
     const comparison = await github(`${apiRoot}/compare/${sha}...${pr.head.sha}`, token);

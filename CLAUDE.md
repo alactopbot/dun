@@ -39,8 +39,8 @@ GitHub Issue、标签、分支和 PR 是实时状态。需求方案和最终交�
 1. Agent 永不合并；所有交付先创建 Draft PR。
 2. Agent 在唯一 Draft PR 提交统一 Spec；有问题时人类留下普通评论并保持 Draft，没有问题时点击
    Ready for review，聊天不批准流程。
-3. GitHub Ready 时间线自动绑定 Spec 提交；人类不填写关键词、SHA、摘要或结构化协议，Agent 不替人
-   点击 Ready for review。
+3. GitHub Ready 时间线记录操作者和时间；后续 Agent 把当时 PR 头写入交接并由 Gate 校验。人类不
+   填写关键词、SHA、摘要或结构化协议，Agent 不替人点击 Ready for review。
 4. 既有测试语义变化必须进入 Spec 并通过 Ready 状态确认，或属于成熟 Pattern 的明确允许变化。
 5. Gate 失败关闭；`MISCONFIGURED` 和必需检查跳过都不算通过。
 6. 写作者不能给自己验收，必须使用全新上下文独立验证。

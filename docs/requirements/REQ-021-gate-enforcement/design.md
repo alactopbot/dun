@@ -9,7 +9,7 @@ PR #20 在独立验证结束前被合并，验证器随后拒绝。机器 Gate �
 
 为 PR 增加确定性协议检查，同时保持自然的人工体验。Agent 在同一 Draft PR 提交统一 Spec 与机读
 `factory.json`；有问题时人类保持 Draft 并留下普通评论，没有问题时点击 Ready for review。时间线
-事件自动提供操作者、提交 SHA、时间与来源。独立
+事件提供操作者、时间与来源，后续 Agent 自动记录当时 PR 头。独立
 验证使用绑定当前头的 `factory-verification:v2`。最终合并就是产品验收。
 
 ## 产品流程
@@ -56,7 +56,8 @@ Issue
 `convert_to_draft`：
 
 - 只接受仓库 Owner 触发的最新 Ready 事件；
-- 使用事件自带的完整 `commit_id` 作为获批 Spec 版本；
+- GitHub 当前可能不返回 Ready 事件的 `commit_id`；后续 Agent 在进入实现前把当时 PR 头记录到
+  `factory-handoff:v2.approved_plan_sha`，人类无需填写；
 - 确认该提交仍是当前 PR 头的祖先；
 - 比较 Ready 提交到当前头的 diff。若 `design.md`、`factory.json`、Pattern、项目策略或章程发生变化，
   Ready 自动失效；普通实现代码变化不会让 Spec 失效；
@@ -100,7 +101,7 @@ GitHub API、时间线、来源或完整 SHA 缺失时不猜测成功，而以�
 
 - 所有 Draft/Ready、范围和验证协议测试通过；
 - Draft 中的普通评论能由后续 Agent 当作 Spec 反馈处理，不会被误判为批准；
-- Owner 点击 Ready 后，时间线事件能绑定当时完整 SHA；Convert to draft 能撤销旧 Ready；
+- Owner 点击 Ready 后，Agent 能记录当时完整 PR 头；Convert to draft 能撤销旧 Ready；
 - Ready 后修改 Spec、范围、Pattern 或项目策略会自动失败，普通实现提交不会；
 - PR 缺少当前 SHA 的独立验证时，GitHub Check 为红；
 - 验证器发布结构化接受证据并添加标签后，重新触发的 Check 为绿；

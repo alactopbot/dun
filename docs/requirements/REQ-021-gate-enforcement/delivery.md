@@ -16,7 +16,7 @@ completed_at: pending
 ## 候选结果
 
 - 新增可执行 PR 协议验证器，并接入 GitHub `factory-gates`。
-- 人工有问题就保持 Draft 并留普通评论，没有问题只点击 Ready for review；时间线自带提交 SHA 与来源。
+- 人工有问题就保持 Draft 并留普通评论，没有问题只点击 Ready for review；Agent 自动记录当时 PR 头。
 - 统一 Spec 的机读范围由 `factory.json` 承载并约束完整 diff。
 - 独立验证必须使用 `factory-verification:v2` 绑定当前 PR 头。
 - 8 组协议测试覆盖 Ready for review、Convert to draft、非可信操作者、错误 SHA、Spec 漂移、范围外

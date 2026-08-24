@@ -42,7 +42,7 @@ function validContext() {
       changedFiles: ["app/exhibits/page.tsx", "docs/requirements/REQ-007-animal/delivery.md"],
     },
     issue: { number: 7 },
-    issueComments: [comment("<!-- factory-handoff:v2 -->\nrequirement: REQ-007\nreview_pr: 8")],
+    issueComments: [comment(`<!-- factory-handoff:v2 -->\nrequirement: REQ-007\nreview_pr: 8\napproved_plan_sha: ${specSha}`)],
     prComments: [verification()],
     specTransitions: [transition()],
     openLinkedPrs: [8],
@@ -62,6 +62,12 @@ function validContext() {
 
 test("Ready for review 事件绑定 Spec 提交并允许实现继续", () => {
   assert.deepEqual(validateGateContext(validContext()), { ok: true, errors: [] });
+});
+
+test("GitHub Ready 事件缺少 commit_id 时使用 Agent 记录的当时 PR 头", () => {
+  const context = validContext();
+  context.specTransitions[0].commitId = null;
+  assert.equal(validateGateContext(context).ok, true);
 });
 
 test("Draft 状态表示方案尚未通过", () => {
