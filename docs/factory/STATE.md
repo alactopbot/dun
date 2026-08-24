@@ -15,10 +15,11 @@ is ambiguous between "nothing was wrong" and "the check never ran".
 ## Current snapshot
 
 - last successful specification handoff: FQ-1 on 2026-08-24
-- last successful triage: FQ-3 through FQ-6 on 2026-08-24
+- last successful triage: FQ-4 promoted after FQ-3 merged on 2026-08-24
 - last successful monitor: none
-- ready to implement: 1 (`FQ-3`)
-- waiting to implement: 3 (`FQ-4`, `FQ-5`, `FQ-6`)
+- ready to implement: 1 (`FQ-4`)
+- waiting to implement: 2 (`FQ-5`, `FQ-6`)
+- completed: 1 (`FQ-3`)
 - in progress: 0
 - awaiting review: 0
 - charter gaps: none known
