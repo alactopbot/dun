@@ -49,6 +49,10 @@ function gateError(gate, reason) {
   return `gate:${gate}:${reason}`;
 }
 
+function requirementId(issueNumber) {
+  return `REQ-${String(issueNumber).padStart(3, "0")}`;
+}
+
 export function validateGateContext(context) {
   const errors = [];
   const { pr, issue, issueComments, prComments, openLinkedPrs, comparisons } = context;
@@ -62,7 +66,7 @@ export function validateGateContext(context) {
     return { ok: false, errors };
   }
 
-  if (handoff.fields.requirement !== `REQ-${issue.number}`) errors.push("handoff:requirement-mismatch");
+  if (handoff.fields.requirement !== requirementId(issue.number)) errors.push("handoff:requirement-mismatch");
   if (Number(handoff.fields.review_pr) !== pr.number) errors.push("handoff:review-pr-mismatch");
 
   const requiredGates = [];
@@ -80,7 +84,7 @@ export function validateGateContext(context) {
       continue;
     }
     if (!trusted(evidence.item)) errors.push(gateError(gate, "untrusted-author"));
-    if (evidence.fields.requirement !== `REQ-${issue.number}`) errors.push(gateError(gate, "requirement-mismatch"));
+    if (evidence.fields.requirement !== requirementId(issue.number)) errors.push(gateError(gate, "requirement-mismatch"));
     if (!isFullSha(evidence.fields.approved_sha)) {
       errors.push(gateError(gate, "invalid-sha"));
       continue;
@@ -112,7 +116,7 @@ export function validateGateContext(context) {
     errors.push("verification:missing");
   } else {
     if (!trusted(verification.item)) errors.push("verification:untrusted-author");
-    if (verification.fields.requirement !== `REQ-${issue.number}`) errors.push("verification:requirement-mismatch");
+    if (verification.fields.requirement !== requirementId(issue.number)) errors.push("verification:requirement-mismatch");
     if (!isFullSha(verification.fields.verified_sha)) errors.push("verification:invalid-sha");
     if (verification.fields.verified_sha !== pr.headSha) errors.push("verification:stale-sha");
     if (!verification.item.url) errors.push("verification:missing-source");

@@ -17,18 +17,18 @@ function comment(body, overrides = {}) {
 }
 
 function gate(gateName, sha = planSha) {
-  return comment(`<!-- factory-gate:v2 -->\nrequirement: REQ-7\ngate: ${gateName}\ndecision: approved\napproved_sha: ${sha}`);
+  return comment(`<!-- factory-gate:v2 -->\nrequirement: REQ-007\ngate: ${gateName}\ndecision: approved\napproved_sha: ${sha}`);
 }
 
 function verification(sha = headSha) {
-  return comment(`<!-- factory-verification:v2 -->\nrequirement: REQ-7\ndecision: accepted\nverified_sha: ${sha}`);
+  return comment(`<!-- factory-verification:v2 -->\nrequirement: REQ-007\ndecision: accepted\nverified_sha: ${sha}`);
 }
 
 function validContext() {
   return {
     pr: { number: 8, state: "OPEN", headSha, labels: ["factory:verified"] },
     issue: { number: 7 },
-    issueComments: [comment("<!-- factory-handoff:v2 -->\nrequirement: REQ-7\nhuman_gates: technical-plan=approved, product-acceptance=pending\nreview_pr: 8")],
+    issueComments: [comment("<!-- factory-handoff:v2 -->\nrequirement: REQ-007\nhuman_gates: technical-plan=approved, product-acceptance=pending\nreview_pr: 8")],
     prComments: [gate("technical-plan"), verification()],
     openLinkedPrs: [8],
     comparisons: { [planSha]: { ancestorOfHead: true, changedFiles: ["app/exhibits/page.tsx"] } },
