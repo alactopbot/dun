@@ -83,39 +83,42 @@ Gate：实现阶段 `deep`；本次仅 Spec 的 PR 使用 `fast`
 
 ## 6. 模型候选与权利决定
 
-### 6.1 已比较候选
+### 6.1 选定来源
 
-按照技术计划的 100 分候选量表，在只依据公开页面元数据的 Spec 阶段做预评分；下载后的几何、材质、动画和权利证据仍须由验证脚本及人工查看确认。
+两只动物统一选用 Quaternius 官方 [Animated Dinosaur Pack](https://quaternius.com/packs/animateddinosaurs.html)：
+
+- 官方页在 2026-08-25 明确列出作者 Quaternius、6 个带动画和纹理的低多边形恐龙、FBX/OBJ/Blend 格式及 `CC0`，并写明可用于个人和商业项目；
+- 官方下载按钮指向作者公开的 [Google Drive 文件夹](https://drive.google.com/drive/folders/1u5Fhu3ziuRlGonW6bUI7uClqBGoSNeF6)；取得文件不依赖 Sketchfab/Epic 账号或 Real ID 身份验证；
+- 公开目录中的 `License.txt`（文件 ID `1XSnL5PPEEVuZFZbW9m6fKbU4AUVAfyfY`）明确写明 `LowPoly Models by @Quaternius`、`CC0 1.0 Universal` 和 `Public Domain Dedication`；
+- 选定原始文件为 `Triceratops.blend`（文件 ID `1pxvaW89pkg8tiXoqnCKiuw-BJzhZzBxK`，目录记录 1,049,080 bytes）与 `Stegosaurus.blend`（文件 ID `1mRVzt_zhZC_JsGoMvyIsRlGU5bMw7ccS`，目录记录 1,156,460 bytes）；两者均由 Drive 标记为可下载；
+- [Poly Pizza 的作者包镜像](https://poly.pizza/bundle/Animated-Dinosaur-Bundle-SmoLdBLO2K) 逐项列出 Quaternius 的三角龙和剑龙并标记 CC0，也提供 GLTF/FBX 下载。它只用于交叉核对，不作为原始文件来源；正式处理从 Quaternius 官方 `.blend` 开始。
+
+使用同一作者、同一包和同一许可证，使两只动物的艺术风格、骨架/动画结构与权利证据一致。正式归属仍保留作者与直接来源，即使 CC0 不强制署名。
+
+### 6.2 候选比较
+
+按照技术计划的 100 分量表，以包作为一个能同时完成三角龙垂直切片和剑龙接入的候选单位：
 
 | 候选 | 权利 | 科学 | 视觉 | 性能 | 动画 | 可修复 | 儿童体验 | 合计 | 决定 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| Ferocious Industries, [PBR Stegasaurus (Animated)](https://sketchfab.com/3d-models/pbr-stegasaurus-animated-ec254ea1554941fe8a131f62db0faf3d) | 25 | 10 | 12 | 15 | 8 | 6 | 4 | 80 | 首选入库候选 |
-| Artec 3D, [Stegosaurus Skeleton](https://sketchfab.com/3d-models/stegosaurus-skeleton-dc6e1c748484449587b81426d41da6cb) | 25 | 18 | 8 | 0 | 0 | 2 | 4 | 57 | 不作为运行时候选 |
+| Quaternius 官方 Animated Dinosaur Pack | 25 | 12 | 12 | 15 | 10 | 10 | 5 | 89 | 选定 |
+| 原 Sketchfab 两模型组合 | 0 | 10 | 12 | 15 | 8 | 6 | 4 | 55 | 拒绝 |
+| 机构/博物馆骨架扫描组合 | 25 | 20 | 8 | 0 | 0 | 2 | 4 | 59 | 拒绝 |
 
-首选页面在 2026-08-25 显示可下载、CC Attribution、约 19.8k 三角面、2K PBR 纹理及动画，满足进入下载审查的最低条件。Artec 候选虽是 Denver Museum of Nature & Science 装架骨架扫描且页面标记 CC Attribution，但约 570 万三角面、包含装架结构且无安静生命复原动画，低于 75 分并超过运行时硬上限，不进入正式制作。
+原 Sketchfab 组合的网页许可声明可读，但取得原始归档和下载时许可证据需要新建 Epic 账号并完成 Real ID 身份验证，无法满足本项目“权利清晰度 25 分”和不引入无关身份收集的边界，因此权利维度为 0 并直接淘汰。机构骨架扫描具有较强科学依据，但装架结构、数百万三角形和缺少安静生命复原动画使其低于运行时要求。搜索中出现的 CC BY-NC、品牌游戏提取、上传者无再授权证据或来源不明候选继续全部拒绝。
 
-搜索中出现的 CC BY-NC 候选全部拒绝；来自游戏、电影或其他品牌且无法证明上传者拥有再授权权利的模型，即使页面显示 CC BY，也不得使用。
+### 6.3 批准与处理边界
 
-三角龙垂直切片使用同一量表比较以下候选：
+人类把本 Draft PR 重新设为 Ready，即同意把上述两个官方 `.blend` 文件作为本需求唯一允许下载和审查的三角龙、剑龙原始模型，但不等于提前认定其可发布。实现开始后必须先：
 
-| 候选 | 权利 | 科学 | 视觉 | 性能 | 动画 | 可修复 | 儿童体验 | 合计 | 决定 |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| JZG, [Triceratops](https://sketchfab.com/3d-models/triceratops-27fdbc94f05b4e0c844db6fd679b2265) | 25 | 10 | 12 | 15 | 0 | 10 | 5 | 77 | 首选入库候选 |
-| toaste, [Triceratops Skeleton](https://sketchfab.com/3d-models/triceratops-skeleton-4f4e38e8c70a42f391ed2353a7b4c091) | 25 | 16 | 7 | 15 | 0 | 7 | 4 | 74 | 不作为运行时候选 |
+1. 从列明的官方 Drive 文件 ID 下载两个 `.blend` 和 `License.txt`，记录下载日期、原始文件名、字节数、原始 SHA-256、作者、官方页面、Drive URL、许可证 URL 和许可证文本；
+2. 使用已安装的 Blender LTS 打开源文件，确认没有缺失外链、意外脚本、品牌标志或与包内 CC0 声明冲突的第三方资产；只复制审查后的数据到隔离工作文件，不直接运行未知脚本；
+3. 将模型与 NHM 的可观察骨骼特征对照：三角龙检查四足体态、三只面角和颈盾；剑龙检查四足体态、背板序列和尾刺。模型保持低多边形艺术复原，不作为科学证据；
+4. 删除攻击、死亡、跳跃、奔跑等不符合 DUN 的动作，只保留一个最安静、可闭环且无明显滑步的片段并重命名为 `Idle`；没有合格片段就保持静态；
+5. 按 +X 朝向、+Y 竖直、脚底 Y=0、自包含材质和技术预算导出 GLB，再运行优化、Khronos Validator、真实查看器与儿童体验检查；
+6. 在运行时、来源面板和 credits 中写明 `Quaternius · Animated Dinosaur Pack · CC0-1.0`、DUN 的修改步骤和原始/运行时哈希；不把颜色、软组织或动作当作事实。
 
-JZG 页面在 2026-08-25 显示模型由上传者使用 ZBrush、Blender、Substance Painter、Marmoset Toolbag 和 Photoshop 创作，可下载、CC Attribution，约 7.2k 三角面；它达到 75 分并避免采用搜索中明确来自 LEGO、Jurassic World、Prehistoric Kingdom 或其他游戏/品牌的上传物。静态模型是允许的：若无法制作可信的安静 Idle，就保持静态并按需渲染。toaste 候选页面虽标记 CC Attribution、约 21.9k 三角面并称为 Melbourne Museum 展品的扫描，但上传者不是馆方且属于装架骨架，不满足本次安静生命复原的产品角色。
-
-### 6.2 首选候选的批准边界
-
-人类把本 Draft PR 设为 Ready，即同意将 Ferocious Industries 剑龙候选与 JZG 三角龙候选作为本需求各自唯一允许下载和审查的模型，但不等于提前认定其可发布。实现开始后必须先：
-
-1. 从直接详情页下载，保存下载日期、原始文件名、字节数、原始 SHA-256、作者、详情页、下载时许可证文本/截图和许可证 URL；
-2. 确认许可证为允许修改、商业使用和随网页交付原始/衍生 GLB 的 CC BY 4.0，且页面与归档中没有冲突条款或上游版权风险；
-3. 将模型与 NHM 的可观察骨骼特征对照，检查四足姿态、背板排列、尾刺和不带攻击/惊吓动作；
-4. 检查所有动画，只保留或制作一个 6–10 秒、首尾闭合、无滑步的 `Idle`；不能可靠修复时保持静态；
-5. 在运行时和 poster 中明确称为艺术复原，不把颜色、软组织或动作作为事实。
-
-上述规则同样适用于 JZG 三角龙候选；两者任一项失败就停止素材入库，把 PR 转回 Draft 并报告证据。不得自行换用另一个模型。这样避免在实现中新增未审核的素材决定。
+任一文件的下载内容、许可证、上游归属或科学/儿童体验审查失败，就停止素材入库并把同一 PR 转回 Draft；不得自行换用另一个模型或 Poly Pizza 镜像字节。
 
 ## 7. 背景、poster、缩略图与 provenance
 
@@ -186,7 +189,7 @@ JZG 页面在 2026-08-25 显示模型由上传者使用 ZBrush、Blender、Subst
 ## 11. 实现顺序
 
 1. 在任何模型入库前，锁定依赖并建立 schema、provenance、预算和哈希的 fail-closed 测试。
-2. 分别下载并审查本 Spec 唯一允许的 JZG 三角龙与 Ferocious Industries 剑龙候选；保存直接来源、许可和原始哈希证据。任一失败则转回 Draft。
+2. 从 Quaternius 官方 Drive 文件 ID 分别下载并审查选定的三角龙、剑龙 `.blend` 与包内 `License.txt`；保存直接来源、许可和原始哈希证据。任一失败则转回 Draft。
 3. 按技术计划处理两个 GLB：Blender 规范化、材质/动画清理、Meshopt + WebP 优化、Khronos Validator 和真实查看器复核。
 4. 建立统一 schema、catalog、素材校验脚本和公共 ViewerController，以三角龙完成垂直切片并迁移既有内容测试。
 5. 用同一 schema 和展示器接入剑龙；若需要修改核心 ViewerController 才能接入，先修正通用契约和测试，不复制动物专用展示器。
@@ -231,8 +234,7 @@ JZG 页面在 2026-08-25 显示模型由上传者使用 ZBrush、Blender、Subst
 
 ## 14. 风险与回滚
 
-- **模型权利或上游来源失败**：最高风险。停止入库并把同一 PR 转 Draft；不替换候选、不提交无法再分发的原文件。
-- **三角龙模型权利或质量失败**：与剑龙使用相同的 fail-closed 处理；转回 Draft，不以品牌资产、非商业资产或临时占位 GLB 绕过。
+- **模型权利或上游来源失败**：最高风险。两个 Quaternius 源文件使用同一套 fail-closed 处理；停止入库并把同一 PR 转 Draft，不改用 Poly Pizza 镜像、品牌资产、非商业资产或临时占位 GLB。
 - **3D 依赖、Cloudflare 或 vinext 不兼容**：保留 SSR 静态页面，回退客户端增强提交；不牺牲正文或降级体验来保住 Canvas。
 - **模型性能超预算**：先优化纹理、材质、draw calls 和几何；超过硬上限则拒绝资产并回到 Draft，而非降低全站 DPR 或删除测试。
 - **科学复原与来源冲突**：把不确定性写入说明或拒绝模型；模型不能覆盖机构来源。
