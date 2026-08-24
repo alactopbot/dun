@@ -26,7 +26,7 @@ The corresponding live labels use the `factory:` prefix, for example
 
 ## FQ-3: Make npm test discover future test files
 
-- disposition: ready-to-implement
+- disposition: done
 - source: https://github.com/alactopbot/dun/issues/3
 - last_triaged: 2026-08-24
 - files_expected: package.json
@@ -34,11 +34,11 @@ The corresponding live labels use the `factory:` prefix, for example
 - gate_level: deep
 - done_when: `scripts.test` builds first and uses standard `node --test` discovery; unrelated package metadata and existing tests stay unchanged; the package assertion proves the change; `npm test` discovers the entrance test; Deep gates are green
 - confidence: high
-- notes: This is the only ready item. `package.json` is load-bearing, so implementation requires an explicitly authorized interactive run and a human-read draft PR.
+- notes: Completed by human merge of PR #8 on 2026-08-24.
 
 ## FQ-4: Link a Triceratops tracer exhibit
 
-- disposition: wait-to-implement
+- disposition: ready-to-implement
 - source: https://github.com/alactopbot/dun/issues/4
 - last_triaged: 2026-08-24
 - files_expected: app/page.tsx, app/exhibits/triceratops/page.tsx, tests/triceratops-route.test.mjs
@@ -46,7 +46,7 @@ The corresponding live labels use the `factory:` prefix, for example
 - gate_level: full
 - done_when: The entrance links to a server-rendered Triceratops route with the approved semantic placeholder structure; the new route test and original entrance test run; Full gates are green
 - confidence: high
-- blocker: FQ-3 must be merged before this item becomes ready.
+- notes: This is the only ready item.
 
 ## FQ-5: Add verified bilingual Triceratops content and original media
 
