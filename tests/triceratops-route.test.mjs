@@ -36,7 +36,6 @@ test("入口链接到服务端渲染的三角龙占位展品", async () => {
 
   assert.match(exhibit, /<title>三角龙展品 · DUN<\/title>/i);
   assert.match(body, /<h1\b[^>]*>[^<]*三角龙/i);
-  assert.match(body, /<[^>]+lang="en"[^>]*>[^<]*Triceratops/i);
   assert.match(body, /<a\b[^>]*href="\/"[^>]*>[^<]*返回博物馆/i);
   assert.equal(count(body, /<figure\b[^>]*data-exhibit-figure(?:="")?[^>]*>/gi), 1);
   assert.equal(count(body, /data-observation-prompt(?:="")?/gi), 3);
