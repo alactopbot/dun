@@ -1,10 +1,9 @@
 ---
 name: factory-verify
-description: Independently verify a factory pull request, including fail-closed gates, negative test proof, scope, and load-bearing review.
+description: 独立验证 Factory V2 完整需求的范围、Pattern 不变量、测试、Gate 与中文交付证据。
 ---
 
-# Factory PR verification for Codex
+# Codex Factory 验证适配器
 
-Read `docs/factory/CONTRACT.md`, `docs/factory/CHARTER.md`, and then the canonical workflow
-in `.claude/skills/factory-verify/SKILL.md`. Use a fresh subagent for any critic pass and the
-shared `.factory/scripts/prove-test.sh` procedure for negative test proof.
+读取共享契约、章程、项目配置和 `.claude/skills/factory-verify/SKILL.md`，在全新上下文中冷读并
+执行验证。负向测试证明使用 `.factory/scripts/prove-test.sh`。

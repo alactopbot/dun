@@ -18,6 +18,9 @@ required_files=(
   AGENTS.md
   docs/factory/CONTRACT.md
   docs/factory/CHARTER.md
+  .factory/project.json
+  .factory/project.schema.json
+  .factory/patterns/animal-exhibit-v1.json
   .factory/gates.conf
   .factory/scripts/prove-test.sh
   .claude/scripts/gates.sh
@@ -28,6 +31,14 @@ required_files=(
 for path in "${required_files[@]}"; do
   [ -f "$path" ] && pass "$path exists" || fail "$path is missing"
 done
+
+if command -v node >/dev/null 2>&1 \
+  && node -e 'for (const path of process.argv.slice(1)) JSON.parse(require("node:fs").readFileSync(path, "utf8"))' \
+    .factory/project.json .factory/project.schema.json .factory/patterns/animal-exhibit-v1.json; then
+  pass "Factory V2 JSON 配置可解析"
+else
+  fail "Factory V2 JSON 配置无法解析"
+fi
 
 # install.sh never overwrites, so on a repo that already had .claude/settings.json
 # the deny rules and the hook wiring can be absent while every file is present.
@@ -42,11 +53,11 @@ if [ -f .claude/hooks/block-merge.sh ] && [ ! -x .claude/hooks/block-merge.sh ];
 fi
 
 missing_deny=0
-for rule in 'docs/factory/CHARTER.md' '.factory/gates.conf' '.claude/scripts/gates.sh'; do
-  grep -q "Edit($rule)" .claude/settings.json 2>/dev/null || missing_deny=$((missing_deny + 1))
+for rule in 'docs/factory/CHARTER.md' '.factory/project.json' '.factory/patterns' '.factory/gates.conf' '.claude/scripts/gates.sh'; do
+  grep -Fq "Edit($rule" .claude/settings.json 2>/dev/null || missing_deny=$((missing_deny + 1))
 done
-[ "$missing_deny" -eq 0 ] && pass "policy files are in the Edit deny list" \
-  || fail "$missing_deny policy files are missing from the Edit deny list in .claude/settings.json"
+[ "$missing_deny" -eq 0 ] && pass "Factory 策略文件位于 Edit 拒绝列表" \
+  || fail "$missing_deny 个 Factory 策略路径未加入 .claude/settings.json 的 Edit 拒绝列表"
 
 if [ -f CLAUDE.md ] && grep -q '<PROJECT NAME>\|<install>\|<One paragraph:' CLAUDE.md; then
   fail "CLAUDE.md still contains setup placeholders"
@@ -76,8 +87,9 @@ fi
 if command -v gh >/dev/null 2>&1 && gh auth status >/dev/null 2>&1; then
   pass "GitHub CLI authenticated"
   missing_labels=0
+  factory_label_names="$(gh label list --repo alactopbot/dun --limit 100 --json name --jq '.[].name' 2>/dev/null)"
   for label in factory:ready-to-implement factory:ready-to-spec factory:needs-info factory:wait-to-implement factory:in-progress factory:awaiting-review; do
-    gh label view "$label" >/dev/null 2>&1 || missing_labels=$((missing_labels + 1))
+    grep -Fxq "$label" <<<"$factory_label_names" || missing_labels=$((missing_labels + 1))
   done
   [ "$missing_labels" -eq 0 ] && pass "live queue labels exist" || warn "$missing_labels live queue labels missing; run ./.factory/scripts/bootstrap-github.sh --apply"
 else

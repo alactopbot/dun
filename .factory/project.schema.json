@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DUN Factory project policy",
+  "type": "object",
+  "required": ["factoryVersion", "project", "tier", "language", "humanPolicy", "automation", "evidence"],
+  "properties": {
+    "factoryVersion": { "const": 2 },
+    "project": { "type": "string", "minLength": 1 },
+    "tier": { "enum": ["revival", "greenfield", "oss", "client-production"] },
+    "language": {
+      "type": "object",
+      "required": ["workflow", "productPrimary", "productSecondary", "code"]
+    },
+    "humanPolicy": { "type": "object" },
+    "automation": {
+      "type": "object",
+      "required": ["autoMerge", "autoDeploy"]
+    },
+    "evidence": { "type": "object" }
+  },
+  "additionalProperties": false
+}

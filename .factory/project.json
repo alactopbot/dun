@@ -1,0 +1,28 @@
+{
+  "$schema": "./project.schema.json",
+  "factoryVersion": 2,
+  "project": "dun",
+  "tier": "greenfield",
+  "language": {
+    "workflow": "zh-CN",
+    "productPrimary": "zh-CN",
+    "productSecondary": "en",
+    "code": "en"
+  },
+  "humanPolicy": {
+    "merge": "always",
+    "existingTestChange": "explicit-or-preapproved",
+    "newDependency": "always",
+    "outsidePattern": "always"
+  },
+  "automation": {
+    "autoMerge": false,
+    "autoDeploy": false
+  },
+  "evidence": {
+    "liveState": "github",
+    "checks": "github-checks",
+    "requirementDecision": "docs/requirements",
+    "finalDelivery": "docs/requirements-and-github-comment"
+  }
+}

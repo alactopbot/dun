@@ -1,0 +1,49 @@
+{
+  "id": "animal-exhibit-v1",
+  "version": 1,
+  "title": "儿童恐龙展品",
+  "maturity": "supervised",
+  "appliesWhen": [
+    "新增一种动物或恐龙展品",
+    "复用已有展品的信息结构、双语展示和交互方式"
+  ],
+  "allowedChanges": [
+    "animal-identity",
+    "educational-content",
+    "bilingual-copy",
+    "approved-media",
+    "existing-exhibit-layout"
+  ],
+  "preserved": [
+    "child-safety",
+    "factual-accuracy",
+    "source-attribution",
+    "accessibility",
+    "reduced-motion",
+    "existing-product-language-policy"
+  ],
+  "humanGates": {
+    "bootstrap": ["product-intent", "technical-plan", "product-acceptance"],
+    "supervised": ["technical-plan", "product-acceptance"],
+    "trusted": []
+  },
+  "promotion": {
+    "consecutiveCleanRuns": 3,
+    "requires": [
+      "all-required-gates-green",
+      "independent-verifier-accepted",
+      "no-human-plan-correction",
+      "no-human-product-correction",
+      "no-escaped-defect",
+      "within-pattern-boundary"
+    ]
+  },
+  "demoteOn": [
+    "verifier-rejected",
+    "human-plan-change",
+    "human-product-change",
+    "escaped-defect",
+    "scope-exceeded",
+    "pattern-version-changed"
+  ]
+}

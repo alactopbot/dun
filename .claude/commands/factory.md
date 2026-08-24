@@ -1,72 +1,22 @@
 ---
 name: factory
-description: Factory control room. Show queue state, review bottleneck, and what needs a human right now.
+description: 用 GitHub 实时状态展示 DUN Factory 控制台，突出当前需要人的决定。
 ---
 
-You are the factory control room. The human wants to know what is going on and what needs
-them, quickly.
+# Factory 控制台
 
-Read `docs/factory/CONTRACT.md` and `docs/factory/CHARTER.md`. Query open issues with
-`factory:*` labels and open factory PRs, then read the newest records under
-`docs/factory/runs/`. Treat `QUEUE.md` and `STATE.md` as snapshots only.
+读取契约、章程、项目配置、Pattern，并查询开放 Issue、分支、Draft PR、Checks 和最新
+`factory-delivery:v2` 评论。只报告，不批准、不合并、不关闭。
 
-If the user passed an argument, handle it:
+支持：`status`（默认）、`next`、`queue`、`stuck` 或指定 Issue 编号。
 
-- `status` (or no argument) - the report below
-- `next` - the single highest-value thing for a human to do right now, and why
-- `queue` - the full queue grouped by disposition
-- `stuck` - only items blocked, stale, or twice-rejected
-- `<issue-number>` - everything about that one item
+报告按以下顺序使用中文输出：
 
-## The status report
+1. 当前需要人的技术方案、产品验收、既有测试、依赖、承重路径或合并决定。
+2. 等待人工决定的开放需求数量与章程背压状态。
+3. 正在执行、可执行、待方案、待信息、待依赖和待评审的需求数量与链接。
+4. 默认分支和开放 PR 的 Gate 健康状态。
+5. 各 Pattern 的成熟度、连续干净执行次数和降级信号。
+6. 一个最有价值的下一步及理由。
 
-Lead with what needs a human. Nothing else is urgent.
-
-```
-FACTORY - <repo> - tier: <tier>
-
-NEEDS YOU (<n>)
-  PR #<n>  <title>
-           <why it needs you: load-bearing / tests modified / gate skipped / verifier reservations>
-  FQ-<n>   needs-info: <the actual question>
-
-REVIEW QUEUE: <n> / <charter limit>
-  <if at or over the limit, say plainly: the factory should stop taking new work
-   until this drains. The constraint is not how many agents can run, it is how
-   many decisions are pending your judgment.>
-
-RUNNING
-  <issues labeled factory:in-progress and visible routine runs, with links>
-
-QUEUE
-  ready-to-implement  <n>
-  ready-to-spec       <n>
-  needs-info          <n>
-  wait-to-implement   <n>
-  awaiting-review     <n>
-
-HEALTH
-  gates on main: GREEN | RED (<failing>) | MISCONFIGURED (<missing>)
-  skipped gates: <list, or none>
-  charter gaps:  <n>  <- unreviewed decisions the factory could not make
-  last monitor:  <date>  <- if over a week, say the loop is not closed
-
-FLOW (last 30 days, when records are complete)
-  verifier rejection rate: <n>%
-  median review wait:      <duration>
-  escaped defects:         <n>
-
-SUGGESTED NEXT
-  <one thing, with the reason>
-```
-
-## Rules
-
-- **Never** merge, approve, or close anything from this command. It reports.
-- If the review queue is at the charter limit, lead with that above everything else. A full
-  review queue is the binding constraint on the whole factory and everything else is noise
-  until it drains.
-- If gates are red on the default branch, lead with that instead: every verdict since it
-  broke was measured against a broken baseline.
-- Be terse. This is a dashboard. Long prose defeats the purpose.
-- If no run record has landed in over a week, say so. Stale evidence reads as calm.
+数据不完整时明确写“不足以判断”，不得从缺少评论或 Check 推断成功。

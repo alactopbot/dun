@@ -1,10 +1,9 @@
 ---
 name: factory-tune
-description: Review factory evidence and propose tighter or looser constraints without editing the charter. Use for a periodic constraint review.
+description: 根据最终交付证据提出 Pattern 晋级、降级和 Factory 约束调整建议。
 ---
 
-# Factory tuning for Codex
+# Codex Factory 调优适配器
 
-Read `docs/factory/CONTRACT.md`, then follow `.claude/commands/factory-tune.md`. Propose
-changes and record accepted human decisions in `docs/factory/DECISIONS.md`; never edit the
-charter or gate requirements on your own initiative.
+读取共享契约并执行 `.claude/commands/factory-tune.md`。只提出有证据的建议；未经人类明确批准，
+不得修改章程、项目配置、Pattern 或 Gate。

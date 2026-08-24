@@ -1,123 +1,76 @@
 ---
 name: factory-spec
-description: Turn a ready-to-spec queue item into an approved plan through explicit human gates. Use when an item needs scope decided before code exists, when planning a feature, or before starting a migration. Runs interactively - not for unattended routines.
+description: 为一个完整需求形成与其 Pattern 成熟度相适应的中文方案，并在同一 Issue 内完成必要的人类确认。用于新模式、监督模式需求或范围发生变化时。
 ---
 
-# Factory spec
+# Factory 需求方案
 
-This skill exists because the cheapest place to fix a decision is before any code encodes
-it. Once a model has written a thousand lines, changing direction is expensive and every
-instinct is to patch instead.
+方案阶段的输出是一个完整需求的可执行设计，不是把需求变成更多 Issue。
 
-**This skill is interactive.** It stops and waits for a human. Do not run it inside an
-unattended routine; a routine that approves its own spec has no gates at all.
+## 前置读取
 
-Read `docs/factory/CONTRACT.md` and `docs/factory/CHARTER.md` before gate 1.
+读取契约、章程、项目配置、适用 Pattern、Issue 全文和最新可信 `factory-handoff:v2`。在
+`docs/requirements/REQ-<issue-number>-<名称>/design.md` 中维护一份设计；同一需求的补充与批准
+继续更新该文件和 Issue，不建立多套并行状态。
 
-## Gates
+## 按成熟度选择确认深度
 
-Four, in order. Stop at each one. Never merge two gates into a single pass. Never proceed
-on an inferred approval: "looks good" on gate 1 is not approval of gate 2.
+### bootstrap
 
-Write each gate's output into `docs/factory/specs/FQ-<n>/` as its own file, and track
-approvals in `docs/factory/specs/FQ-<n>/00-status.md`.
+用于第一次建立新 Pattern。依次确认：
 
-### Gate 1 - Product (`01-product.md`)
+1. 产品意图：用户问题、成功标准、完成后的产品表述、明确不做什么。
+2. 技术方案：现有模块、数据与调用流、依赖、承重路径、风险与回退。
+3. 执行设计：准确路径、接口约定、测试证明、最不确定的决策。
+4. 产品验收：从用户视角确认完整结果，并沉淀可复用 Pattern。
 
-No technical content whatsoever. If you find yourself naming a file or a function, you are
-in the wrong gate.
+只有人类明确批准当前阶段后才继续，但这些确认都属于同一个 Issue 和最终 PR。
 
-- The user problem, stated as a person's problem
-- What success looks like, measurably
-- A short announcement written as if the change already shipped
-- Plain HTML mockups for any screen involved, in `mockups/`
-- **What we are deliberately not doing**
+### supervised
 
-That last item is the one people skip and the one that saves the most time. It is also
-where the kill decision lives: if the honest answer to "should this exist" is no, this gate
-is where that is cheap to say.
+Pattern 已经建立。把产品差异、技术影响、内部 work units、测试与验收标准合并为一份技术方案，
+只在 `technical-plan` 和最终 `product-acceptance` 停止等待。重复性的产品意图和架构选择直接引用
+Pattern，不要求重新确认。
 
-**STOP. Ask for approval.**
+### trusted
 
-### Gate 2 - Architecture (`02-architecture.md`)
+需求完全落在成熟 Pattern 内时，方案与产品验收自动通过。Agent 仍需写出精简设计、执行全部
+证据与独立验证；任何越界或不确定性立即退回 `supervised` 或新模式。
 
-- Which existing systems and modules this touches
-- New endpoints, data structures, and their shapes
-- The end-to-end call flow, in order
-- External dependencies, and whether each is genuinely required
-- Which `LOAD_BEARING` paths are involved
-- What could break elsewhere
+## 内部 work units
 
-**STOP. Ask for approval.** For anything touching a load-bearing path, also run the
-`factory-critic` subagent against this document before asking, and include its output.
+将实现拆成可以顺序验证和恢复的内部 work units。每项说明行为结果、预期路径、失败证据和完成
+证据。它们可以对应提交或 PR checklist，但不得各自创建 GitHub Issue、分支、PR 或人工 Gate。
+工作单元可以小，完整需求不能因此被切碎。
 
-### Gate 3 - Program design (`03-design.md`)
+## 设计文档最少内容
 
-- Exact file paths, new and modified
-- Type signatures and function contracts, **no implementations**
-- The call stack for the main flow
-- The test list: what will be tested and what each test proves
-- **The three decisions you are least confident about**
+- 需求与成功标准
+- Pattern、版本、模式及匹配理由
+- 本次允许变化与必须保持的不变量
+- 技术方案、影响路径和依赖决定
+- 内部 work units 与测试证明
+- 产品验收场景
+- 明确不做的内容和已知风险
+- 已获得的人类授权，包括既有测试、依赖和承重路径
 
-That last section is the highest-value part of this gate. It is where a reviewer can
-intervene before the uncertainty is buried under working code.
+## 交回执行
 
-**STOP. Ask for approval.**
+所需确认完成后，更新同一条可信交接评论为：
 
-### Gate 4 - Slices (`04-slices.md`)
-
-Decompose into vertical slices. Each slice must be independently shippable, independently
-testable, and small enough to review in one sitting.
-
-- **Slice 0 is a tracer bullet**: end to end, mostly mocked, proving the shape works.
-- Each later slice replaces one mock with real behavior.
-- Each slice gets its own queue entry with its own `done_when`.
-
-Once approved, create or update one GitHub issue per slice and apply
-`factory:ready-to-implement`. Create or update its `factory-handoff:v1` comment with the
-approved `done_when`, expected files, gate level, and confidence. Also write each slice into
-the `QUEUE.md` snapshot. The issue label and comment are the handoff back to the unattended
-part of the factory.
-
-**STOP. Ask for approval before writing the queue entries.**
-
-After the approved handoff, write a unique `spec` run record under `docs/factory/runs/`.
-
-## Status file
-
-`00-status.md` tracks state so the spec survives a context reset or a week away:
-
-```
-item: FQ-<n>
-gate_1_product: approved 2026-08-16 | pending | rejected
-gate_2_architecture: pending
-gate_3_design: not-started
-gate_4_slices: not-started
-slices_completed: 0 / ?
-open_questions:
-  - <anything blocking, with who owns the answer>
+```text
+<!-- factory-handoff:v2 -->
+requirement: REQ-<issue-number>
+disposition: ready-to-implement
+mode: bootstrap | supervised | trusted
+pattern: <pattern-id | new>
+pattern_version: <number | pending>
+done_when: <完整且可验证的产品结果>
+allowed_paths: <逗号分隔路径>
+load_bearing: true | false
+gate_level: fast | full | deep
+human_gates: <已完成或 none>
+created_at: <UTC timestamp>
 ```
 
-## For migrations specifically
-
-If this spec covers a migration, gate 2 must answer one question before anything else:
-
-**What is the oracle?**
-
-An old or unlaunched project usually has the thinnest test coverage in the portfolio, which
-means a migration can compile, typecheck, pass every existing test, and still behave
-differently. Green does not mean equivalent.
-
-So the first slices are not migration slices:
-
-1. Make it build on the current stack
-2. Make it typecheck
-3. Pin current behavior with characterization tests and golden-master snapshots
-4. **Only then** migrate, wide and fast, against the oracle you just built
-
-This inverts the usual reading of back-pressure. Instead of accepting the verification
-budget you have and limiting autonomy to match, you go build a bigger budget first and
-claim the autonomy it buys. Each of those four steps is itself a clean factory job.
-
-If gate 2 cannot name the oracle, the migration is not ready and no amount of agent
-throughput fixes that.
+把 Issue 状态改为 `factory:ready-to-implement`。不创建中间 PR；设计与实现最终进入同一个 Draft PR。

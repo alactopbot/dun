@@ -1,0 +1,31 @@
+{
+  "skill_name": "factory-implement",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "DUN 的三角龙展品已经上线。现在新增一个剑龙展品，信息结构、双语方式、交互和素材流程都沿用三角龙。请说明 Factory 应如何从 Issue 推进到最终交付。只输出计划，不执行 GitHub 操作或修改文件。",
+      "expected_output": "把剑龙作为一个完整需求，匹配 animal-exhibit-v1 的 supervised 模式，只保留技术方案和产品验收确认，并用一个 Issue、分支和 Draft PR 完成交付。",
+      "files": [],
+      "expectations": [
+        "明确使用一个 Issue、一个分支和一个 Draft PR 承载完整剑龙需求",
+        "把实现拆分视为内部工作单元，不为工作单元创建额外 Issue 或 PR",
+        "正确匹配 animal-exhibit-v1 的 supervised 模式，并仅保留技术方案与产品验收两个人工 Gate",
+        "使用语义范围、Pattern 不变量、测试和独立验证控制风险，不提出变更数量阈值",
+        "面向人的计划使用中文"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "给 DUN 所有动物展品增加可点击播放的双语真人音频讲解，包括新的音频素材和播放组件。请说明 Factory 应如何处理这个需求。只输出计划，不执行 GitHub 操作或修改文件。",
+      "expected_output": "识别该能力越出 animal-exhibit-v1，作为一个完整的新模式需求进入 bootstrap/方案流程，明确素材许可、儿童安全、依赖与交互决策，同时不切碎成多个 Issue。",
+      "files": [],
+      "expectations": [
+        "明确指出音频能力越出 animal-exhibit-v1 的允许范围，不能直接按成熟动物展品复制",
+        "将需求路由到新 Pattern 的 bootstrap 或 ready-to-spec 流程",
+        "仍把端到端音频能力作为一个完整需求，不按组件或步骤拆成多个 Issue/PR",
+        "明确要求确认音频素材来源与许可、儿童安全、交互和依赖等关键风险",
+        "面向人的计划使用中文"
+      ]
+    }
+  ]
+}

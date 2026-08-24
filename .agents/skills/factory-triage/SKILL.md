@@ -1,10 +1,9 @@
 ---
 name: factory-triage
-description: Classify GitHub issues into the factory's live label queue and write an auditable snapshot. Use for backlog triage or a scheduled triage run.
+description: 按 DUN 项目策略和 Pattern 分诊一个完整 GitHub 需求，选择自治模式并写入 V2 可信交接。
 ---
 
-# Factory triage for Codex
+# Codex Factory 分诊适配器
 
-Read `docs/factory/CONTRACT.md`, `docs/factory/CHARTER.md`, and then the canonical workflow
-in `.claude/skills/factory-triage/SKILL.md`. Follow that workflow using the tools available
-in Codex. GitHub labels are the live queue; `QUEUE.md` is only a snapshot.
+读取共享契约、章程、项目配置和 `.claude/skills/factory-triage/SKILL.md`，使用 Codex 可用工具
+完整执行该中文流程。GitHub 是实时状态来源。
