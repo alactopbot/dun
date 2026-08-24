@@ -24,18 +24,53 @@ The corresponding live labels use the `factory:` prefix, for example
 
 ---
 
-## Example entry (delete this)
+## FQ-3: Make npm test discover future test files
 
-## FQ-142: Expired tokens return 500 instead of 401
 - disposition: ready-to-implement
-- source: https://github.com/owner/repo/issues/142
-- last_triaged: 2026-08-16
-- repro: confirmed
-- files_expected: src/auth/verify.ts, src/auth/verify.test.ts
+- source: https://github.com/alactopbot/dun/issues/3
+- last_triaged: 2026-08-24
+- files_expected: package.json
 - load_bearing: true
 - gate_level: deep
-- done_when: `verify.test.ts` has a case for an expired token asserting a 401 response, it fails on `main`, and it passes after the change
+- done_when: `scripts.test` builds first and uses standard `node --test` discovery; unrelated package metadata and existing tests stay unchanged; the package assertion proves the change; `npm test` discovers the entrance test; Deep gates are green
 - confidence: high
-- notes: `src/auth/**` is load-bearing, so this cannot be auto-implemented despite being simple. Route through factory-spec or implement with a forced human read.
+- notes: This is the only ready item. `package.json` is load-bearing, so implementation requires an explicitly authorized interactive run and a human-read draft PR.
+
+## FQ-4: Link a Triceratops tracer exhibit
+
+- disposition: wait-to-implement
+- source: https://github.com/alactopbot/dun/issues/4
+- last_triaged: 2026-08-24
+- files_expected: app/page.tsx, app/exhibits/triceratops/page.tsx, tests/triceratops-route.test.mjs
+- load_bearing: false
+- gate_level: full
+- done_when: The entrance links to a server-rendered Triceratops route with the approved semantic placeholder structure; the new route test and original entrance test run; Full gates are green
+- confidence: high
+- blocker: FQ-3 must be merged before this item becomes ready.
+
+## FQ-5: Add verified bilingual Triceratops content and original media
+
+- disposition: wait-to-implement
+- source: https://github.com/alactopbot/dun/issues/5
+- last_triaged: 2026-08-24
+- files_expected: content/exhibits/triceratops.ts, app/exhibits/triceratops/page.tsx, public/media/triceratops/exhibit.webp, tests/triceratops-content.test.mjs
+- load_bearing: true
+- gate_level: deep
+- done_when: The approved three sourced propositions, bilingual prompts, source records, invariants, and original credited reconstruction replace every content and media placeholder; the content test proves the replacement; Deep gates are green
+- confidence: medium
+- blocker: FQ-4 must be merged before this item becomes ready.
+- notes: Content and media are load-bearing, so implementation requires an explicitly authorized interactive run and a human-read draft PR.
+
+## FQ-6: Apply the calm responsive Triceratops exhibit presentation
+
+- disposition: wait-to-implement
+- source: https://github.com/alactopbot/dun/issues/6
+- last_triaged: 2026-08-24
+- files_expected: app/exhibits/triceratops/page.module.css, app/exhibits/triceratops/page.tsx, tests/triceratops-style.test.mjs
+- load_bearing: false
+- gate_level: full
+- done_when: The page applies the approved calm responsive visual contract without altering facts, sources, media, or behavior; the style contract test proves the change; existing route and content tests remain green; Full gates are green
+- confidence: medium
+- blocker: FQ-5 must be merged before this item becomes ready.
 
 ---
