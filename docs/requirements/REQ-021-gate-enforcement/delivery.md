@@ -2,15 +2,15 @@
 
 ```text
 requirement: REQ-021
-outcome: pending
+outcome: corrected
 pattern: new
 pattern_version: pending
 gates: deep GREEN (6 passed, mutation skipped because project has no mutation script)
-verifier: pending
-human_plan_change: false
+verifier: accepted
+human_plan_change: true
 human_product_change: false
-eligible_clean_run: pending
-completed_at: pending
+eligible_clean_run: false
+completed_at: 2026-08-24T12:03:46Z
 ```
 
 ## 候选结果
@@ -27,5 +27,6 @@ completed_at: pending
 
 `FACTORY_GATES: level=deep status=GREEN passed=6 failed=0 failing=none skipped=mutation misconfigured=none`
 
-GitHub 候选 Check 和全新上下文独立验证完成前，`outcome`、`verifier` 与
-`eligible_clean_run` 保持 `pending`。
+- 候选独立复验：`accepted`，绑定 `2e3ea6f63cf4d9c2a2018f6b7e9ec1eae57d790b`
+- 候选必需 Check：GREEN，Actions run `32724951224`
+- 本次经历人工方案反馈与独立验证拒绝后修正，因此结果为 `corrected`，不计为 Pattern 干净运行。
