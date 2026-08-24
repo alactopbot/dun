@@ -33,6 +33,7 @@ test("入口链接到服务端渲染的三角龙占位展品", async () => {
   assert.match(exhibitResponse.headers.get("content-type") ?? "", /^text\/html\b/i);
   const exhibit = await exhibitResponse.text();
   const body = renderedBody(exhibit);
+  const visibleText = body.replace(/<[^>]*>/g, " ");
 
   assert.match(exhibit, /<title>三角龙展品 · DUN<\/title>/i);
   assert.match(body, /<h1\b[^>]*>[^<]*三角龙/i);
@@ -43,6 +44,7 @@ test("入口链接到服务端渲染的三角龙占位展品", async () => {
   assert.equal(count(body, /<details\b[^>]*data-source-credit(?:="")?[^>]*>/gi), 1);
   assert.equal(count(body, /data-closing-section(?:="")?/gi), 1);
   assert.doesNotMatch(body, /<details\b[^>]*\bopen(?:\s|=|>)/i);
+  assert.doesNotMatch(visibleText, /[a-z]/i);
   assert.doesNotMatch(
     body,
     /<(?:audio|video|form)\b|\bautoplay\b|登录|注册|账号|积分|奖励|analytics|tracking|telemetry/i,
