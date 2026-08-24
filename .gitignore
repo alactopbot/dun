@@ -23,3 +23,6 @@ npm-debug.log*
 /dist/
 /.wrangler/
 *.tsbuildinfo
+
+# reviewed source models and intermediate renders stay outside the repository
+/asset-workbench/

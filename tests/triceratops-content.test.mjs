@@ -38,10 +38,10 @@ test("三角龙展品渲染经过核实的双语内容、来源和原创媒体",
     "离开屏幕后，找一找身边的圆形、尖角和扇形。"])
     assert.match(body, new RegExp(text));
 
-  const image = body.match(/<img\b[^>]*>/i)?.[0] ?? "";
-  assert.match(image, /src="\/media\/triceratops\/exhibit\.webp"/i);
-  assert.match(image, /width="1536"/i);
-  assert.match(image, /height="1024"/i);
+  const image = [...body.matchAll(/<img\b[^>]*>/gi)].map(([tag]) => tag).find((tag) => /poster-landscape/.test(tag)) ?? "";
+  assert.match(image, /src="\/museum\/animals\/triceratops\/images\/poster-landscape\.webp\?v=[a-f0-9]+"/i);
+  assert.match(image, /width="1280"/i);
+  assert.match(image, /height="720"/i);
   assert.match(image, /alt="[^"]+"/i);
   assert.equal([...body.matchAll(/data-fact-id=/g)].length, 3);
   for (const [factId, sourceIds] of [["three-horned-face", ["nhm-triceratops"]],

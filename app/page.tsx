@@ -1,7 +1,7 @@
 const rooms = [
-  { icon: "◒", title: "大地展厅", subtitle: "LAND", text: "从三角龙开始，观察脚印、牙齿和骨骼。", href: "/exhibits/triceratops" },
-  { icon: "≈", title: "远古海洋", subtitle: "OCEAN", text: "潜入蓝色深处，认识曾经生活在海里的巨兽。" },
-  { icon: "⌁", title: "天空之上", subtitle: "SKY", text: "抬头看看，翼龙怎样借助风飞过史前世界。" },
+  { icon: "◒", title: "大地展厅", subtitle: "LAND", text: "从三角龙和剑龙开始，观察角、背板与身体形状。", links: [["三角龙", "/exhibits/triceratops"], ["剑龙", "/exhibits/stegosaurus"]] },
+  { icon: "≈", title: "远古海洋", subtitle: "OCEAN", text: "潜入蓝色深处，认识曾经生活在海里的巨兽。", links: undefined },
+  { icon: "⌁", title: "天空之上", subtitle: "SKY", text: "抬头看看，翼龙怎样借助风飞过史前世界。", links: undefined },
 ];
 
 const promises = [
@@ -42,7 +42,7 @@ export default function Home() {
       <section className="rooms section" id="museum">
         <div className="section-heading"><p className="eyebrow">THREE ROOMS, ENDLESS QUESTIONS</p><h2>从哪里开始探索？</h2></div>
         <div className="room-grid">
-          {rooms.map((room) => <article className="room-card" key={room.title}><div className="room-icon" aria-hidden="true">{room.icon}</div><p>{room.subtitle}</p><h3>{room.title}</h3><span>{room.text}</span>{room.href ? <a className="coming" href={room.href}>参观三角龙展品 →</a> : <span className="coming">逐步开放</span>}</article>)}
+          {rooms.map((room) => <article className="room-card" key={room.title}><div className="room-icon" aria-hidden="true">{room.icon}</div><p>{room.subtitle}</p><h3>{room.title}</h3><span>{room.text}</span>{room.links ? <div className="exhibit-links">{room.links.map(([name, href]) => <a className="coming" href={href} key={href}>参观{name}展品 →</a>)}</div> : <span className="coming">逐步开放</span>}</article>)}
         </div>
       </section>
 

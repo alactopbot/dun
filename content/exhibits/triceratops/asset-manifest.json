@@ -1,0 +1,88 @@
+{
+  "animalId": "triceratops",
+  "presentationSha256": "3afc976906f154bd2daa99cf9cb67909fdb6aeb87e8ef04f9eb0f3ad5fc01d2c",
+  "assets": [
+    {
+      "type": "model",
+      "path": "public/museum/animals/triceratops/model/model.glb",
+      "url": "/museum/animals/triceratops/model/model.glb?v=10dcc416c3e2",
+      "bytes": 173072,
+      "runtimeSha256": "10dcc416c3e2034c876837a287766f36076918abac8d741febba48530b73ec4f",
+      "originalSha256": "6eca99470d0f452bc8930ba5db40c642c6b17e9dd1567862b4c17fb052959bf9",
+      "license": "CC0-1.0",
+      "creator": "Quaternius",
+      "source": "https://quaternius.com/packs/animateddinosaurs.html",
+      "redistributionApproved": true
+    },
+    {
+      "type": "background",
+      "variant": "landscape",
+      "path": "public/museum/animals/triceratops/backgrounds/landscape.webp",
+      "url": "/museum/animals/triceratops/backgrounds/landscape.webp?v=78f40a895388",
+      "bytes": 4520,
+      "width": 1280,
+      "height": 720,
+      "runtimeSha256": "78f40a8953887bc2b302eaa527567abfe8ba2736b6082d55d74dc12440f723a3",
+      "license": "CC-BY-SA-4.0",
+      "creator": "DUN project",
+      "redistributionApproved": true
+    },
+    {
+      "type": "background",
+      "variant": "portrait",
+      "path": "public/museum/animals/triceratops/backgrounds/portrait.webp",
+      "url": "/museum/animals/triceratops/backgrounds/portrait.webp?v=44782cd7da4b",
+      "bytes": 3956,
+      "width": 720,
+      "height": 1280,
+      "runtimeSha256": "44782cd7da4b0c27695590e6dba223a9e48ff9e5bb40c3ed3439d0298ba37700",
+      "license": "CC-BY-SA-4.0",
+      "creator": "DUN project",
+      "redistributionApproved": true
+    },
+    {
+      "type": "poster",
+      "variant": "landscape",
+      "path": "public/museum/animals/triceratops/images/poster-landscape.webp",
+      "url": "/museum/animals/triceratops/images/poster-landscape.webp?v=6ef9ded4597d",
+      "bytes": 11340,
+      "width": 1280,
+      "height": 720,
+      "runtimeSha256": "6ef9ded4597d76c57da6f3d81ae1ec8f315ac13ef3f73e3222fda8ca144c14f2",
+      "modelSha256": "10dcc416c3e2034c876837a287766f36076918abac8d741febba48530b73ec4f",
+      "presentationSha256": "3afc976906f154bd2daa99cf9cb67909fdb6aeb87e8ef04f9eb0f3ad5fc01d2c",
+      "license": "CC-BY-SA-4.0",
+      "creator": "DUN project",
+      "redistributionApproved": true
+    },
+    {
+      "type": "poster",
+      "variant": "portrait",
+      "path": "public/museum/animals/triceratops/images/poster-portrait.webp",
+      "url": "/museum/animals/triceratops/images/poster-portrait.webp?v=0bc494bc09c0",
+      "bytes": 7958,
+      "width": 720,
+      "height": 1280,
+      "runtimeSha256": "0bc494bc09c0f8f94215df8e6f1c421c7be52e0eb09b24a693ea578d68667bc9",
+      "modelSha256": "10dcc416c3e2034c876837a287766f36076918abac8d741febba48530b73ec4f",
+      "presentationSha256": "3afc976906f154bd2daa99cf9cb67909fdb6aeb87e8ef04f9eb0f3ad5fc01d2c",
+      "license": "CC-BY-SA-4.0",
+      "creator": "DUN project",
+      "redistributionApproved": true
+    },
+    {
+      "type": "thumbnail",
+      "path": "public/museum/animals/triceratops/images/thumbnail.webp",
+      "url": "/museum/animals/triceratops/images/thumbnail.webp?v=3e8891dc7e7a",
+      "bytes": 3000,
+      "width": 320,
+      "height": 320,
+      "runtimeSha256": "3e8891dc7e7a5a8f03f23ca78257e389c012ed39d1f31692efa51ae8ac310541",
+      "modelSha256": "10dcc416c3e2034c876837a287766f36076918abac8d741febba48530b73ec4f",
+      "presentationSha256": "3afc976906f154bd2daa99cf9cb67909fdb6aeb87e8ef04f9eb0f3ad5fc01d2c",
+      "license": "CC-BY-SA-4.0",
+      "creator": "DUN project",
+      "redistributionApproved": true
+    }
+  ]
+}

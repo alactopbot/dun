@@ -1,0 +1,88 @@
+{
+  "animalId": "stegosaurus",
+  "presentationSha256": "a6eaaef86843a39cdf2a3591f203a8409c8f67f413d512c93b6d2c2d87529909",
+  "assets": [
+    {
+      "type": "model",
+      "path": "public/museum/animals/stegosaurus/model/model.glb",
+      "url": "/museum/animals/stegosaurus/model/model.glb?v=94072797ccef",
+      "bytes": 262524,
+      "runtimeSha256": "94072797ccefc89c01584f272dcff8487abce2ffcd3663fa2ef98fc8fbfe8d65",
+      "originalSha256": "55d9f573594896323802464c55683bd9b313c9241552b83f16fe7e6ff1a8420a",
+      "license": "CC0-1.0",
+      "creator": "Quaternius",
+      "source": "https://quaternius.com/packs/animateddinosaurs.html",
+      "redistributionApproved": true
+    },
+    {
+      "type": "background",
+      "variant": "landscape",
+      "path": "public/museum/animals/stegosaurus/backgrounds/landscape.webp",
+      "url": "/museum/animals/stegosaurus/backgrounds/landscape.webp?v=6b1c22ad1c29",
+      "bytes": 4778,
+      "width": 1280,
+      "height": 720,
+      "runtimeSha256": "6b1c22ad1c295016ab4e6214c1769164c46af565f32aa4fade9ea1ecac15cf12",
+      "license": "CC-BY-SA-4.0",
+      "creator": "DUN project",
+      "redistributionApproved": true
+    },
+    {
+      "type": "background",
+      "variant": "portrait",
+      "path": "public/museum/animals/stegosaurus/backgrounds/portrait.webp",
+      "url": "/museum/animals/stegosaurus/backgrounds/portrait.webp?v=b67b0790dfed",
+      "bytes": 3866,
+      "width": 720,
+      "height": 1280,
+      "runtimeSha256": "b67b0790dfedbc2792a2d95310771b7faad52892f65c783e5770525445ba965e",
+      "license": "CC-BY-SA-4.0",
+      "creator": "DUN project",
+      "redistributionApproved": true
+    },
+    {
+      "type": "poster",
+      "variant": "landscape",
+      "path": "public/museum/animals/stegosaurus/images/poster-landscape.webp",
+      "url": "/museum/animals/stegosaurus/images/poster-landscape.webp?v=7620b8c3c0e0",
+      "bytes": 13528,
+      "width": 1280,
+      "height": 720,
+      "runtimeSha256": "7620b8c3c0e01f8e77e52355614db04364dbce90fe6dfc74ceef4d00c5bf5a4f",
+      "modelSha256": "94072797ccefc89c01584f272dcff8487abce2ffcd3663fa2ef98fc8fbfe8d65",
+      "presentationSha256": "a6eaaef86843a39cdf2a3591f203a8409c8f67f413d512c93b6d2c2d87529909",
+      "license": "CC-BY-SA-4.0",
+      "creator": "DUN project",
+      "redistributionApproved": true
+    },
+    {
+      "type": "poster",
+      "variant": "portrait",
+      "path": "public/museum/animals/stegosaurus/images/poster-portrait.webp",
+      "url": "/museum/animals/stegosaurus/images/poster-portrait.webp?v=89bc1ce39f57",
+      "bytes": 9472,
+      "width": 720,
+      "height": 1280,
+      "runtimeSha256": "89bc1ce39f57eca6fc89cccdd2362f541b292768a3329888d9b4c57c51d5af52",
+      "modelSha256": "94072797ccefc89c01584f272dcff8487abce2ffcd3663fa2ef98fc8fbfe8d65",
+      "presentationSha256": "a6eaaef86843a39cdf2a3591f203a8409c8f67f413d512c93b6d2c2d87529909",
+      "license": "CC-BY-SA-4.0",
+      "creator": "DUN project",
+      "redistributionApproved": true
+    },
+    {
+      "type": "thumbnail",
+      "path": "public/museum/animals/stegosaurus/images/thumbnail.webp",
+      "url": "/museum/animals/stegosaurus/images/thumbnail.webp?v=e46e44acc54a",
+      "bytes": 3558,
+      "width": 320,
+      "height": 320,
+      "runtimeSha256": "e46e44acc54af717699a6930e142342cfd45c76b95777d3bc4a29994c53ea971",
+      "modelSha256": "94072797ccefc89c01584f272dcff8487abce2ffcd3663fa2ef98fc8fbfe8d65",
+      "presentationSha256": "a6eaaef86843a39cdf2a3591f203a8409c8f67f413d512c93b6d2c2d87529909",
+      "license": "CC-BY-SA-4.0",
+      "creator": "DUN project",
+      "redistributionApproved": true
+    }
+  ]
+}

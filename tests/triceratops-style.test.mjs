@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const stylesheetUrl = new URL("../app/exhibits/triceratops/page.module.css", import.meta.url);
+const stylesheetUrl = new URL("../app/exhibits/[slug]/page.module.css", import.meta.url);
 
 test("三角龙展品样式遵守响应式与无障碍契约", async () => {
   const css = await readFile(stylesheetUrl, "utf8");
