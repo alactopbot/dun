@@ -13,8 +13,8 @@ GitHub 承载 Factory 的实时状态、并发认领、PR Gate 和最终机器�
 需要方案确认的需求在设计提交推送后就创建唯一 Draft PR。技术方案、依赖、既有测试授权、产品
 验收和最终合并都在该 PR 进行；实现阶段不得另开 PR。
 
-人类用 PR 评论或 Review 作出决定。Factory 只接受仓库 Owner、Member 或 Collaborator，并把经过
-核验的原始决定规范化为：
+人类直接在 PR 发布结构化决定，并亲自填写审阅时的完整提交 SHA。Factory 只接受仓库 Owner、
+Member 或 Collaborator；GitHub API 的评论 URL、作者身份和时间作为原始来源：
 
 ```text
 <!-- factory-gate:v2 -->
@@ -22,13 +22,25 @@ requirement: REQ-<issue-number>
 gate: technical-plan | product-acceptance | existing-test-change | dependency
 decision: approved | rejected
 approved_sha: <40-character commit SHA>
-approved_by: <GitHub login>
-approved_at: <UTC timestamp>
 ```
 
 技术方案批准绑定设计提交；只要设计、Pattern、允许路径、依赖和测试授权未漂移，后续实现提交
 不会使它失效。产品验收绑定经独立验证的候选提交；之后若混入产品、测试或策略变化则必须重验。
-Agent 不得自行构造批准，聊天记录也不能转换成 GitHub 授权。
+Agent 不得自行构造批准、替含糊评论选择 SHA，聊天记录也不能转换成 GitHub 授权。
+
+## 必需 PR 协议检查
+
+`.factory/scripts/validate-pr-gates.mjs` 在 GitHub Actions 中验证：
+
+- PR 仍开放，且同一 Issue 只有一个开放 PR；
+- 交接来自可信作者，`review_pr` 指向当前 PR；
+- 必需人工 Gate 来自可信原始评论、使用完整 SHA 且属于当前 PR 历史；
+- 技术方案批准后设计、Pattern、允许范围与策略没有漂移；
+- 产品验收后只允许最终 `delivery.md` 证据变化；
+- `factory:verified` 与 `factory-verification:v2` 均存在并绑定当前 PR 头。
+
+方案评审阶段或产品验收等待阶段，Check 为红是正常的合并保护。人类提交 Gate 后，后续 Agent
+更新标签或推送提交触发重检。分支保护必须把 `factory-gates` 设为必需且禁止 Agent 绕过。
 
 ## 默认分支保护
 

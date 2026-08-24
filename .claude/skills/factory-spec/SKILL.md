@@ -16,11 +16,10 @@ description: 为一个完整需求形成与其 Pattern 成熟度相适应的中�
 
 ## GitHub Gate
 
-所有人工决定都在该 Draft PR 上完成，并规范化为 `factory-gate:v2`。只接受仓库 Owner、Member
-或 Collaborator 的 PR 评论或 Review；聊天、运行转录和 Agent 自述都不是授权。Gate 必须记录
-决定所绑定的完整提交 SHA，后续 Agent 先核对批准者权限、SHA 与方案是否漂移，再改变 Issue 状态。
-
-Agent 不能替人生成 `approved`。它可以在读取到可信的人类决定后补写结构化评论：
+所有人工决定都在该 Draft PR 上完成。只接受仓库 Owner、Member 或 Collaborator 亲自发布的
+`factory-gate:v2` 评论；聊天、运行转录和 Agent 自述都不是授权。人类必须填写审阅时的完整提交
+SHA，GitHub API 的评论 URL 和作者元数据是原始来源。Agent 不能替人生成 `approved`、补写结构化
+评论或为含糊批准选择 SHA：
 
 ```text
 <!-- factory-gate:v2 -->
@@ -28,8 +27,6 @@ requirement: REQ-<issue-number>
 gate: technical-plan | product-acceptance | existing-test-change | dependency
 decision: approved | rejected
 approved_sha: <40-character commit SHA>
-approved_by: <GitHub login>
-approved_at: <UTC timestamp>
 ```
 
 ## 按成熟度选择确认深度
@@ -43,7 +40,8 @@ approved_at: <UTC timestamp>
 ### supervised
 
 Pattern 已建立。把产品差异、技术影响、内部 work units、测试与验收标准合并成一份技术方案。
-PR 加 `factory:plan-review`，Issue 设为 `factory:wait-to-implement`，由人在 GitHub PR 批准技术方案。
+PR 加 `factory:plan-review`，Issue 设为 `factory:wait-to-implement`，由人在 GitHub PR 用结构化评论
+批准技术方案。
 批准证据有效后移除该 PR 标签，把 Issue 设为 `factory:ready-to-implement`。最终实现仍在同一 PR
 进行，完成后再进入 `product-acceptance`。
 

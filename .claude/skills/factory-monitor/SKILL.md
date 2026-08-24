@@ -12,7 +12,7 @@ Pattern 和最终交付证据，不依赖之前的 Agent 会话，也不实现�
 
 - `factory:wait-to-implement` 的 PR 是否出现可信技术方案决定；
 - `factory:awaiting-review` 的 PR 是否出现可信产品验收决定；
-- 人类评论或 Review 是否需要规范化为 `factory-gate:v2`；
+- 人类是否直接发布了完整的 `factory-gate:v2`；
 - 结构化 Gate 的批准者权限、绑定 SHA 与后续 diff 是否仍有效；
 - `factory:in-progress` 是否有对应开放分支、唯一 PR 且仍有活动；
 - 合并或关闭后 Issue、分支和标签是否正确收敛；
@@ -21,8 +21,9 @@ Pattern 和最终交付证据，不依赖之前的 Agent 会话，也不实现�
 - Pattern 是否达到晋级条件，或出现应降级的拒绝、人工纠正、逃逸缺陷、越界和升版；
 - 等待人工决策的开放需求是否超过章程背压阈值。
 
-只有先验证原始决定来自可信 GitHub 人类且目标 SHA 明确，才可补写结构化 Gate；绝不能自行发明
-`approved`。技术方案 Gate 有效时可把 Issue 转为 `factory:ready-to-implement`，让后续定时 Agent
+不得补写或规范化人工 Gate，也不得为自然语言批准选择 SHA。只有原始结构化决定来自可信 GitHub
+人类、目标 SHA 明确且 PR 协议验证绿色时，技术方案 Gate 才有效；随后可把 Issue 转为
+`factory:ready-to-implement`，让后续定时 Agent
 恢复同一分支和 PR。产品验收 Gate 有效时可触发最终证据运行。拒绝、SHA 漂移或范围变化保持等待
 并清楚报告原因。
 

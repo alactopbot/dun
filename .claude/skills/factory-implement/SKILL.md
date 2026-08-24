@@ -11,7 +11,8 @@ Draft PR 和最新可信 `factory-handoff:v2` 后再行动。Agent 会话不是�
 ## 选择与恢复
 
 通常选择 `factory:ready-to-implement` 的开放 Issue。若需求已有分支与 PR，验证它们属于同一 Issue，
-校验 `review_pr`、分支头 SHA、批准者权限与所需 `factory-gate:v2`，然后复用已有 Draft PR。技术方案
+运行 `.factory/scripts/validate-pr-gates.mjs` 所定义的同等检查，校验 `review_pr`、分支头 SHA、原始
+评论来源、批准者权限与所需 `factory-gate:v2`，然后复用已有 Draft PR。技术方案
 Gate 绑定设计提交；实现提交本身不会使它失效，但设计、Pattern、允许路径、依赖或测试授权变化会
 使它失效，此时回到同一 PR 请求重新评审。
 
@@ -64,7 +65,8 @@ Gate 绿色后写唯一候选 `delivery.md`，其中 `outcome`、`verifier` 和 
 2. 后续运行核对批准者权限、候选 SHA 与其后 diff；产品、测试或策略发生变化时 Gate 失效并重新验证。
 3. 产品验收不需要，或有效 Gate 已存在时，只更新同一 `delivery.md` 的验证结果、Pattern 资格和完成
    时间，不夹带产品、测试或策略变化。
-4. 推送证据提交，由原验证上下文确认转录准确且 PR Check 最终绿色。
+4. 推送证据提交，由原验证上下文确认转录准确，发布绑定新头的 `factory-verification:v2`，重新
+   触发并确认 PR Check 最终绿色。
 5. 创建或更新一条最终 Issue 评论：
 
 ```text

@@ -40,9 +40,9 @@ Gate 前建 PR。任何模式都不允许 Agent 合并。
 
 ## Gate 证据
 
-结构化评论使用 `factory-gate:v2`，包含需求、Gate 类型、决定、完整提交 SHA、GitHub 登录名和 UTC
-时间。Agent 只能在验证原始 PR 评论或 Review 来自 Owner、Member 或 Collaborator 后规范化它，
-不能自己生成 `approved`。
+结构化评论使用 `factory-gate:v2`，包含需求、Gate 类型、决定和完整提交 SHA。REQ-019 原方案允许
+Agent 把普通批准评论规范化；事后独立验证证明普通评论无法审计地绑定目标 SHA，因此该做法已由
+REQ-021 废止。人类必须直接发布结构化评论，GitHub API 元数据提供作者、时间和原始 URL。
 
 技术方案 Gate 绑定方案提交。纯实现提交不会使其失效；设计、Pattern 版本、允许路径、依赖或既有
 测试授权发生变化时失效。产品验收绑定完成实现并经独立验证的候选提交；之后任何产品、测试或策略

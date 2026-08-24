@@ -21,6 +21,15 @@ model: inherit
 通过时才能接受。不要用文件数、提交数或代码行数代替风险判断。
 
 独立运行检查，不复述实现者的输出。若发现问题，给出严重程度、路径和复现方法；若没有阻塞项，
+接受时先读取当前 PR 头的完整 SHA，并在中文结论中附加：
+
+```text
+<!-- factory-verification:v2 -->
+requirement: REQ-<issue-number>
+decision: accepted
+verified_sha: <当前完整提交 SHA>
+```
+
 输出：
 
 ```text

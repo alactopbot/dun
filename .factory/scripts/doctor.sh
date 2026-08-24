@@ -23,6 +23,7 @@ required_files=(
   .factory/patterns/animal-exhibit-v1.json
   .factory/gates.conf
   .factory/scripts/prove-test.sh
+  .factory/scripts/validate-pr-gates.mjs
   .claude/scripts/gates.sh
   .claude/settings.json
   .claude/hooks/block-merge.sh

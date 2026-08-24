@@ -42,6 +42,7 @@ test("Factory V2 使用需求与成熟 Pattern 驱动渐进自治", async () => 
   assert.match(contract, /内部 work units/);
   assert.match(contract, /factory-delivery:v2/);
   assert.match(contract, /factory-gate:v2/);
+  assert.match(contract, /factory-verification:v2/);
   assert.match(contract, /GitHub Draft PR/);
   assert.doesNotMatch(contract, /QUEUE\.md|STATE\.md|docs\/factory\/runs|行数上限|line limit/i);
 
@@ -85,6 +86,7 @@ test("Factory V2 使用需求与成熟 Pattern 驱动渐进自治", async () => 
   const workflow = await read(".github/workflows/factory-gates.yml");
   assert.match(workflow, /pull_request:/);
   assert.match(workflow, /gates\.sh deep/);
+  assert.match(workflow, /validate-pr-gates\.mjs/);
   assert.doesNotMatch(workflow, /merge|deploy/i);
 
   for (const path of [

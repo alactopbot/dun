@@ -11,5 +11,5 @@ Codex 使用 `.agents/skills/` 中的适配器，实际流程以 `.claude/skills
 
 仓库 Hook 只是纵深保护，GitHub 规则与人工合并仍是最终边界。
 
-所有人工 Gate 只认该需求唯一 GitHub Draft PR 上由可信人类作出的、绑定提交 SHA 的评论或 Review。
-Agent 会话可以中断或更换，不得作为批准、恢复或完成流程的状态来源。
+所有人工 Gate 只认该需求唯一 GitHub Draft PR 上由可信人类亲自发布、包含完整提交 SHA 的结构化
+评论。Agent 不得替评论选择 SHA；会话可以中断或更换，不得作为批准、恢复或完成流程的状态来源。

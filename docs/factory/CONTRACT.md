@@ -66,8 +66,9 @@ created_at: <UTC timestamp>
 授权。方案写入唯一分支后，`bootstrap` 或 `supervised` 必须在第一个人工 Gate 前创建该需求唯一
 Draft PR；后续实现、验证、产品验收和合并继续复用它。
 
-人类可以在 PR 留下约定批准语句或提交 Review。后续 Agent 必须确认批准者是仓库 Owner、Member
-或 Collaborator，并把决定规范化为一条可机读评论：
+人类必须在 PR 直接提交以下可机读评论，并亲自填写当时审阅的完整提交 SHA。GitHub API 返回的
+评论 URL、作者身份、`author_association` 和时间就是原始来源；Agent 不得替含糊评论选择 SHA，
+也不得把聊天批准改写成 Gate：
 
 ```text
 <!-- factory-gate:v2 -->
@@ -75,23 +76,34 @@ requirement: REQ-<issue-number>
 gate: technical-plan | product-acceptance | existing-test-change | dependency
 decision: approved | rejected
 approved_sha: <40-character commit SHA>
-approved_by: <GitHub login>
-approved_at: <UTC timestamp>
 ```
 
 技术方案批准绑定包含设计文档的提交 SHA。后续实现提交不会使它失效，但如果设计文档、Pattern
 版本、允许路径、依赖决定或既有测试授权发生变化，必须重新批准技术方案。产品验收绑定完整实现
 与验证后的候选提交 SHA；该 SHA 后的任何产品、测试或策略变化都会使产品验收失效。
 
-Agent 不得自行生成 `approved` 决定。它只能在读取到可信 GitHub 人类评论或 Review 后规范化证据。
-批准技术方案后，把 Issue 改为 `factory:ready-to-implement`；拒绝或要求修改时保持等待状态并更新
-设计。批准产品验收后，只允许完成最终证据，不得夹带实现变化。
+`.factory/scripts/validate-pr-gates.mjs` 必须直接验证原始评论的可信作者、完整 SHA、PR 历史和其后
+漂移。批准技术方案后，把 Issue 改为 `factory:ready-to-implement`；拒绝或要求修改时保持等待状态
+并更新设计。批准产品验收后，只允许完成最终证据，不得夹带实现变化。
+
+独立验证器接受当前提交时，直接在同一 PR 发布：
+
+```text
+<!-- factory-verification:v2 -->
+requirement: REQ-<issue-number>
+decision: accepted
+verified_sha: <当前完整提交 SHA>
+```
+
+并添加 `factory:verified`。验证证据必须绑定当前 PR 头；最终交付证据提交后，原验证上下文必须重新
+核对并发布绑定新头的验证评论。没有结构化验证、标签或当前 SHA 时，必需 Check 失败。
 
 ## 执行与验证
 
 1. 从默认分支创建确定性远端分支，以首次无强推 push 完成认领。
 2. 若交接给出已有 Draft PR，验证它属于同一 Issue 与分支并复用；不得再创建 PR。
-3. 验证所有必需 `factory-gate:v2`、批准者权限、SHA 和设计未漂移。
+3. 运行 PR 协议验证，检查所有必需 `factory-gate:v2`、原始来源、批准者权限、SHA、唯一开放 PR
+   和设计未漂移。
 4. 按内部 work units 测试驱动实现。既有测试只能由 GitHub 已批准方案或专门 Gate 授权。
 5. 进入新依赖、未批准承重路径或 Pattern 外变化时，回到同一 PR 请求新 Gate。
 6. 执行规定 Gate；缺失、跳过或 `MISCONFIGURED` 都不算绿色。
