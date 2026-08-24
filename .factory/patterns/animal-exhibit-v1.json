@@ -23,10 +23,10 @@
     "existing-product-language-policy"
   ],
   "humanGates": {
-    "bootstrap": ["product-intent", "technical-plan", "product-acceptance"],
-    "supervised": ["technical-plan", "product-acceptance"],
-    "trusted": [],
-    "autonomous": []
+    "bootstrap": ["spec-review", "merge"],
+    "supervised": ["spec-review", "merge"],
+    "trusted": ["merge"],
+    "autonomous": ["merge"]
   },
   "promotion": {
     "consecutiveCleanRuns": 3,

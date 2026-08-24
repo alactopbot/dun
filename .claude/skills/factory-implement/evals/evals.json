@@ -29,26 +29,26 @@
     },
     {
       "id": 3,
-      "prompt": "剑龙需求已经有 Issue #17、分支 claude/fq-17 和只包含技术方案的 Draft PR #18。昨天的 Agent 会话已结束；仓库 Owner 今天在 PR #18 亲自发布了 factory-gate:v2，并填写当时审阅的完整方案 SHA。当前由一个全新的定时 Agent 接手。请说明它应该怎样判断并继续。只输出计划，不执行 GitHub 操作或修改文件。",
-      "expected_output": "只读取并验证 GitHub PR 上的原始结构化人类决定、可信作者、完整 SHA、来源与漂移，更新 Issue 状态，并在同一分支与 Draft PR 继续实现；不要求回到旧会话，也不创建第二个 PR。",
+      "prompt": "剑龙需求已经有 Issue #17、分支 claude/fq-17 和只包含统一 Spec 的 Draft PR #18。昨天的 Agent 会话已结束；仓库 Owner 今天在 PR #18 提交了通过方案的 GitHub Review。当前由一个全新的定时 Agent 接手。请说明它应该怎样判断并继续。只输出计划，不执行 GitHub 操作或修改文件。",
+      "expected_output": "读取并验证最新可信 Review、Review 自带的提交绑定和其后的 Spec 漂移，更新 Issue 状态，并在同一分支与 Draft PR 继续实现；不要求人填写机器字段，也不创建第二个 PR。",
       "files": [],
       "expectations": [
         "明确把 GitHub Issue、分支和 Draft PR 作为跨会话状态，不要求在 Agent 对话再次确认",
-        "验证批准者是可信仓库角色，并把技术方案决定绑定到准确提交 SHA",
-        "验证人类原始 factory-gate:v2 后再把 Issue 转为 ready-to-implement",
+        "验证 Review 作者可信并使用 Review 自带的提交绑定",
+        "验证 Review 通过后再把 Issue 转为 ready-to-implement",
         "复用 claude/fq-17 和 Draft PR #18，不创建第二个分支或 PR",
         "若方案、Pattern、允许路径、依赖或测试授权漂移则停止并要求同一 PR 重新评审"
       ]
     },
     {
       "id": 4,
-      "prompt": "某个监督模式动物展品已经在唯一 Draft PR 完成实现、Deep Gate 和独立验证，Issue 是 factory:awaiting-review。实现 Agent 已退出。仓库 Owner 随后在原 PR 批准产品验收，现在定时 Agent 被唤醒。请说明它如何安全收尾。只输出计划，不执行 GitHub 操作或修改文件。",
-      "expected_output": "定时 Agent 核验同一 PR 上绑定候选 SHA 的可信产品验收 Gate，确认没有产品、测试或策略漂移，只更新 delivery 最终证据并保持 Draft，等待人类合并。",
+      "prompt": "某个监督模式动物展品已经在唯一 Draft PR 完成实现、Deep Gate、独立验证和最终证据，Issue 是 factory:awaiting-review。实现 Agent 已退出。现在定时 Agent 被唤醒。请说明它如何安全收尾。只输出计划，不执行 GitHub 操作或修改文件。",
+      "expected_output": "定时 Agent 核验当前 SHA 的独立验证与绿色 Check，保持原 Draft PR 等待人类合并；合并就是产品验收，不再请求额外评论。",
       "files": [],
       "expectations": [
-        "验证产品验收来自可信 GitHub 人类并绑定经独立验证的候选 SHA",
-        "检查候选 SHA 之后没有产品、测试或策略变化，漂移时使产品 Gate 失效",
-        "只更新同一 delivery.md 和最终结构化交付证据，不夹带实现变化",
+        "验证独立验证证据绑定当前 PR 头且必需 Check 绿色",
+        "发现验证后产品、测试或策略变化时要求重新验证",
+        "不再请求单独产品验收，把最终合并视为产品验收",
         "继续复用原 Draft PR，不创建新 PR、不转 Ready、不由 Agent 合并",
         "整个恢复流程不依赖已经退出的 Agent 会话"
       ]

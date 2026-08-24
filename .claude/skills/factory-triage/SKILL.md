@@ -16,7 +16,7 @@ description: 按项目策略和 Pattern 分诊 GitHub Issue，确定完整需求
 3. `.factory/project.json`
 4. `.factory/patterns/*.json`
 
-GitHub Issue、标签、分支和 PR 是实时状态与人工授权来源。只处理没有 Factory 状态标签，或明确
+GitHub Issue、标签、分支、PR 和 Review 是实时状态与人工决策来源。只处理没有 Factory 状态标签，或明确
 要求重新分诊的 Issue；跳过 `factory:in-progress`。`factory:awaiting-review` 只交给巡检或最终证据
 恢复流程，不能当作新需求认领。
 
@@ -45,10 +45,10 @@ work units，不创建额外 Issue 或 PR。
 
 | disposition | 使用条件 |
 |---|---|
-| `ready-to-implement` | 范围明确，Pattern 与所有前置 GitHub Gate 均已有可信证据 |
+| `ready-to-implement` | Spec Review 已通过，或成熟 Pattern 允许自动通过 |
 | `ready-to-spec` | 新模式、需形成方案或尚未创建方案 Draft PR |
 | `needs-info` | 缺少一个只有人类能回答且会改变结果的问题 |
-| `wait-to-implement` | 需求清楚，正在同一 Draft PR 等待人工 Gate 或明确依赖 |
+| `wait-to-implement` | 需求清楚，正在同一 Draft PR 等待 Spec Review 或明确依赖 |
 
 触及承重路径不是按规模自动拒绝，而是要求 Deep Gate 和项目策略规定的人类授权。匹配
 `NEVER_AUTOMATE` 的工作必须明确交还人类。
@@ -68,7 +68,7 @@ done_when: <完整且可验证的产品结果>
 allowed_paths: <逗号分隔路径>
 load_bearing: true | false
 gate_level: fast | full | deep
-human_gates: <逗号分隔 Gate 或 none>
+human_gates: spec-review=required | automatic, merge=required
 review_pr: <唯一 PR 编号或 pending>
 approved_plan_sha: <40-character SHA 或 pending>
 created_at: <UTC timestamp>
@@ -80,4 +80,4 @@ created_at: <UTC timestamp>
 ## 结束
 
 在 Issue 评论中用中文简述：为何匹配或不匹配 Pattern、采用哪个模式、下一步由谁负责。分诊本身
-不写实现；需要技术方案 Gate 时交给方案阶段创建唯一 Draft PR，所有确认都在 GitHub 完成。
+不写实现；需要 Spec Review 时交给方案阶段创建唯一 Draft PR，所有反馈都在 GitHub 完成。

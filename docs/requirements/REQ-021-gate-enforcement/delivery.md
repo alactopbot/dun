@@ -16,10 +16,11 @@ completed_at: pending
 ## 候选结果
 
 - 新增可执行 PR 协议验证器，并接入 GitHub `factory-gates`。
-- 人工 Gate 必须由可信人类直接提交，包含完整 SHA；GitHub 评论元数据作为原始来源。
+- 人工只提交标准 GitHub Review；Review 自带提交 SHA 与来源，不填写机器字段。
+- 统一 Spec 的机读范围由 `factory.json` 承载并约束完整 diff。
 - 独立验证必须使用 `factory-verification:v2` 绑定当前 PR 头。
-- 6 组协议测试同时覆盖可信正例与非可信作者、短或错误 SHA、聊天批准、来源缺失、方案漂移、
-  产品漂移、第二个 PR、已合并 PR、待方案状态、陈旧验证、更晚拒绝、交接漂移和冲突验证标签。
+- 7 组协议测试覆盖原生 Approve/Request changes、同账号 Comment Review、非可信作者、错误 SHA、
+  Spec 漂移、范围外路径、第二个 PR、已合并 PR、陈旧验证、冲突标签和 trusted 自动 Spec。
 - REQ-019 已更正为 `rejected`，删除不可复现的评测百分比与不实的 PR #18 等待状态。
 
 ## 机器证据

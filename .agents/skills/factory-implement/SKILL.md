@@ -1,6 +1,6 @@
 ---
 name: factory-implement
-description: 恢复并完成一个 Factory V2 完整需求，校验 GitHub Gate、复用唯一 Draft PR 并执行独立验证。
+description: 在统一 Spec 已通过或自动通过后，恢复唯一 Draft PR、完成实现并执行独立验证。
 ---
 
 # Codex Factory 实现适配器

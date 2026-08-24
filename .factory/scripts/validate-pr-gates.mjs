@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 
 import { readFile } from "node:fs/promises";
-import { createHash } from "node:crypto";
+import { readdir } from "node:fs/promises";
 import process from "node:process";
 
 const trustedAssociations = new Set(["OWNER", "MEMBER", "COLLABORATOR"]);
 const protectedPlanPaths = [
   /^docs\/requirements\/REQ-[^/]+\/design\.md$/,
+  /^docs\/requirements\/REQ-[^/]+\/factory\.json$/,
   /^\.factory\/patterns\//,
   /^\.factory\/project\.json$/,
   /^docs\/factory\/CHARTER\.md$/,
@@ -46,35 +47,39 @@ function latestMarker(items, marker, predicate = () => true) {
     .at(-1);
 }
 
-const boundHandoffFields = [
-  "requirement",
-  "mode",
-  "pattern",
-  "pattern_version",
-  "done_when",
-  "allowed_paths",
-  "load_bearing",
-  "gate_level",
-  "human_gates",
-  "review_pr",
-];
-
-export function handoffDigest(fields) {
-  const bound = Object.fromEntries(boundHandoffFields.map((field) => [field, fields[field] ?? ""]));
-  return createHash("sha256").update(JSON.stringify(bound)).digest("hex");
-}
-
-function gateError(gate, reason) {
-  return `gate:${gate}:${reason}`;
-}
-
 function requirementId(issueNumber) {
   return `REQ-${String(issueNumber).padStart(3, "0")}`;
 }
 
+function reviewDecision(review) {
+  if (review.state === "APPROVED") return "approved";
+  if (review.state === "CHANGES_REQUESTED") return "changes-requested";
+  if (review.state !== "COMMENTED") return null;
+  const firstLine = (review.body ?? "").trim().split("\n")[0];
+  if (firstLine === "方案通过") return "approved";
+  if (firstLine === "需要修改" || firstLine.startsWith("需要修改：")) return "changes-requested";
+  return null;
+}
+
+function pathMatches(pattern, path) {
+  let source = "^";
+  for (let index = 0; index < pattern.length; index += 1) {
+    const char = pattern[index];
+    if (char === "*" && pattern[index + 1] === "*") {
+      source += ".*";
+      index += 1;
+    } else if (char === "*") {
+      source += "[^/]*";
+    } else {
+      source += char.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+  }
+  return new RegExp(`${source}$`).test(path);
+}
+
 export function validateGateContext(context) {
   const errors = [];
-  const { pr, issue, issueComments, prComments, openLinkedPrs, comparisons } = context;
+  const { pr, issue, issueComments, prComments, reviews, openLinkedPrs, comparisons, spec } = context;
 
   if (pr.state !== "OPEN") errors.push("pr:not-open");
   if (openLinkedPrs.length !== 1 || openLinkedPrs[0] !== pr.number) errors.push("pr:not-unique-open");
@@ -88,46 +93,35 @@ export function validateGateContext(context) {
   if (handoff.fields.requirement !== requirementId(issue.number)) errors.push("handoff:requirement-mismatch");
   if (Number(handoff.fields.review_pr) !== pr.number) errors.push("handoff:review-pr-mismatch");
 
-  const requiredGates = [];
-  if (["bootstrap", "supervised"].includes(handoff.fields.mode)) requiredGates.push("technical-plan");
-  if (pr.labels.includes("factory:product-review")) requiredGates.push("product-acceptance");
+  if (!spec || spec.requirement !== requirementId(issue.number) || spec.issue !== issue.number) {
+    errors.push("spec:missing-or-mismatched-manifest");
+  } else {
+    if (spec.reviewPr !== pr.number) errors.push("spec:review-pr-mismatch");
+    for (const path of pr.changedFiles) {
+      if (!spec.allowedPaths.some((pattern) => pathMatches(pattern, path))) errors.push(`scope:not-allowed:${path}`);
+    }
 
-  for (const gate of requiredGates) {
-    const allDecisions = prComments
-      .map((item) => ({ item, fields: parseMarker(item.body ?? "", "factory-gate:v2") }))
-      .filter(({ fields }) => fields?.gate === gate);
-    const evidence = allDecisions
-      .filter(({ item }) => trusted(item))
-      .sort((a, b) => new Date(a.item.createdAt) - new Date(b.item.createdAt))
-      .at(-1);
-    if (!evidence) {
-      errors.push(gateError(gate, allDecisions.length ? "untrusted-author" : "missing"));
-      continue;
-    }
-    if (evidence.fields.decision !== "approved") {
-      errors.push(gateError(gate, "latest-decision-not-approved"));
-      continue;
-    }
-    if (evidence.fields.handoff_digest !== handoffDigest(handoff.fields)) {
-      errors.push(gateError(gate, "handoff-drift"));
-    }
-    if (evidence.fields.requirement !== requirementId(issue.number)) errors.push(gateError(gate, "requirement-mismatch"));
-    if (!isFullSha(evidence.fields.approved_sha)) {
-      errors.push(gateError(gate, "invalid-sha"));
-      continue;
-    }
-    if (!evidence.item.url) errors.push(gateError(gate, "missing-source"));
-    const comparison = comparisons[evidence.fields.approved_sha];
-    if (!comparison || !comparison.ancestorOfHead) {
-      errors.push(gateError(gate, "sha-not-in-pr-history"));
-      continue;
-    }
-    if (gate === "technical-plan") {
-      if (comparison.changedFiles.some((path) => protectedPlanPaths.some((pattern) => pattern.test(path)))) {
-        errors.push(gateError(gate, "plan-drift"));
+    if (spec.humanGates.includes("spec-review")) {
+      const review = reviews
+        .filter((item) => trusted(item) && reviewDecision(item))
+        .sort((a, b) => new Date(a.submittedAt) - new Date(b.submittedAt))
+        .at(-1);
+      if (!review) {
+        errors.push("spec-review:missing");
+      } else if (reviewDecision(review) !== "approved") {
+        errors.push("spec-review:changes-requested");
+      } else if (!isFullSha(review.commitId)) {
+        errors.push("spec-review:invalid-sha");
+      } else if (!review.url) {
+        errors.push("spec-review:missing-source");
+      } else {
+        const comparison = comparisons[review.commitId];
+        if (!comparison || !comparison.ancestorOfHead) {
+          errors.push("spec-review:sha-not-in-pr-history");
+        } else if (comparison.changedFiles.some((path) => protectedPlanPaths.some((pattern) => pattern.test(path)))) {
+          errors.push("spec-review:spec-drift");
+        }
       }
-    } else if (comparison.changedFiles.some((path) => !/^docs\/requirements\/REQ-[^/]+\/delivery\.md$/.test(path))) {
-      errors.push(gateError(gate, "candidate-drift"));
     }
   }
 
@@ -180,21 +174,21 @@ async function liveContext(event, token, repository) {
   const issueNumber = linkedIssueNumber(pr.body ?? "");
   if (!issueNumber) throw new Error("PR 正文缺少 Closes #<issue>");
 
-  const [issue, issueComments, prComments, openPulls] = await Promise.all([
+  const [issue, issueComments, prComments, reviews, prFiles, openPulls] = await Promise.all([
     github(`${apiRoot}/issues/${issueNumber}`, token),
     paginate(`${apiRoot}/issues/${issueNumber}/comments`, token),
     paginate(`${apiRoot}/issues/${prNumber}/comments`, token),
+    paginate(`${apiRoot}/pulls/${prNumber}/reviews`, token),
+    paginate(`${apiRoot}/pulls/${prNumber}/files`, token),
     paginate(`${apiRoot}/pulls?state=open`, token),
   ]);
   const openLinkedPrs = openPulls
     .filter((candidate) => linkedIssueNumber(candidate.body ?? "") === issueNumber)
     .map((candidate) => candidate.number);
 
-  const gateShas = prComments
-    .map((comment) => parseMarker(comment.body ?? "", "factory-gate:v2")?.approved_sha)
-    .filter(isFullSha);
+  const reviewShas = reviews.map((review) => review.commit_id).filter(isFullSha);
   const comparisons = {};
-  for (const sha of new Set(gateShas)) {
+  for (const sha of new Set(reviewShas)) {
     const comparison = await github(`${apiRoot}/compare/${sha}...${pr.head.sha}`, token);
     comparisons[sha] = {
       ancestorOfHead: ["identical", "ahead"].includes(comparison.status),
@@ -208,18 +202,36 @@ async function liveContext(event, token, repository) {
     createdAt: comment.created_at,
     url: comment.html_url,
   });
+  const requirementPrefix = requirementId(issueNumber);
+  const requirementDirectories = await readdir("docs/requirements", { withFileTypes: true });
+  const requirementDirectory = requirementDirectories.find(
+    (entry) => entry.isDirectory() && entry.name.startsWith(`${requirementPrefix}-`),
+  );
+  const spec = requirementDirectory
+    ? JSON.parse(await readFile(`docs/requirements/${requirementDirectory.name}/factory.json`, "utf8"))
+    : null;
   return {
     pr: {
       number: pr.number,
       state: pr.state.toUpperCase(),
       headSha: pr.head.sha,
       labels: pr.labels.map((label) => label.name),
+      changedFiles: prFiles.map((file) => file.filename),
     },
     issue: { number: issue.number },
     issueComments: issueComments.map(normalizeComment),
     prComments: prComments.map(normalizeComment),
+    reviews: reviews.map((review) => ({
+      body: review.body,
+      state: review.state,
+      commitId: review.commit_id,
+      authorAssociation: review.author_association,
+      submittedAt: review.submitted_at,
+      url: review.html_url,
+    })),
     openLinkedPrs,
     comparisons,
+    spec,
   };
 }
 

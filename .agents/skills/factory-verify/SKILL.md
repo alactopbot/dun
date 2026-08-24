@@ -1,6 +1,6 @@
 ---
 name: factory-verify
-description: 独立验证 Factory V2 完整需求的范围、Pattern 不变量、GitHub 人工 Gate、测试与中文交付证据。
+description: 独立验证 Factory V2 完整需求的机读 Spec、GitHub Review、Pattern 不变量、测试与交付证据。
 ---
 
 # Codex Factory 验证适配器

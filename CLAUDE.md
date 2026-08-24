@@ -37,15 +37,14 @@ GitHub Issue、标签、分支和 PR 是实时状态。需求方案和最终交�
 必须遵守：
 
 1. Agent 永不合并；所有交付先创建 Draft PR。
-2. Agent 可以根据 GitHub Issue 在唯一 Draft PR 提议 Factory 策略或承重路径变化；未经该 PR 上
-   可信、绑定 SHA 的人工 Gate，不得把提议视为已批准或据此推进依赖工作。
-3. 人工 Gate 只认可信人类在 GitHub Draft PR 亲自发布、包含完整提交 SHA 的结构化证据；Agent
-   不得替含糊评论选择 SHA，聊天批准不作为流程依赖。
-4. 既有测试仅能在 GitHub 已批准方案或可信 Gate 中预授权时修改。
+2. Agent 在唯一 Draft PR 提交统一 Spec；需要人工审阅时，只认 GitHub 标准 Review，聊天不批准流程。
+3. GitHub Review 自动绑定 Spec 提交，人类不填写 SHA、摘要或结构化协议；Agent 不替人 Review。
+4. 既有测试语义变化必须进入 Spec 并通过 Review，或属于成熟 Pattern 的明确允许变化。
 5. Gate 失败关闭；`MISCONFIGURED` 和必需检查跳过都不算通过。
 6. 写作者不能给自己验收，必须使用全新上下文独立验证。
 7. 范围由完整需求、允许路径、Pattern 不变量、风险和证据控制。
-8. 面向人的工作文档、Issue/PR 和结论使用中文。
+8. 最终人工合并同时代表产品验收，不增加独立产品验收确认。
+9. 面向人的工作文档、Issue/PR 和结论使用中文。
 
 以下情况停止并明确交还人类：需求一次澄清后仍有关键歧义；需要未经批准的承重路径、既有测试
 或新依赖；变化越出 Pattern；同一需求连续两次 Gate 失败或验证拒绝；等待人工决策的开放需求

@@ -26,7 +26,6 @@ labels=(
   "factory:rejected|B60205|独立验证发现阻塞项"
   "factory:monitor|BFDADC|由 Factory 巡检创建"
   "factory:plan-review|7057FF|Draft PR 等待 GitHub 技术方案确认"
-  "factory:product-review|D876E3|Draft PR 等待 GitHub 产品验收"
 )
 
 if [ "$APPLY" -eq 0 ]; then
