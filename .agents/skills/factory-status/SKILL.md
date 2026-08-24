@@ -1,10 +1,8 @@
 ---
 name: factory-status
-description: Show the factory control room from live GitHub labels, open PRs, recent run records, gate health, and charter limits.
+description: 从 GitHub 实时数据展示 Factory 控制台和当前需要人的决定。
 ---
 
-# Factory status for Codex
+# Codex Factory 状态适配器
 
-Read `docs/factory/CONTRACT.md`, then follow the report workflow in
-`.claude/commands/factory.md`. Live GitHub labels and PRs outrank the Markdown snapshots.
-This skill reports only; it never merges, approves, labels, or closes work.
+读取共享契约并执行 `.claude/commands/factory.md`。只报告，不修改标签、不批准、不关闭、不合并。

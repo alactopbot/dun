@@ -1,45 +1,16 @@
-# Factory charter
+# DUN Factory 章程
 
-**This file is the human judgment, upstream.** Every factory skill reads it before acting.
-It is the primary policy file a human must review, and an agent must never edit it on its
-own initiative.
-
-Fill it in once per repo. Revisit it deliberately (see "Constraint review" at the bottom),
-not continuously.
-
-Set this to `ready` only after reviewing every section:
+本文件承载人类确认过的项目边界。执行规则见 `docs/factory/CONTRACT.md`，可机读配置见
+`.factory/project.json`。未经当前会话中的人类明确授权，Agent 不得修改本文件或 Factory 自身规则。
 
 ```
 CHARTER_STATUS: ready
-```
-
----
-
-## 1. Tier
-
-Delete all but one. This single choice sets how much autonomy every routine gets.
-
-| Tier | Means | Autonomy |
-|---|---|---|
-| `revival` | Unlaunched, no users, no revenue. Migration and resurrection work. | Widest. Long runs, wide fan-out, human reads samples not diffs. |
-| `greenfield` | Personal project, users not yet depending on it. | Wide. Gates carry it; human samples. |
-| `oss` | Published, other people depend on it, contributions arrive. | Moderate. Agent ranks attention, human owns every merge. |
-| `client-production` | Someone else's business depends on this. | Narrow. Short loops, no unattended merges, everything read. |
-
-```
 TIER: greenfield
 ```
 
-**Why the tier and not the difficulty:** autonomy tracks who gets hurt when it is wrong.
-A ten-thousand-line migration on an unlaunched project is a safer bet than a fifty-line
-change to a client's auth path.
+## 承重路径
 
----
-
-## 2. Load-bearing paths
-
-Globs that no routine may modify unattended, regardless of tier. A change touching any of
-these is forced to `deep` gates and a human read, and may never be auto-merged.
+下列路径需要 Deep Gate 和人类阅读；进入这些路径本身不是错误，但必须已在本次需求中明确批准：
 
 ```
 LOAD_BEARING:
@@ -60,84 +31,55 @@ LOAD_BEARING:
   - "AGENTS.md"
 ```
 
-`.claude/**` is on the list on purpose. An agent that can rewrite the factory's own rules
-has no constraints at all.
-
----
-
-## 3. Test-file rule
-
 ```
 TESTS_ARE_LOAD_BEARING: true
 ```
 
-When true, an unattended run may not modify an existing test file. An interactive session
-may do so only after explicit human approval, and the resulting draft PR requires a human
-read even when every gate is green. Agents routinely rewrite assertions to match broken
-behavior, so an unexplained green suite after an agent edited the tests is weak evidence.
+既有测试只能在当前会话明确批准，或在已经批准的技术方案中预先授权时修改。新增测试文件不受
+此限制，但仍需证明它能够在旧行为上失败。
 
-Adding a *new* test file is not covered by this rule.
-
----
-
-## 4. What is automatable here
-
-The triage skill uses this to decide `ready-to-implement` versus `ready-to-spec`.
-Be specific. Vague entries produce vague triage.
+## 可自动处理的工作
 
 ```
 AUTOMATABLE:
-  - Lint, format, and type-only fixes
-  - Documentation and comment corrections that do not alter educational claims
-  - Accessibility fixes that preserve approved product behavior
-  - Test coverage added in new test files for existing behavior
-  - Bug fixes limited to at most 3 files with a reproducible failing test
-  - Small visual fixes that implement an already-approved acceptance criterion
+  - 不改变教育事实的格式、文档和注释修正
+  - 保持已批准产品行为的无障碍修复
+  - 为既有行为增加新的测试文件
+  - 有可复现失败证据且不越出已批准 Pattern 的缺陷修复
+  - 完整落在成熟 Pattern 允许范围内的产品需求
 
 NEEDS_SPEC:
-  - Anything adding a user-visible feature
-  - Any dinosaur fact, narration, translation, parent prompt, or educational claim
-  - Any new image, 3D model, audio, font, dataset, or external asset
-  - Any account, storage, network, analytics, or telemetry behavior
-  - Any new production dependency or dependency major-version change
-  - Anything changing a public API or exported type signature
-  - Anything touching more than 5 files
-  - Anything a load-bearing path
+  - 尚未匹配任何 Pattern 的用户可见能力
+  - Pattern 未覆盖的教育事实、叙事、翻译或家长提示
+  - 新的图片、三维模型、音频、字体、数据集或外部资产来源
+  - 新的账号、存储、网络、分析或遥测行为
+  - 新生产依赖、依赖大版本变化、公共 API 或导出类型变化
+  - 超出 Pattern 允许变化或可能破坏其不变量的工作
 
 NEVER_AUTOMATE:
-  - Merge decisions
-  - Architectural direction and dependency choices
-  - Product intent: whether a feature should exist at all
-  - Advertising, engagement ranking, autoplay, behavioral tracking, or child profiling
-  - Removing attribution, licensing, privacy, accessibility, or reduced-motion safeguards
-  - Anything the charter does not cover (default deny)
+  - 合并决定
+  - 未经批准的架构方向和依赖选择
+  - 广告、参与度排序、自动播放、行为跟踪或儿童画像
+  - 移除署名、许可、隐私、无障碍或减少动态效果保护
+  - 章程、项目配置和 Pattern 都未覆盖的工作
 ```
 
-The last line matters. Silence in this file means stop, not proceed.
+未覆盖意味着停止并请求判断，不代表可以自行扩展权限。
 
----
-
-## 5. Definition of done
-
-An item may only move to `verified` when all of these hold. The verify skill checks each
-one independently and does not accept the implementer's word on any of them.
+## 完成定义
 
 ```
 DONE:
-  - gates.sh reports FACTORY_GATES status=GREEN at the required level
-  - The change is covered by a test that fails without it
-  - No existing test file was modified, or an interactive human explicitly approved it
-    and the draft PR is flagged for human read
-  - The diff does the one thing the queue item describes and nothing else
-  - A human can read the PR body and understand why this is safe
+  - 规定等级的 gates.sh 最终报告 FACTORY_GATES status=GREEN
+  - 行为变化具有能在旧实现上失败的测试或等价证据
+  - 既有测试的修改已获明确批准或在批准方案中预授权
+  - 完整需求已实现，且没有越出交接与 Pattern 允许范围
+  - Pattern 的全部不变量得到验证
+  - 全新上下文的独立验证器已接受
+  - Draft PR 用中文清楚说明产品结果、证据、风险与人工决策点
 ```
 
-That last criterion is the answerability bar. On `client-production` it means explainable
-in six months by someone who is not you, which is tighter than verifiable today.
-
----
-
-## 6. Gate level by change type
+## Gate 等级
 
 ```
 GATES:
@@ -146,36 +88,30 @@ GATES:
   docs_only: fast
 ```
 
----
+本次 Factory V2 升级触及承重路径，因此必须执行 Deep Gate。
 
-## 7. Stop conditions
-
-The factory halts and asks for a human when any of these is true. This is the back-pressure
-valve. It exists so that a routine cannot grind through a bad assumption at volume.
+## 停止与背压
 
 ```
 STOP_IF:
-  - Gates were red twice in a row on the same item
-  - The fix requires touching a load-bearing path
-  - The change would exceed 300 changed lines
-  - The queue item is ambiguous after one clarification attempt
-  - More than 3 items are already awaiting human review
+  - 同一需求的 Gate 连续两次失败
+  - 独立验证连续两次拒绝
+  - 需求在一次澄清后仍有会改变结果的歧义
+  - 需要进入未获批准的承重路径、修改既有测试或引入依赖
+  - 变化超出交接允许范围或 Pattern 边界
+  - 超过 3 个开放需求正在等待人工决策
 ```
 
-The last one is the orchestration-tax limit. The constraint on a factory is not how many
-agents can run, it is how many decisions can be pending your judgment at once. When the
-review queue is full, stop producing.
+范围控制依据需求语义、允许路径、Pattern 不变量和验证证据，不依据文件数或代码行数。
 
----
+## Pattern 校准
 
-## 8. Constraint review
-
-Constraints set once become either a permanent tax or a permanent hole. Review this file:
-
-- **Loosen** when a class of change has been green across a long enough run, and record
-  the run of evidence in `docs/factory/DECISIONS.md`.
-- **Tighten** immediately when an escaped defect traces back to an automated gate you
-  trusted. Record what the gate missed.
+- 新模式以 `bootstrap` 运行，首个完整需求用于建立规范和验收基线。
+- `supervised` 模式只保留 Pattern 声明的方案与产品验收 Gate。
+- 达到 Pattern 的连续干净执行条件后可晋级 `trusted`。
+- `autonomous` 是可机读的未来级别，当前项目禁用，不能由 Agent 自行启用。
+- 任何拒绝、人工纠正、逃逸缺陷、越界或 Pattern 升版都会触发降级评估。
+- 自治等级不改变项目级人工合并规则。
 
 ```
 LAST_REVIEWED: 2026-08-24

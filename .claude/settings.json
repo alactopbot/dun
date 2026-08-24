@@ -15,6 +15,8 @@
       "Bash(gh pr merge:*)",
       "Bash(git merge:*)",
       "Edit(docs/factory/CHARTER.md)",
+      "Edit(.factory/project.json)",
+      "Edit(.factory/patterns/**)",
       "Edit(.factory/gates.conf)",
       "Edit(AGENTS.md)",
       "Edit(.claude/scripts/gates.sh)",

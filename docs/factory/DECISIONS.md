@@ -1,73 +1,52 @@
-# Factory decisions
+# Factory 决策记录
 
-Why the factory is configured the way it is. Written by a human, informed by
-`/factory-tune`.
+本文件说明 Factory 为什么采用当前策略，供后续调优判断过去的放宽或收紧是否正确。新记录置顶，
+必须引用真实 Issue、PR、Check 或交付证据。
 
-This file exists so a future tuning pass can tell whether a past loosening was a mistake.
-Without it, every constraint review starts from scratch and the same argument gets had
-twice a year.
+## 记录模板
 
-Newest at the top.
+### YYYY-MM-DD：决策名称
 
----
+- **变化：** 规则前后有什么不同。
+- **证据：** 支持决定的真实执行与结果。
+- **接受的风险：** 这项决定让什么更可能发生。
+- **重新评估条件：** 出现什么观察时撤销或调整。
 
-## Template
+## 已确认决策
 
-### 2026-08-16 - <what changed>
+### 2026-08-24：DUN 启用按 Pattern 渐进自治的 Factory V2
 
-**Change:** <the specific rule, before and after>
+- **变化：** 一个完整需求使用一个 Issue、一个分支和一个 Draft PR；内部工作单元不再产生独立
+  流程对象。三角龙建立的 `animal-exhibit-v1` 从监督模式开始，连续 3 次干净执行后才具备晋级条件。
+- **证据：** 三角龙首次需求完整走通 V1，但多次拆分和人工确认造成明显编排成本；REQ-002 用契约
+  测试固定新边界。
+- **接受的风险：** 单个需求运行可能持续更久，需要依靠提交、测试和 checklist 恢复上下文。
+- **重新评估条件：** 一个完整需求无法稳定恢复，或内部工作单元之间频繁出现不可隔离的失败。
 
-**Evidence:** <the run of data. "23 dependency bumps over 6 weeks, zero escapes" is
-evidence. "It seemed fine" is not.>
+### 2026-08-24：范围不设置变更数量阈值
 
-**Risk accepted:** <what this makes more likely, stated plainly>
+- **变化：** 停止条件只依据需求语义、允许路径、Pattern 不变量、风险和证据。
+- **证据：** 变更数量无法区分完整实现与流水账，也无法可靠表达产品风险。
+- **接受的风险：** 自动判断不能依赖一个简单数字，必须认真核验完整 diff 与证据。
+- **重新评估条件：** 不恢复数量阈值；若出现范围失控，应修正需求定义、Pattern 或确定性 Gate。
 
-**Revisit if:** <the observation that would reverse this>
+### 2026-08-24：合并始终由人类执行
 
----
+- **变化：** 所有 Factory 交付停在 Draft PR，任何自治模式都不改变合并策略。
+- **证据：** 合并是当前项目最终责任边界。
+- **接受的风险：** 吞吐受人工评审能力限制。
+- **重新评估条件：** 当前阶段不自动重新评估。
 
-## Seed entries
+### 2026-08-24：实现与验证使用不同上下文
 
-### 2026-08-16 - Merge is never automated, on any tier
+- **变化：** `factory-implement` 必须交给全新上下文的验证器冷读，不得自我认证。
+- **证据：** 实现者容易按自己原有意图解释代码，独立上下文能减少确认偏差。
+- **接受的风险：** 每个需求需要额外验证成本。
+- **重新评估条件：** 不取消隔离；只根据实际误报或漏报调整验证规则。
 
-**Change:** No routine or session may merge, on any tier including `revival`. Enforced by a
-GitHub ruleset or branch protection. Harness hooks block common shell routes as a second
-layer.
+### 2026-08-24：既有测试变更需要授权
 
-**Evidence:** Structural rather than empirical. The merge decision is where accountability
-lives, and it is the one point where a human takes responsibility for consequences.
-
-**Risk accepted:** Throughput is capped by human review availability. This is intentional.
-The binding constraint on a factory is decisions pending judgment, not agents running.
-
-**Revisit if:** Never, at any tier.
-
----
-
-### 2026-08-16 - Verification is a separate agent from implementation
-
-**Change:** `factory-implement` must delegate to the `factory-verifier` subagent and may
-not self-certify.
-
-**Evidence:** An agent asked to check its own work grades the intent it already had. The
-separation is the only thing that makes a green result mean anything.
-
-**Risk accepted:** Roughly doubles token cost per item. Worth it.
-
-**Revisit if:** Never. Tune the verifier's strictness instead.
-
----
-
-### 2026-08-16 - Unattended runs may not modify existing test files
-
-**Change:** An unattended run stops before modifying a pre-existing test file. An
-interactive session requires explicit human approval, stays draft, and receives a human
-read regardless of gate status.
-
-**Evidence:** Agents can rewrite assertions to match broken behavior. An unexplained green
-suite after the implementation agent changed the tests is weak evidence and can be
-invisible to ordinary automated checks because everything passes.
-
-**Risk accepted:** Legitimate test refactors need a human. Acceptable.
-
-**Revisit if:** Never, while the gates depend on the tests being trustworthy.
+- **变化：** 既有测试只能在当前会话明确批准，或批准技术方案中预先授权时修改。
+- **证据：** 修改断言可能让错误行为获得虚假绿色结果。
+- **接受的风险：** 合法测试重构需要人工判断。
+- **重新评估条件：** 不取消授权要求；可把重复且明确的测试迁移写入 Pattern。

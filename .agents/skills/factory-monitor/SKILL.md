@@ -1,10 +1,9 @@
 ---
 name: factory-monitor
-description: Inspect factory health, stale work, CI, security advisories, and recent run evidence without implementing fixes.
+description: 巡检 GitHub 实时状态、PR Gate、证据缺口、停滞认领和 Pattern 退化信号。
 ---
 
-# Factory monitoring for Codex
+# Codex Factory 巡检适配器
 
-Read `docs/factory/CONTRACT.md`, `docs/factory/CHARTER.md`, and then the canonical workflow
-in `.claude/skills/factory-monitor/SKILL.md`. Write a unique run record rather than appending
-to shared state.
+读取共享契约、项目配置和 `.claude/skills/factory-monitor/SKILL.md`。只根据 GitHub 实时对象与
+最终交付证据判断，不实现产品修复。

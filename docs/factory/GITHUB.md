@@ -1,43 +1,25 @@
-# GitHub setup
+# GitHub 控制面
 
-GitHub carries the factory's live queue and its merge boundary. This page records the
-repository-side setup that cannot be inferred safely from Markdown alone.
+GitHub 承载 Factory 的实时状态、并发认领、PR Gate 和最终机器证据。
 
-## Queue labels
+## 标签
 
-Preview and create the labels:
+运行 `./.factory/scripts/bootstrap-github.sh` 预览，确认仓库后增加 `--apply`。Issue 状态标签互斥；
+`factory:monitor` 可作为来源标签共存；`factory:verified` 与 `factory:rejected` 用于 PR 验证结论。
 
-```bash
-./.factory/scripts/bootstrap-github.sh
-./.factory/scripts/bootstrap-github.sh --apply
-```
+## 默认分支保护
 
-Queue-state labels are mutually exclusive. `factory:monitor` is provenance and may coexist
-with one issue state. `factory:verified` and `factory:rejected` belong on pull requests.
+为实际默认分支配置规则：
 
-## Default-branch rules
+- 所有变更通过 PR 进入；
+- 禁止强推，并且不允许 Agent 账号绕过；
+- Factory Gates 成为必需检查；
+- 最终合并由人类执行。
 
-Create a GitHub ruleset or branch-protection rule for the actual default branch. At
-minimum:
+仓库内 Hook 只能覆盖常见本地命令，GitHub 规则才是远端执行边界。
 
-- require changes to arrive through a pull request
-- block force pushes and branch deletion
-- do not grant the account used by unattended agents a bypass
-- require the repository's CI checks once they exist
+## 认领与清理
 
-Whether you require human approvals depends on the repository tier and team. The factory
-itself never approves or merges, even when GitHub would permit it.
-
-The committed Claude and Codex hooks block common shell routes to merging and direct
-pushes. They cannot cover every hosted tool or API path, so a repository-side rule remains
-the enforcement boundary.
-
-## Claim branches
-
-Implementation runs claim work through `claude/fq-<issue-number>`. The first run pushes a
-unique empty claim commit without force. A later run starts from the same base with a
-different claim commit, so Git rejects its non-fast-forward push.
-
-If a claim is stale, inspect the issue, branch, cloud session, and latest run record. A
-human may then delete or recover the branch. Monitoring reports stale claims but never
-steals them automatically.
+实现运行用确定性远端分支完成首次无强推认领，失败者立即停止。Draft PR 合并后由 GitHub 关闭
+带有 `Closes #<issue>` 的需求，并由仓库设置自动删除已合并分支。关闭但未合并的 PR 必须把 Issue
+恢复到明确状态；巡检只报告或修复确定的状态漂移，不会抢占仍有效的认领。
