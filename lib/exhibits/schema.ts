@@ -2,9 +2,9 @@ export type LocalizedText = Readonly<{ zh: string; en: string }>;
 export type EvidenceLevel = "fossil-evidence" | "scientific-consensus";
 export type AssetType = "model" | "background" | "poster" | "thumbnail";
 export type ScientificSource = Readonly<{ id: string; title: string; publisher: string; url: `https://${string}`; accessedOn: `${number}-${number}-${number}`; locator: string; supports: string }>;
-export type RuntimeAsset = Readonly<{ type: AssetType; variant?: "landscape" | "portrait"; path: string; url: string; bytes: number; width?: number; height?: number; runtimeSha256: string; originalSha256?: string; modelSha256?: string; presentationSha256?: string; license: "CC0-1.0" | "CC-BY-SA-4.0"; creator: string; source?: string; redistributionApproved: boolean }>;
+export type RuntimeAsset = Readonly<{ type: AssetType; variant?: "landscape" | "portrait"; path: string; url: string; bytes: number; width?: number; height?: number; runtimeSha256: string; originalSha256?: string; modelSha256?: string; presentationSha256?: string; license: "CC0-1.0" | "CC-BY-4.0" | "CC-BY-SA-4.0"; creator: string; title?: string; source?: string; sketchfabUid?: string; licenseUrl?: string; attribution?: string; modifications?: string; downloadedAt?: `${number}-${number}-${number}`; redistributionApproved: boolean }>;
 export type AssetManifest = Readonly<{ animalId: string; presentationSha256: string; assets: readonly RuntimeAsset[] }>;
-export type Presentation = Readonly<{ cameraFov: number; cameraDirection: readonly [number, number, number]; targetHeightRatio: number; minDistanceFactor: number; maxDistanceFactor: number; autoRotateRadiansPerSecond: number }>;
+export type Presentation = Readonly<{ cameraFov: number; cameraDirection: readonly [number, number, number]; cameraDistanceFactor?: number; targetHeightRatio: number; minDistanceFactor: number; maxDistanceFactor: number; autoRotateRadiansPerSecond: number }>;
 export type MuseumAnimal = Readonly<{
   slug: "triceratops" | "stegosaurus" | "tyrannosaurus"; status: "published"; name: LocalizedText; scientificName: string;
   introduction: LocalizedText; stageAlt: LocalizedText; adultNote: LocalizedText;

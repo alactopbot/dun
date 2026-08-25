@@ -31,8 +31,9 @@ test("入口和公共参数化路由服务端渲染三只动物", async () => {
     assert.match(html, /缩小/);
     assert.match(html, /恢复初始视角/);
     assert.match(html, /aria-current="page"/);
-    assert.match(html, /Quaternius/);
-    assert.match(html, /CC0-1\.0/);
+    assert.match(html, /Sketchfab/);
+    assert.match(html, /CC BY 4\.0/);
+    assert.doesNotMatch(html, /Quaternius/);
   }
 
   assert.equal((await request("/exhibits/not-an-animal")).status, 404);

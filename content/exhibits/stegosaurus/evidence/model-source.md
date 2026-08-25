@@ -1,12 +1,12 @@
 # Stegosaurus model source
 
-- Creator: Quaternius (`@Quaternius`)
-- Pack: Animated Dinosaur Pack
-- Official page: https://quaternius.com/packs/animateddinosaurs.html
-- Official Drive folder: https://drive.google.com/drive/folders/1u5Fhu3ziuRlGonW6bUI7uClqBGoSNeF6
-- File: `Stegosaurus.blend`, Drive ID `1mRVzt_zhZC_JsGoMvyIsRlGU5bMw7ccS`
-- Retrieved: 2026-08-25; 1,156,460 bytes
-- Original SHA-256: `55d9f573594896323802464c55683bd9b313c9241552b83f16fe7e6ff1a8420a`
-- License file SHA-256: `83d8959f9fc56353ed571fbe2dc52e4bcd64508e2399501cd45ac2ce3df0bf8c`
+- Title: `Stegosaurus - Low Poly Dinosaur`
+- Creator: Billy Jackman (`billyjackman3d` on Sketchfab)
+- Official page: https://sketchfab.com/3d-models/stegosaurus-low-poly-dinosaur-9776fff241a54639b184d25a2777f63f
+- Sketchfab UID: `9776fff241a54639b184d25a2777f63f`
+- Retrieved through the official page Download control: 2026-08-25
+- Downloaded file: `stegosaurus_-_low_poly_dinosaur.glb`; 271,308 bytes
+- Original SHA-256: `67a73c5e4fcbf68db94be467f52ef0aef5ad8c29dba647476471253b7988dbc2`
+- Runtime SHA-256: `67a73c5e4fcbf68db94be467f52ef0aef5ad8c29dba647476471253b7988dbc2`
 
-The source was opened with Blender 5.2 LTS using `--disable-autoexec`. It contains one armature, one animal mesh, flat-color materials, an Idle clip, and five action clips. Stale unpacked image paths were not used by the visible mesh and were removed before export.
+The official downloadable GLB embeds the same title, creator profile, fixed Sketchfab URL, and `CC-BY-4.0` license in `asset.extras`. It is self-contained and contains 2,994 triangles, 17 draw calls, no texture or animation, and no camera, light, external URI, script, logo, text, or watermark node. The model is an artistic reconstruction, not a scientific source.

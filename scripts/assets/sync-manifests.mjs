@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
-for (const animalId of ["triceratops", "stegosaurus"]) {
+for (const animalId of ["triceratops", "stegosaurus", "tyrannosaurus"]) {
   const manifestPath = `content/exhibits/${animalId}/asset-manifest.json`;
   const presentation = await readFile(`content/exhibits/${animalId}/presentation.json`);
   const manifest = JSON.parse(await readFile(manifestPath, "utf8"));

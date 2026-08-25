@@ -41,7 +41,8 @@ export default async function ExhibitPage({ params }: { params: Promise<{ slug: 
       </section>
       <details className={styles.sourcePanel} data-source-credit><summary>来源与创作说明</summary>
         <ul className={styles.sourceList}>{animal.sources.map((source) => <li key={source.id}><cite lang="en">{source.title}</cite> · <span lang="en">{source.publisher}</span><br />定位：<span lang="en">{source.locator}</span><br />查阅日期：{source.accessedOn}<br />{source.supports}<br /><a data-source-link href={source.url} target="_blank" rel="noreferrer">查看机构原页</a></li>)}</ul>
-        <p>模型：Quaternius · Animated Dinosaur Pack · CC0-1.0。DUN 已移除不适合儿童体验的动作与外链，保留安静的 Idle，重新定向、着地并转换为自包含 GLB。</p>
+        <p>模型：{model.creator} · <a href={model.source} target="_blank" rel="noreferrer">{model.title}（Sketchfab）</a> · CC BY 4.0。{model.modifications}</p>
+        <p>署名：{model.attribution}。许可证：<a href={model.licenseUrl} target="_blank" rel="noreferrer">Creative Commons Attribution 4.0</a>。</p>
         <p>运行时模型 SHA-256：<code>{model.runtimeSha256}</code></p>
         <p>环境、poster 与缩略图：DUN 项目程序化创作 · CC BY-SA 4.0；不作为科学证据。</p>
         {animal.slug === "triceratops" ? <p>迁移前静态图像：DUN 项目（使用 OpenAI 图像生成工具创作） · CC BY-SA 4.0；保留于 <code>/media/triceratops/exhibit.webp</code> 作为降级参考。</p> : null}

@@ -1,8 +1,7 @@
-LowPoly Models by @Quaternius
+Stegosaurus - Low Poly Dinosaur by Billy Jackman on Sketchfab
+https://sketchfab.com/3d-models/stegosaurus-low-poly-dinosaur-9776fff241a54639b184d25a2777f63f
 
-License:
-CC0 1.0 Universal (CC0 1.0)
-Public Domain Dedication
-https://creativecommons.org/publicdomain/zero/1.0/
+Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0):
+https://creativecommons.org/licenses/by/4.0/
 
-Copied from the official pack License.txt retrieved 2026-08-25.
+License and attribution recorded from the official model page and the official downloadable GLB asset.extras on 2026-08-25. DUN uses the downloaded model without geometry or material changes and generates new hash-bound museum preview images.

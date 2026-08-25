@@ -1,7 +1,7 @@
 # Runtime processing report
 
-Processed with `scripts/assets/export_blend.py` in Blender 5.2 LTS. Unknown source scripts were disabled. DUN removed stale external images and Attack, Death, Jump, Run, and Walk actions; retained and renamed the calm clip to `Idle`; rotated the animal to face +X; converted Z-up to glTF +Y-up; scaled, centered, and grounded it; and rebuilt the reviewed flat colors as metallic/roughness materials. The GLB is self-contained and contains no camera, light, text, logo, or watermark node.
+DUN imported Sketchfab's official downloadable GLB into Blender 5.2 LTS with script auto-execution disabled. `scripts/assets/normalize_sketchfab.py` centered the top-level scene in the ground plane and placed the lowest mesh point at ground height; geometry and materials were not edited. Offline review found no prohibited content or external dependency. DUN regenerated the poster and thumbnail from the normalized GLB and checked-in presentation data.
 
-Khronos glTF Validator 2.0.0-dev.3.10 reports 0 errors, warnings, infos, or hints.
+Khronos glTF Validator reports 0 errors and 0 warnings. Runtime metrics: 5,095,012 bytes, 7,164 triangles, 2 draw calls, 5 embedded textures with a maximum dimension of 2048 pixels, and no animation.
 
-Runtime SHA-256: `10dcc416c3e2034c876837a287766f36076918abac8d741febba48530b73ec4f`.
+Runtime SHA-256: `659f6d9218da0f170d9f95e0a635fff456ee106808fc11e6e514ac9b85150a6a`. The original download SHA-256 remains `94ce54a32b2e3fe5aa1d296db61f843c0b8a266430a70e00ce94537356fda0ef`.

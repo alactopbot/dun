@@ -65,9 +65,12 @@ if [ "${#previous_states[@]}" -gt 0 ]; then
 fi
 
 api_args=(--method PATCH "repos/{owner}/{repo}/issues/$ISSUE")
-for label in "${preserved_labels[@]}" "$TARGET_STATE"; do
-  api_args+=(-f "labels[]=$label")
-done
+if [ "${#preserved_labels[@]}" -gt 0 ]; then
+  for label in "${preserved_labels[@]}"; do
+    api_args+=(-f "labels[]=$label")
+  done
+fi
+api_args+=(-f "labels[]=$TARGET_STATE")
 
 if ! gh api "${api_args[@]}" >/dev/null; then
   echo "FACTORY_STATE: issue=$ISSUE status=ERROR reason=issue-update-failed previous=$previous state=$TARGET_STATE" >&2

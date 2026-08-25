@@ -111,6 +111,15 @@ export function selectGateLevel(context) {
   return level;
 }
 
+export function classifyVerification(context) {
+  const verification = latestMarker(context.prComments, "factory-verification", (_fields, item) => trusted(item));
+  if (!verification) return "verification-pending";
+  const { decision, verified_sha: verifiedSha } = verification.fields;
+  if (!isFullSha(verifiedSha) || !["accepted", "rejected"].includes(decision)) return "verification-invalid";
+  if (verifiedSha !== context.pr.headSha) return "reverify-required";
+  return decision === "accepted" ? "accepted-current-head" : "rejected-current-head";
+}
+
 export function validatePrState(context) {
   const errors = [];
   const {
@@ -167,17 +176,30 @@ export function validatePrState(context) {
     }
   }
 
-  if (pr.labels.includes("factory:rejected")) errors.push("verification:rejected-label-present");
-  if (!pr.labels.includes("factory:verified")) errors.push("verification:label-missing");
-
   const verification = latestMarker(prComments, "factory-verification", (_fields, item) => trusted(item));
+  const verificationState = classifyVerification(context);
   if (!verification) {
+    if (pr.labels.includes("factory:rejected")) errors.push("verification:orphan-rejected-label-present");
+    if (pr.labels.includes("factory:verified")) errors.push("verification:orphan-verified-label-present");
     errors.push("verification:missing");
-  } else {
-    if (verification.fields.decision !== "accepted") errors.push("verification:latest-decision-not-accepted");
-    if (verification.fields.requirement !== requirementId(issue.number)) errors.push("verification:requirement-mismatch");
+  } else if (verificationState === "verification-invalid") {
     if (!isFullSha(verification.fields.verified_sha)) errors.push("verification:invalid-sha");
-    if (verification.fields.verified_sha !== pr.headSha) errors.push("verification:stale-sha");
+    if (!["accepted", "rejected"].includes(verification.fields.decision)) errors.push("verification:invalid-decision");
+  } else if (verificationState === "reverify-required") {
+    errors.push("verification:stale-sha");
+    errors.push("verification:reverify-required");
+    if (pr.labels.includes("factory:verified")) errors.push("verification:stale-verified-label-present");
+    if (pr.labels.includes("factory:rejected")) errors.push("verification:stale-rejected-label-present");
+  } else if (verificationState === "rejected-current-head") {
+    errors.push("verification:current-head-rejected");
+    if (!pr.labels.includes("factory:rejected")) errors.push("verification:rejected-label-missing");
+    if (pr.labels.includes("factory:verified")) errors.push("verification:verified-label-present-on-rejection");
+    if (verification.fields.requirement !== requirementId(issue.number)) errors.push("verification:requirement-mismatch");
+    if (!verification.item.url) errors.push("verification:missing-source");
+  } else {
+    if (pr.labels.includes("factory:rejected")) errors.push("verification:rejected-label-present");
+    if (!pr.labels.includes("factory:verified")) errors.push("verification:label-missing");
+    if (verification.fields.requirement !== requirementId(issue.number)) errors.push("verification:requirement-mismatch");
     if (!verification.item.url) errors.push("verification:missing-source");
     if (verification.fields.gate_status !== "GREEN") errors.push("verification:gate-not-green");
     const actualGateLevel = verification.fields.gate_level;
@@ -192,6 +214,15 @@ export function validatePrState(context) {
   }
 
   return { ok: errors.length === 0, errors };
+}
+
+export function routePrState(context, result = validatePrState(context)) {
+  const verificationState = classifyVerification(context);
+  if (verificationState === "reverify-required") return "REVERIFY_REQUIRED";
+  if (verificationState === "rejected-current-head") return "IMPLEMENTATION_REPAIR";
+  if (verificationState === "verification-pending") return "VERIFICATION_PENDING";
+  if (verificationState === "verification-invalid") return "RECOVERY_REQUIRED";
+  return result.ok ? "AWAITING_REVIEW" : "BLOCKED";
 }
 
 async function github(path, token) {
@@ -357,12 +388,13 @@ async function main() {
     ? JSON.parse(await readFile(process.argv[fixtureIndex + 1], "utf8"))
     : await externalInvocation();
   const result = validatePrState(context);
+  const route = routePrState(context, result);
   for (const error of result.errors) console.error(`FACTORY_PR_STATE_ERROR: ${error}`);
   let gateLevel = "none";
   if (result.ok) {
     gateLevel = selectGateLevel(context);
   }
-  console.log(`FACTORY_PR_STATE: status=${result.ok ? "GREEN" : "RED"} gate_level=${gateLevel} errors=${result.errors.join(",") || "none"}`);
+  console.log(`FACTORY_PR_STATE: status=${result.ok ? "GREEN" : "RED"} route=${route} gate_level=${gateLevel} errors=${result.errors.join(",") || "none"}`);
   if (!result.ok) process.exitCode = 1;
 }
 

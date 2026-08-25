@@ -1,6 +1,7 @@
 {
   "cameraFov": 38,
-  "cameraDirection": [0.65, -1, 0.25],
+  "cameraDirection": [0.65, 1, 0.25],
+  "cameraDistanceFactor": 2.05,
   "targetHeightRatio": 0.52,
   "minDistanceFactor": 0.72,
   "maxDistanceFactor": 2.8,

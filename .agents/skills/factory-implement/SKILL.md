@@ -39,6 +39,22 @@ Only `CLAIMED` may create new work. `EXISTS` or `LOST` means another run owns th
 stop. After a successful claim and completed preflight, use the state script above to replace the previous Factory state
 label with `factory:in-progress`. Never add or remove Factory state labels directly.
 
+Before implementation starts, resumes, or requests re-verification, check whether GitHub's actual default branch has
+advanced:
+
+```bash
+./.factory/scripts/sync-default-branch.sh --check <issue-number>
+```
+
+`UP_TO_DATE` needs no action. `BEHIND` must be followed by the same command without `--check`; this is the only permitted
+path for merging a branch into an Issue branch. The script verifies the exact `issue/<number>` branch, a clean worktree,
+the `origin` remote, and the default branch reported by GitHub before fetching and merging only
+`origin/<default-branch>`. After `SYNCED`, rerun the selected Gate. A `CONFLICT` is recoverable: resolve ordinary code
+conflicts, use `git merge --continue`, and rerun the Gate. Use `git merge --abort` or `--quit` when recovery requires
+returning to the pre-sync state. Ask for product input only when the conflict makes approved scope, behavior, or a
+historical product decision ambiguous. Dirty worktrees, fetch failures, hook diagnostics, and ordinary conflicts do not
+by themselves authorize `factory:needs-info`.
+
 ## Implement the outcome
 
 Re-read `done_when` as the stopping condition. Establish a test or equivalent artifact that fails on the old behavior,
@@ -64,15 +80,18 @@ completed result, material risk, exact Gate verdict, and links to verification e
 Hand the Issue, authority source, base revision, current head, and complete diff to a fresh independent Agent context.
 Do not provide the implementer's persuasive summary. The verifier follows `factory-verify` and reaches its own verdict.
 
-Fix a substantive implementation rejection on the same branch, rerun Gates, and request verification again. Stop after
-the same implementation problem causes two consecutive rejections. Validator metadata incompatibility, unavailable
-optional platform capabilities, and other workflow-recovery diagnostics do not consume this limit. Any commit after
-acceptance makes the verification stale.
+Every verdict is bound to its `verified_sha`. Fix a substantive rejection on the same branch and PR, rerun Gates, and
+request a fresh independent verification. Once the fix produces a new head, the old rejection is stale: keep the existing
+trusted Ready authorization, normalize the Issue to `factory:in-progress`, and route the new SHA to a fresh verifier. Do
+not leave the new head blocked by `factory:rejected` and do not ask the user to repeat Ready. Stop after the same problem
+rejects the same current head twice and cannot be repaired without changing the Spec. Validator metadata incompatibility,
+unavailable optional platform capabilities, stale-label cleanup, default-branch synchronization, and other workflow
+recovery diagnostics do not consume this limit. Any commit after acceptance likewise makes the verification stale and
+requires a new independent verdict.
 
 ## Complete the run
 
 When the current full SHA has accepted verification with a green Gate verdict, `factory:verified` is present,
-`factory:rejected` is absent, and the external PR state validator is green, run
-`./.factory/scripts/set-issue-state.sh <issue-number> awaiting-review`.
+`factory:rejected` is absent, and the external PR state validator is green, set the Issue to `factory:awaiting-review`.
 Project CI must also be green when the repository configures it. The pull request explains the result, risk, tests, and
 evidence. Stop without merging or publishing; merge is the human product-acceptance decision.
