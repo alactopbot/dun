@@ -18,6 +18,8 @@ Gate：实现阶段 `deep`；本次仅 Spec 的 PR 使用 `fast`
 - 三个展品在桌面 Web 满足静态素材预算和浏览器加载/交互检查；移动端保持响应式，并在低性能、无
   WebGL 或模型失败时仍可阅读完整展品和完成导航；
 - `./.factory/scripts/gates.sh deep` 为 GREEN，当前 PR head 通过独立验证。
+- 当前需求分支包含 main 上已交付的三只动物；Factory hook 允许非受保护需求分支同步默认分支，同时
+  继续阻止受保护分支 merge、产品 PR merge、受保护分支 push 与 force push。
 
 ## 2. 范围决定
 
@@ -31,7 +33,8 @@ Gate：实现阶段 `deep`；本次仅 Spec 的 PR 使用 `fast`
 - 不改变现有背景的创作归属；只有与新模型绑定的 poster 和缩略图必须重做，背景仅在真实可读性检查失败时才按现有 DUN 流水线重做。
 - 不增加声音、自动播放、攻击/奔跑动作、评分、竞争、惊吓效果或运行时 AI。
 - 不重写公共 Three.js 展示器、schema 或 catalog；只做承载真实来源数据和新模型所必需的最小修改。
-- 不创建或扩大 Factory Pattern，不修改 Factory 治理、技术计划或项目许可证。
+- 不创建或扩大 Factory Pattern，不修改技术计划或项目许可证。Factory 治理修改仅限解决本需求已经
+  触发的 base→feature 分支同步误拦截，不扩大 Agent 的产品合并或发布权限。
 
 ## 4. 用户可见体验
 
@@ -103,8 +106,12 @@ Gate：实现阶段 `deep`；本次仅 Spec 的 PR 使用 `fast`
 - `app/exhibits/[slug]/page.tsx` 与 `lib/exhibits/**`：让来源面板从 manifest/provenance 读取真实模型标题、作者、来源、许可与修改摘要，移除 Quaternius 硬编码；属于承重路径。
 - `scripts/assets/**`：仅在现有校验无法 fail closed 检查 CC BY 必需字段、固定 UID、署名或派生哈希时扩展。
 - `tests/**`：增加模型来源、许可、UID、credits、哈希、预算、静态模型和回退回归；测试属于承重范围。
+- `.factory/hooks/block-merge.sh`、`docs/factory/{CONTRACT,GITHUB}.md`、`tests/factory-hook.test.mjs`：允许非
+  受保护需求分支同步默认分支，继续 fail closed 阻止产品合并、受保护分支写入与强推；属于承重范围。
 
-不新增依赖，不修改 `package.json`、lockfile、`docs/MUSEUM_TECHNICAL_PLAN.md`、`LICENSE`、`CONTENT-LICENSE.md`、`.factory/**`、`.agents/**`、`.codex/**`、`AGENTS.md` 或发布配置。实现若证明必须越出以上范围、改变依赖或既有产品/测试语义，先把同一 PR 转回 Draft 审核。
+不新增依赖，不修改 `package.json`、lockfile、`docs/MUSEUM_TECHNICAL_PLAN.md`、`LICENSE`、`CONTENT-LICENSE.md`、
+除上述 hook 外的 `.factory/**`、`.agents/**`、`.codex/**`、`AGENTS.md` 或发布配置。实现若证明必须越出
+以上范围、改变依赖或既有产品/测试语义，先把同一 PR 转回 Draft 审核。
 
 ## 8. 必须保持的不变量
 
@@ -114,22 +121,28 @@ Gate：实现阶段 `deep`；本次仅 Spec 的 PR 使用 `fast`
 - 单页一个 Canvas/Renderer；不锁定全局滚动；键盘、200% 缩放、响应式和减少动态效果保持可用。
 - 第三方模型必须允许修改、商业使用和网页再分发；许可、作者、Sketchfab 来源、修改和哈希完整可追溯。
 - 代码继续使用 AGPL-3.0；DUN 原创背景和派生图像继续使用 CC BY-SA 4.0；三个第三方模型及其修改保留 CC BY 4.0。
+- feature 分支同步不能获得向受保护分支写入、强推、调用 GitHub merge API 或完成产品合并的权限；仅在
+  PR 最终验证前吸收已批准的默认分支历史。
 
 ## 9. 实现顺序
 
-1. 先增加失败测试，证明当前 manifest/credits 仍指向 Quaternius、当前 poster 与旧模型哈希绑定。
-2. 从三个固定 Sketchfab 页面下载归档并保存许可、作者、UID、原始文件和 SHA-256 证据；先做权利与内容审查，任一失败即转回 Draft，不能留下只迁移部分馆藏的结果。
-3. 在隔离 Blender 流水线中规范化、清理和优化三只模型；运行现有 inspect、预算和 Khronos Validator。
-4. 替换 GLB，更新 provenance、manifest、credits 数据和必要的 presentation；重新生成并绑定 poster/thumbnail。
-5. 用公共 viewer 验证静态/动画分支、交互、失败回退、资源释放和单 Renderer，不为单只动物复制展示器逻辑。
-6. 完成自动测试、六个已批准视口、200% 缩放、减少动态效果、桌面浏览器加载/交互、移动端响应式与
+1. 用回归测试证明旧 hook 会误拦截 feature 分支同步和正文命令文本；修复 hook 后同步当前 main，并保持
+   产品合并、受保护分支与 force push 阻止边界。
+2. 增加失败测试，证明当前 manifest/credits 仍指向 Quaternius、当前 poster 与旧模型哈希绑定。
+3. 从三个固定 Sketchfab 页面下载归档并保存许可、作者、UID、原始文件和 SHA-256 证据；先做权利与内容审查，任一失败即转回 Draft，不能留下只迁移部分馆藏的结果。
+4. 在隔离 Blender 流水线中规范化、清理和优化三只模型；运行现有 inspect、预算和 Khronos Validator。
+5. 替换 GLB，更新 provenance、manifest、credits 数据和必要的 presentation；重新生成并绑定 poster/thumbnail。
+6. 用公共 viewer 验证静态/动画分支、交互、失败回退、资源释放和单 Renderer，不为单只动物复制展示器逻辑。
+7. 完成自动测试、六个已批准视口、200% 缩放、减少动态效果、桌面浏览器加载/交互、移动端响应式与
    降级可用，以及来源面板检查。
-7. 运行 `./.factory/scripts/gates.sh deep`，再由隔离的新 Agent 使用 `factory-verify` 对当前完整 SHA 冷读验证。
+8. 运行 `./.factory/scripts/gates.sh deep`，再由隔离的新 Agent 使用 `factory-verify` 对当前完整 SHA 冷读验证。
 
 ## 10. 测试与验收
 
 ### 10.1 自动与资产测试
 
+- hook 测试覆盖：feature 分支允许 `git merge origin/main`，受保护分支 merge 被阻止，abort/quit 可恢复，
+  PR merge/API、受保护分支 push、所有 force push 继续被阻止，Issue/PR/comment 正文提到命令不误判。
 - manifest 对缺失/错误 UID、作者、详情页、CC BY 4.0、署名、原始哈希、运行时哈希和再分发结论 fail closed。
 - 只允许本 Spec 固定的三个 UID；仍引用 Quaternius、未知 Sketchfab UID、NC/ND/Editorial/view-only 或品牌提取来源时失败。
 - GLB 为自包含 glTF 2.0，不含外部资源、相机、灯光、文字/Logo 节点；尺寸、三角形、纹理和 draw call 在预算内。
@@ -151,4 +164,6 @@ Gate：实现阶段 `deep`；本次仅 Spec 的 PR 使用 `fast`
 - 最大风险是上传者误授权、下载时许可漂移和归档内第三方内容；以固定 UID、下载时证据、原创过程说明和 fail-closed 停止处理。
 - 静态模型可能降低“生命感”，但比不自然或攻击动画更符合 DUN；交互旋转、缩放和观察引导仍成立。
 - 新模型的材质与既有背景可能不协调；先调整 DUN 灯光/presentation，只有必要时才重做背景，且不得改变科学事实。
+- hook 解析器若漏拦截真实合并命令或误拦截普通正文，会削弱治理或再次阻塞恢复；用受保护/非受保护分支、
+  shell wrapper、API、push 与正文用例回归，GitHub ruleset 继续作为最终保护边界。
 - 回滚以模型、manifest、provenance、presentation、poster、thumbnail 和 credits 为一个原子单元恢复到上一组已验证资产；不得留下混合作者、旧哈希或失配派生图。

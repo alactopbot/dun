@@ -56,6 +56,11 @@ push 成功；`EXISTS` 或 `LOST` 表示另一个运行已拥有该需求。此�
 成功认领并完成前置检查后，通过状态脚本把 Issue 设为 `factory:in-progress`。普通需求立即在该分支创建 Draft Spec PR；Pattern 需求
 直接实现并创建普通 PR。任何时候已有分支或 PR 都必须恢复，不能新建第二套流程对象。
 
+默认分支在需求执行期间前进时，Agent 可以在 `issue/*` 等非受保护分支把 `origin/main`、`origin/master`
+或项目实际默认分支合入当前需求分支，解决冲突后重跑规定 Gate 和独立验证。`merge --abort`、`merge --quit`
+等恢复操作始终允许。Agent 不得在受保护分支发起本地 merge，也不得通过 GitHub PR merge 或 merge API
+完成产品合并。
+
 ## 状态与 handoff
 
 Issue 使用唯一状态标签：`factory:ready-to-spec`、`factory:wait-to-implement`、

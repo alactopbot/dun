@@ -35,6 +35,8 @@ GitHub Checks 本身不是 Factory 错误。
 默认分支必须要求 PR、禁止强推和 Agent 绕过。Hooks 只是纵深防御，不能代替 GitHub ruleset。使用附带
 的 Codex hook 适配时，首次安装或 hook 变化后运行
 `/hooks` 审阅并信任
-项目 hook。实现分支使用确定性名称并禁止强推；已有 PR 时必须恢复而非新建。为每个启用的 Pattern
+项目 hook。Hook 按实际 shell 命令和当前分支判断：允许默认分支合入非受保护需求分支以及 merge
+abort/quit，阻止受保护分支上的本地 merge、GitHub merge API、受保护分支 push 和所有 force push；Issue、
+PR 或评论正文仅提到这些命令不会触发阻止。实现分支使用确定性名称并禁止强推；已有 PR 时必须恢复而非新建。为每个启用的 Pattern
 另建与 `activation.issueLabel` 完全相同的标签；Pattern 配置通过普通人工 PR 进入默认分支后，后续
 Issue 才能使用该授权。
