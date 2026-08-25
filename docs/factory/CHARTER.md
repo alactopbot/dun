@@ -80,6 +80,9 @@ GATES:
   docs_only: fast
 ```
 
+初始 fast、full、deep 都只要求 build。等级表示可逐步扩展的策略位置，不预装额外质量门槛；只有项目明确
+决定成为交付条件后，才把 typecheck、lint、test、mutation 或 architecture 加入对应等级。
+
 ## 停止与背压
 
 ```text

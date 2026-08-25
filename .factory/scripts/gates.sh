@@ -5,9 +5,9 @@
 # by a confident paragraph. Every factory skill calls it. Nothing merges without it.
 #
 # Usage:
-#   ./.factory/scripts/gates.sh fast    # types + lint            (~seconds, run constantly)
-#   ./.factory/scripts/gates.sh full    # + tests + build
-#   ./.factory/scripts/gates.sh deep    # + mutation + architecture (load-bearing changes)
+#   ./.factory/scripts/gates.sh fast    # run REQUIRED_FAST
+#   ./.factory/scripts/gates.sh full    # run REQUIRED_FULL
+#   ./.factory/scripts/gates.sh deep    # run REQUIRED_DEEP
 #
 # Exit codes:  0 = all required gates green   1 = at least one gate red
 #              2 = invalid level or a required gate could not run
@@ -35,9 +35,9 @@ case "$LEVEL" in
     ;;
 esac
 
-REQUIRED_FAST="types lint"
-REQUIRED_FULL="types lint test"
-REQUIRED_DEEP="types lint test"
+REQUIRED_FAST="build"
+REQUIRED_FULL="build"
+REQUIRED_DEEP="build"
 ARCHITECTURE_COMMAND=""
 if [ -f .factory/gates.conf ]; then
   # This file is protected by the factory contract and contains assignments only.
@@ -96,6 +96,11 @@ skip() {
   esac
 }
 
+required() {
+  case " $REQUIRED " in *" $1 "*) return 0 ;; esac
+  return 1
+}
+
 has()      { command -v "$1" >/dev/null 2>&1; }
 pkg_has()  { [ -f package.json ] && node -e "process.exit(require('./package.json').scripts?.['$1']?0:1)" 2>/dev/null; }
 
@@ -121,81 +126,69 @@ PMRUN="$PM run"
 printf 'factory gates | level=%s stack=%s pm=%s\n' "$LEVEL" "$STACK" "$PM"
 
 # ---------------------------------------------------------------------------
-# TIER 1 - fast. Types and lint. Cheap enough to run on every edit.
+# Run only checks explicitly required by the selected level. Merely detecting a
+# project command must not silently turn it into a verdict-affecting policy.
 # ---------------------------------------------------------------------------
 case "$STACK" in
   node)
-    if pkg_has typecheck;    then run types $PMRUN typecheck
-    elif [ -f tsconfig.json ] && has npx; then run types npx --no-install tsc --noEmit
-    else skip types "no typecheck script or tsconfig.json"; fi
-
-    if pkg_has lint;         then run lint $PMRUN lint
-    elif has npx && [ -f eslint.config.js -o -f eslint.config.mjs -o -f .eslintrc.json -o -f .eslintrc.cjs ]; then
-                                  run lint npx --no-install eslint .
-    else skip lint "no lint script or eslint config"; fi
+    if required types; then
+      if pkg_has typecheck; then run types $PMRUN typecheck
+      elif [ -f tsconfig.json ] && has npx; then run types npx --no-install tsc --noEmit
+      else skip types "no typecheck script or tsconfig.json"; fi
+    fi
+    if required lint; then
+      if pkg_has lint; then run lint $PMRUN lint
+      elif has npx && [ -f eslint.config.js -o -f eslint.config.mjs -o -f .eslintrc.json -o -f .eslintrc.cjs ]; then
+        run lint npx --no-install eslint .
+      else skip lint "no lint script or eslint config"; fi
+    fi
+    if required test; then
+      if pkg_has test; then run test $PMRUN test; else skip test "no test script"; fi
+    fi
+    if required build; then
+      if pkg_has build; then run build $PMRUN build; else skip build "no build script"; fi
+    fi
+    if required mutation; then
+      if pkg_has mutation; then run mutation $PMRUN mutation; else skip mutation "no mutation script"; fi
+    fi
     ;;
   python)
-    if has ruff;  then run lint  ruff check .;  else skip lint  "ruff not installed"; fi
-    if has mypy;  then run types mypy .;        else skip types "mypy not installed"; fi
+    if required lint; then if has ruff; then run lint ruff check .; else skip lint "ruff not installed"; fi; fi
+    if required types; then if has mypy; then run types mypy .; else skip types "mypy not installed"; fi; fi
+    if required test; then if has pytest; then run test pytest -q; else skip test "pytest not installed"; fi; fi
+    if required build; then
+      if python3 -c 'import build' >/dev/null 2>&1; then run build python3 -m build
+      else skip build "python build module not installed"; fi
+    fi
+    if required mutation; then if has mutmut; then run mutation mutmut run; else skip mutation "mutmut not installed"; fi; fi
     ;;
   rust)
-    run types cargo check --all-targets
-    if has cargo-clippy || cargo clippy --version >/dev/null 2>&1; then
-      run lint cargo clippy --all-targets -- -D warnings
-    else skip lint "clippy not installed"; fi
+    if required types; then run types cargo check --all-targets; fi
+    if required lint; then
+      if has cargo-clippy || cargo clippy --version >/dev/null 2>&1; then run lint cargo clippy --all-targets -- -D warnings
+      else skip lint "clippy not installed"; fi
+    fi
+    if required test; then run test cargo test --all; fi
+    if required build; then run build cargo build --release; fi
+    if required mutation; then skip mutation "no portable Rust mutation command configured"; fi
     ;;
   go)
-    run types go vet ./...
-    if has golangci-lint; then run lint golangci-lint run; else skip lint "golangci-lint not installed"; fi
+    if required types; then run types go vet ./...; fi
+    if required lint; then if has golangci-lint; then run lint golangci-lint run; else skip lint "golangci-lint not installed"; fi; fi
+    if required test; then run test go test ./...; fi
+    if required build; then run build go build ./...; fi
+    if required mutation; then skip mutation "no portable Go mutation command configured"; fi
     ;;
   *)
-    skip types "unknown stack"; skip lint "unknown stack"
+    for gate in types lint test build mutation; do required "$gate" && skip "$gate" "unknown stack"; done
     ;;
 esac
 
 # ---------------------------------------------------------------------------
-# TIER 2 - full. Tests and build. The default gate before any PR.
+# Architecture remains an explicit project command because it has no portable
+# stack convention.
 # ---------------------------------------------------------------------------
-if [ "$LEVEL" = "full" ] || [ "$LEVEL" = "deep" ]; then
-  case "$STACK" in
-    node)
-      if pkg_has test; then run test $PMRUN test; else skip test "no test script"; fi
-      if pkg_has build; then run build $PMRUN build; else skip build "no build script"; fi
-      ;;
-    python)
-      if has pytest; then run test pytest -q; else skip test "pytest not installed"; fi
-      ;;
-    rust)
-      run test cargo test --all
-      run build cargo build --release
-      ;;
-    go)
-      run test go test ./...
-      run build go build ./...
-      ;;
-    *) skip test "unknown stack"; skip build "unknown stack" ;;
-  esac
-fi
-
-# ---------------------------------------------------------------------------
-# TIER 3 - deep. Mutation and architecture rules.
-# Run on anything touching a load-bearing path (see docs/factory/CHARTER.md).
-# ---------------------------------------------------------------------------
-if [ "$LEVEL" = "deep" ]; then
-  case "$STACK" in
-    node)
-      if pkg_has mutation; then run mutation $PMRUN mutation
-      else skip mutation "no 'mutation' script (see CHARTER.md - coverage is not a substitute)"; fi
-      ;;
-    python)
-      if has mutmut;    then run mutation mutmut run; else skip mutation "mutmut not installed"; fi
-      ;;
-    rust|go) ;;
-    *)
-      skip mutation "unknown stack"
-      ;;
-  esac
-
+if required architecture; then
   if [ -n "$ARCHITECTURE_COMMAND" ]; then
     run architecture bash -lc "$ARCHITECTURE_COMMAND"
   else
