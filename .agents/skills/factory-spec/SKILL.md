@@ -37,7 +37,9 @@ For an ordinary requirement, `design.md` is the complete plan authority used by 
 ## Review lifecycle
 
 Push the claimed branch and create the single linked Draft pull request with `Closes #<issue>`. Set the Issue to
-`factory:wait-to-implement` and stop. The Draft state is the plan-review state; do not duplicate it with a PR label.
+`factory:wait-to-implement` by running
+`./.factory/scripts/set-issue-state.sh <issue-number> wait-to-implement`, then stop. Never add or remove Factory state labels
+directly. The Draft state is the plan-review state; do not duplicate it with a PR label.
 
 - Feedback: keep the pull request Draft and revise the same `design.md` from ordinary review comments.
 - Approval: only a trusted human selecting **Ready for review** authorizes implementation.

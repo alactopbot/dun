@@ -18,8 +18,14 @@ requests, Checks, and either the approved `design.md` or the explicitly selected
   and no expected governance-file changes.
 
 When a trusted Ready transition authorizes an ordinary requirement, replace the Issue's previous Factory state label with
-`factory:in-progress` when implementation starts. This transition is mechanical state normalization, not another approval
-decision.
+`factory:in-progress` when implementation starts by running:
+
+```bash
+./.factory/scripts/set-issue-state.sh <issue-number> in-progress
+```
+
+This transition is mechanical state normalization, not another approval decision. Finish all authority and missing-decision
+checks first; do not create a transient `in-progress` state when the correct destination is already `needs-info`.
 
 Recover an existing deterministic branch or unique pull request. If neither exists, claim before writing:
 
@@ -28,7 +34,8 @@ Recover an existing deterministic branch or unique pull request. If neither exis
 ```
 
 Only `CLAIMED` may create new work. `EXISTS` or `LOST` means another run owns the same Issue; recover its branch/PR or
-stop. After a successful claim, replace the Issue's previous Factory state label with `factory:in-progress`.
+stop. After a successful claim and completed preflight, use the state script above to replace the previous Factory state
+label with `factory:in-progress`. Never add or remove Factory state labels directly.
 
 ## Implement the outcome
 
@@ -61,6 +68,7 @@ Any commit after acceptance makes the verification stale.
 ## Complete the run
 
 When the current full SHA has accepted verification with a green Gate verdict, `factory:verified` is present,
-`factory:rejected` is absent, and the external PR state validator is green, set the Issue to `factory:awaiting-review`.
+`factory:rejected` is absent, and the external PR state validator is green, run
+`./.factory/scripts/set-issue-state.sh <issue-number> awaiting-review`.
 Project CI must also be green when the repository configures it. The pull request explains the result, risk, tests, and
 evidence. Stop without merging or publishing; merge is the human product-acceptance decision.
