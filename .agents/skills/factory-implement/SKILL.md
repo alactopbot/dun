@@ -13,13 +13,21 @@ pull request, or approval gate.
 Read `AGENTS.md`, the contract, charter, complete Issue discussion, trusted handoff, current labels, linked pull
 requests, Checks, and either the approved `design.md` or the explicitly selected Pattern.
 
-- Ordinary path: require a trusted Ready transition and no later Spec or governance drift.
+- Ordinary path: require a trusted Ready transition. Ready authorizes continuation but is not bound to event commit
+  metadata; the current Spec and complete diff remain the implementation authority. A later change requires a new Draft
+  cycle only when it changes the authorized product outcome or expands scope.
 - Pattern path: require one activation label, an enabled matching Pattern on the default branch, complete semantic match,
   and no expected governance-file changes.
 
 When a trusted Ready transition authorizes an ordinary requirement, replace the Issue's previous Factory state label with
-`factory:in-progress` when implementation starts. This transition is mechanical state normalization, not another approval
-decision.
+`factory:in-progress` when implementation starts by running:
+
+```bash
+./.factory/scripts/set-issue-state.sh <issue-number> in-progress
+```
+
+This transition is mechanical state normalization, not another approval decision. Finish all authority and missing-decision
+checks first; do not create a transient `in-progress` state when the correct destination is already `needs-info`.
 
 Recover an existing deterministic branch or unique pull request. If neither exists, claim before writing:
 
@@ -28,7 +36,8 @@ Recover an existing deterministic branch or unique pull request. If neither exis
 ```
 
 Only `CLAIMED` may create new work. `EXISTS` or `LOST` means another run owns the same Issue; recover its branch/PR or
-stop. After a successful claim, replace the Issue's previous Factory state label with `factory:in-progress`.
+stop. After a successful claim and completed preflight, use the state script above to replace the previous Factory state
+label with `factory:in-progress`. Never add or remove Factory state labels directly.
 
 ## Implement the outcome
 
@@ -55,12 +64,15 @@ completed result, material risk, exact Gate verdict, and links to verification e
 Hand the Issue, authority source, base revision, current head, and complete diff to a fresh independent Agent context.
 Do not provide the implementer's persuasive summary. The verifier follows `factory-verify` and reaches its own verdict.
 
-Fix a rejection on the same branch, rerun Gates, and request verification again. Stop after two consecutive rejections.
-Any commit after acceptance makes the verification stale.
+Fix a substantive implementation rejection on the same branch, rerun Gates, and request verification again. Stop after
+the same implementation problem causes two consecutive rejections. Validator metadata incompatibility, unavailable
+optional platform capabilities, and other workflow-recovery diagnostics do not consume this limit. Any commit after
+acceptance makes the verification stale.
 
 ## Complete the run
 
 When the current full SHA has accepted verification with a green Gate verdict, `factory:verified` is present,
-`factory:rejected` is absent, and the external PR state validator is green, set the Issue to `factory:awaiting-review`.
+`factory:rejected` is absent, and the external PR state validator is green, run
+`./.factory/scripts/set-issue-state.sh <issue-number> awaiting-review`.
 Project CI must also be green when the repository configures it. The pull request explains the result, risk, tests, and
 evidence. Stop without merging or publishing; merge is the human product-acceptance decision.
