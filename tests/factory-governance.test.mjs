@@ -1,5 +1,13 @@
 import assert from "node:assert/strict";
-import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  chmodSync,
+  copyFileSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -76,7 +84,13 @@ test("Deep Gate is deterministic and keeps audit explicit", () => {
 });
 
 test("state script is valid shell and wired into Factory authorities", () => {
-  assert.equal(spawnSync("bash", ["-n", stateScript]).status, 0);
+  for (const script of [
+    ".factory/scripts/doctor.sh",
+    ".factory/scripts/gates.sh",
+    ".factory/scripts/set-issue-state.sh",
+  ]) {
+    assert.equal(spawnSync("bash", ["-n", join(root, script)]).status, 0, `${script} must parse`);
+  }
   assert.match(read(".factory/scripts/doctor.sh"), /set-issue-state\.sh/);
   assert.match(read("docs/factory/CONTRACT.md"), /set-issue-state\.sh/);
 
@@ -85,6 +99,48 @@ test("state script is valid shell and wired into Factory authorities", () => {
     assert.match(source, /set-issue-state\.sh/, `${skill} must use the state script`);
     assert.doesNotMatch(source, /gh issue edit/, `${skill} must not edit state labels directly`);
   }
+});
+
+test("doctor fails closed when the required state script is absent", (t) => {
+  const fixture = mkdtempSync(join(tmpdir(), "dun-factory-doctor-"));
+  t.after(() => rmSync(fixture, { recursive: true, force: true }));
+
+  const requiredWithoutStateScript = [
+    "AGENTS.md",
+    "docs/factory/CONTRACT.md",
+    "docs/factory/CHARTER.md",
+    "docs/factory/GITHUB.md",
+    "docs/requirements/README.md",
+    ".factory/pattern.schema.json",
+    ".factory/gates.conf",
+    ".factory/scripts/claim.sh",
+    ".factory/scripts/gates.sh",
+    ".factory/scripts/prove-test.sh",
+    ".factory/scripts/validate-pr-state.mjs",
+    ".factory/hooks/block-merge.sh",
+    ".codex/hooks.json",
+  ];
+  for (const relativePath of requiredWithoutStateScript) {
+    const destination = join(fixture, relativePath);
+    mkdirSync(dirname(destination), { recursive: true });
+    copyFileSync(join(root, relativePath), destination);
+    if (relativePath.endsWith(".sh")) chmodSync(destination, 0o755);
+  }
+
+  assert.equal(spawnSync("git", ["init", "--quiet"], { cwd: fixture }).status, 0);
+  const fakeBin = join(fixture, "fake-bin");
+  mkdirSync(fakeBin);
+  writeFileSync(join(fakeBin, "gh"), "#!/usr/bin/env bash\nexit 1\n");
+  chmodSync(join(fakeBin, "gh"), 0o755);
+
+  const result = spawnSync(join(root, ".factory/scripts/doctor.sh"), {
+    cwd: fixture,
+    encoding: "utf8",
+    env: { ...process.env, PATH: `${fakeBin}:${process.env.PATH}` },
+  });
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /FAIL  \.factory\/scripts\/set-issue-state\.sh is missing/);
+  assert.match(result.stdout, /FACTORY_DOCTOR: failures=1/);
 });
 
 test("state update preserves ordinary labels and replaces all old states in one PATCH", (t) => {
@@ -119,12 +175,55 @@ test("setting the sole current state is idempotent and performs no PATCH", (t) =
   assert.equal(result.calls.filter((call) => call.startsWith("api ")).length, 0);
 });
 
+test("state update handles zero or one prior Factory state", async (t) => {
+  for (const [name, labels] of [
+    ["zero prior states", "priority:high"],
+    ["one different prior state", "priority:high\nfactory:needs-info"],
+  ]) {
+    await t.test(name, (t) => {
+      const result = fakeGhRun(t, ["42", "in-progress"], { labels });
+      assert.equal(result.status, 0, result.stderr);
+      assert.match(result.stdout, /status=UPDATED/);
+      const apiCalls = result.calls.filter((call) => call.startsWith("api "));
+      assert.equal(apiCalls.length, 1);
+      assert.match(apiCalls[0], /labels\[\]=priority:high/);
+      assert.match(apiCalls[0], /labels\[\]=factory:in-progress/);
+    });
+  }
+});
+
 test("state script fails closed for invalid input and GitHub failures", async (t) => {
+  await t.test("missing arguments", (t) => {
+    const result = fakeGhRun(t, []);
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /usage:/);
+    assert.equal(result.calls.length, 0);
+  });
+
+  await t.test("invalid Issue number", (t) => {
+    const result = fakeGhRun(t, ["0", "needs-info"]);
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /usage:/);
+    assert.equal(result.calls.length, 0);
+  });
+
   await t.test("invalid state", (t) => {
     const result = fakeGhRun(t, ["42", "unknown"]);
     assert.equal(result.status, 2);
     assert.match(result.stderr, /reason=invalid-state/);
     assert.equal(result.calls.length, 0);
+  });
+
+  await t.test("gh unavailable", (t) => {
+    const fixture = mkdtempSync(join(tmpdir(), "dun-without-gh-"));
+    t.after(() => rmSync(fixture, { recursive: true, force: true }));
+    const result = spawnSync("/bin/bash", [stateScript, "42", "needs-info"], {
+      cwd: root,
+      encoding: "utf8",
+      env: { ...process.env, PATH: fixture },
+    });
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, /reason=gh-unavailable/);
   });
 
   await t.test("authentication failure", (t) => {
