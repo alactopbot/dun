@@ -17,6 +17,8 @@ Gate：实现阶段 `deep`；本次仅 Spec 的 PR 使用 `fast`
   一次 GitHub PATCH 中写入唯一目标状态；
 - 重复设置相同状态是无操作，非法输入、鉴权失败、读取失败或更新失败都明确 fail closed；
 - Contract、相关 skills 和 doctor 检查与实际脚本一致；
+- 可信 owner 的 Ready 事件直接授权继续，不依赖 GitHub 未承诺提供的事件 `commit_id`；validator 元数据
+  兼容问题不再被误计为实现拒绝；
 - 治理行为有确定性回归测试，规定 Gate 为 GREEN，并通过当前 SHA 的独立验证。
 
 ## 2. 背景与范围决定
@@ -32,13 +34,17 @@ Issue #27 已证明当前 `deep` Gate 会在 types、lint、测试和 build 全�
 这两个修正共同服务于一个可验收结果：Factory 在外部服务和并发状态更新面前保持可恢复、确定且
 fail-closed。本需求不创建 Pattern；Pattern 不能授权治理文件修改。
 
+恢复 PR #33 还证明 GitHub 的 `ready_for_review` Timeline 事件可合法返回 `commit_id: null`。Ready 的可信
+操作者和时间线状态足以表达继续授权，最终独立验证已经绑定当前完整 SHA；将不存在的事件 SHA 当作硬
+前提会让真实授权、Gate 和实现全部有效时仍无法交付，因此本需求同时移除该平台元数据耦合。
+
 ## 3. 非目标
 
 - 不删除 `package.json` 中的显式 `audit` 命令，不声称依赖没有漏洞。
 - 不把外部漏洞服务失败伪装成安全检查通过；Factory verdict 只是不再包含该检查。
 - 不改变 fast/full 的产品检查语义，不降低 types、lint、test 或已有 build 失败的阻塞效果。
 - 不自动修复依赖、不修改 lockfile、不新增依赖或 GitHub Actions。
-- 不改变 claim 分支、Draft/Ready、独立验证、最终人工合并或 Pattern 授权模型。
+- 不改变 claim 分支、可信 owner 点击 Draft/Ready、独立验证绑定当前 SHA、最终人工合并或 Pattern 授权模型。
 - 不修改产品代码、展品、素材、事实、许可、归属或发布行为。
 - 不在本需求中合并或发布治理变更。
 
@@ -84,12 +90,16 @@ fail-closed。本需求不创建 Pattern；Pattern 不能授权治理文件修�
 - `.factory/scripts/gates.sh`：删除各语言 audit 探测和执行路径，同步帮助文本及默认 Deep 集合。
 - `.factory/scripts/set-issue-state.sh`：实现校验、标签分类、幂等判断、单次 PATCH 和稳定结果输出。
 - `.factory/scripts/doctor.sh`：检查新脚本存在且满足现有脚本健康要求。
+- `.factory/scripts/validate-pr-state.mjs`：验证可信 Ready 操作者和当前 Ready 状态，不要求 Timeline 事件提供
+  `commit_id`，继续严格校验最终 verification 的当前完整 SHA。
 - `.agents/skills/factory-{triage,spec,implement,monitor}/SKILL.md`：在各自已授权的状态转换点调用统一脚本。
+- `.agents/skills/factory-verify/SKILL.md`、`docs/factory/{CHARTER,GITHUB}.md`：区分真实实现拒绝与可恢复的
+  validator/平台元数据诊断，并记录 Ready 的实际授权语义。
 - `docs/factory/CONTRACT.md`：把原子状态更新写入正式契约，并补足 Pattern 指南入口。
 - `tests/**`：增加不访问真实 GitHub 或外部漏洞服务的脚本回归测试。
 
-上述 `.factory/**`、`.agents/**`、Factory contract 和 tests 均为承重路径，实现必须使用 Deep Gate。不得
-修改 `docs/factory/CHARTER.md`、Pattern 配置、产品代码、依赖或 lockfile。
+上述 `.factory/**`、`.agents/**`、Factory 文档和 tests 均为承重路径，实现必须使用 Deep Gate。不得修改
+Pattern 配置、产品代码、依赖或 lockfile。
 
 ## 6. 必须保持的不变量
 
@@ -99,6 +109,7 @@ fail-closed。本需求不创建 Pattern；Pattern 不能授权治理文件修�
 - 必需 Gate 的 skip 或未运行仍为 MISCONFIGURED；任何已运行 Gate 的失败仍为 RED。
 - Deep Gate 仍覆盖所有 fast/full 检查和现有 build；删除 audit 不能删除或放宽其他检查。
 - 独立验证、当前 SHA 绑定、`factory:verified` 和最终人工合并要求保持不变。
+- Ready 必须来自可信 owner，最新转换仍不得是 Draft；只有不可靠的事件 `commit_id` 约束被移除。
 - 无令牌、私有 registry 凭据、日志或本地环境路径进入仓库。
 
 ## 7. 实现顺序
@@ -107,9 +118,10 @@ fail-closed。本需求不创建 Pattern；Pattern 不能授权治理文件修�
 2. 实现状态脚本并用 fake `gh` 覆盖非法输入、保留普通标签、清理多个旧状态、幂等无写、读取失败和
    PATCH 失败。
 3. 从 Gate 配置与执行器移除 audit，保留显式 `npm run audit`，并验证 Deep 不调用外部漏洞服务。
-4. 更新 doctor、Contract 和四个相关 skills，检查所有允许的状态写入入口都使用统一脚本。
-5. 运行脚本语法检查、回归测试、`doctor.sh` 和 `./.factory/scripts/gates.sh deep`。
-6. 由隔离的新 Agent 对当前完整 SHA、Issue、Spec、完整 diff 和 Gate 证据进行冷读验证。
+4. 更新 Ready validator、Factory 文档和相关 skills，加入 `commit_id` 缺失仍可验证的回归测试。
+5. 更新 doctor、Contract 和四个相关 skills，检查所有允许的状态写入入口都使用统一脚本。
+6. 运行脚本语法检查、回归测试、`doctor.sh` 和 `./.factory/scripts/gates.sh deep`。
+7. 由隔离的新 Agent 对当前完整 SHA、Issue、Spec、完整 diff 和 Gate 证据进行冷读验证。
 
 ## 8. 测试与验证
 
@@ -127,6 +139,8 @@ fail-closed。本需求不创建 Pattern；Pattern 不能授权治理文件修�
 - Gate 测试使用 fake package manager 或静态契约断言，证明 Deep 不访问 audit，同时 types/lint/test/build
   的失败语义没有改变。
 - `doctor.sh` 在新脚本存在且可执行时通过，缺失时 fail closed。
+- validator fixture 覆盖可信 `ready_for_review` 且事件没有 `commit_id` 的 GitHub 实际响应，结果不得出现
+  `spec-ready:invalid-sha`；不可信操作者、最新状态为 Draft 和 verification SHA 过期仍须失败。
 - 运行 `./.factory/scripts/gates.sh deep`；不得跳过必需 Gate 或报告 MISCONFIGURED。
 
 ## 9. 验收标准
@@ -137,6 +151,7 @@ fail-closed。本需求不创建 Pattern；Pattern 不能授权治理文件修�
 - 状态更新保留普通及 Pattern 标签、清理全部旧状态、写入唯一目标状态，并且最多一次 PATCH。
 - 幂等、错误和异常旧状态行为都有自动测试，机器可读输出与退出码稳定。
 - Contract、skills、doctor、配置与实现一致，Pattern 和人工授权边界不变。
+- GitHub Ready 事件 `commit_id` 为 `null` 时，可信 owner Ready 加当前 SHA 独立验证仍可得到 GREEN。
 - Deep Gate GREEN，当前 SHA 的独立验证接受，PR 清楚记录删除强制 audit 的风险与恢复方式。
 
 ## 10. 风险与回滚
@@ -149,6 +164,8 @@ fail-closed。本需求不创建 Pattern；Pattern 不能授权治理文件修�
 - **skill 与脚本漂移**：doctor 和测试覆盖必需文件与调用约束，独立验证搜索所有直接状态写入。
 - **自修改 Gate 的可信度**：独立验证必须同时检查批准 Spec、Gate 配置差异、回归测试和完整脚本，不能
   仅引用修改后的 Gate 自身 verdict。
+- **放宽 Ready 的错误授权风险**：只移除 GitHub 未保证的事件 SHA；继续校验最新转换为 Ready、操作者有
+  写权限、PR 非 Draft，以及最终 verification 精确匹配当前 head SHA。
 
 回滚时恢复原 Gate 配置和 audit 执行路径，并同时回滚状态脚本、doctor、Contract、skills 和对应测试，
 不得留下文档要求脚本但仓库缺失，或脚本存在但 Agent 继续直接改标签的半完成状态。

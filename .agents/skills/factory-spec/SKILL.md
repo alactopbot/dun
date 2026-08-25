@@ -43,8 +43,9 @@ directly. The Draft state is the plan-review state; do not duplicate it with a P
 
 - Feedback: keep the pull request Draft and revise the same `design.md` from ordinary review comments.
 - Approval: only a trusted human selecting **Ready for review** authorizes implementation.
-- Revocation: **Convert to draft** or a later change to the Spec, Pattern, charter, or Factory governance requires a new
-  review cycle.
+- Revocation: **Convert to draft**, a changed authorized product outcome, or expanded scope requires a new review cycle.
+  Editing the current Spec without changing that authorization does not revoke a trusted Ready event; the complete current
+  Spec is checked by Gates and independent verification.
 
 Humans do not need to provide keywords, hashes, or structured approval comments. This skill never clicks Ready on their
 behalf and never begins product implementation.

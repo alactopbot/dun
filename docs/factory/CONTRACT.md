@@ -21,8 +21,8 @@ Checks 仍然有效，但 Factory 不安装或依赖 GitHub Actions。聊天不�
    数据或素材、影响范围、不变量、实现顺序、测试、验收和风险。
 3. 创建唯一 Draft PR，通过状态脚本把 Issue 设为 `factory:wait-to-implement` 后停止；Draft 本身就是方案待审状态。
 4. 人类有问题时保持 Draft 并留普通评论；通过时点击 **Ready for review**。
-5. Agent 检测到可信 Ready 后把 Issue 状态从等待改为实现中，并在同一 PR 恢复实现。Ready 后 Spec、
-   Pattern 或治理规则变化必须重新转为 Draft。
+5. Agent 检测到可信 Ready 后把 Issue 状态从等待改为实现中，并在同一 PR 恢复实现。Ready 只证明可信
+   owner 允许继续，不绑定事件 SHA；只有产品结果或授权范围改变时才必须重新转为 Draft。
 
 ### 显式 Pattern
 
@@ -97,13 +97,14 @@ gate_status: GREEN
 ```
 
 发布新 verdict 前先移除旧 `factory:verified`；接受评论存在后再重新添加该标签，并由外部 Agent 运行
-`node .factory/scripts/validate-pr-state.mjs --pr <编号>`。验证拒绝就在同一分支修正；连续两次拒绝后停止。
+`node .factory/scripts/validate-pr-state.mjs --pr <编号>`。真实实现问题导致的验证拒绝就在同一分支修正；
+同一实现问题连续两次拒绝后停止。validator 元数据兼容、可选平台能力缺失等恢复性问题不消耗拒绝次数。
 当前 SHA 的独立验证、实际 Gate 结果和状态校验都绿色后，通过状态脚本将 Issue 设为
 `factory:awaiting-review`。项目
 已有 CI 仍须满足自身合并规则。最终合并代表产品验收，Agent 不合并或发布。
 
 ## 停止条件
 
-一次澄清后仍有改变结果的歧义；认领失败且没有可恢复 PR；普通 PR 仍是 Draft；Ready 后 Spec 漂移；
+一次澄清后仍有改变结果的歧义；认领失败且没有可恢复 PR；普通 PR 仍是 Draft；产品结果或授权范围变化；
 Pattern 不完整匹配或越界；需要未批准依赖、既有测试语义或承重路径；同一需求连续两次 Gate 失败或
-验证拒绝；等待人工决定超过章程阈值。停止时在 GitHub 留下可恢复证据。
+同一实现问题连续两次验证拒绝；等待人工决定超过章程阈值。停止时在 GitHub 留下可恢复证据。

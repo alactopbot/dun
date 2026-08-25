@@ -13,6 +13,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
+import { validatePrState } from "../.factory/scripts/validate-pr-state.mjs";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const stateScript = join(root, ".factory/scripts/set-issue-state.sh");
@@ -81,6 +82,80 @@ test("Deep Gate is deterministic and keeps audit explicit", () => {
   assert.doesNotMatch(gates, /\brun audit\b/);
   assert.doesNotMatch(gates, /REQUIRED_DEEP=.*audit/);
   assert.match(packageJson.scripts.audit, /npm audit/);
+});
+
+function ordinaryValidatorContext() {
+  const headSha = "a".repeat(40);
+  return {
+    pr: {
+      number: 31,
+      state: "OPEN",
+      isDraft: false,
+      headSha,
+      labels: ["factory:verified"],
+      changedFiles: [".factory/scripts/validate-pr-state.mjs"],
+    },
+    issue: { number: 31, state: "OPEN", labels: ["factory:in-progress"] },
+    issueComments: [{
+      body: "<!-- factory-handoff -->\nrequirement: REQ-031\npattern: none",
+      authorAssociation: "OWNER",
+      createdAt: "2026-08-25T00:00:00Z",
+      url: "https://example.test/handoff",
+    }],
+    prComments: [{
+      body: [
+        "<!-- factory-verification -->",
+        "decision: accepted",
+        "requirement: REQ-031",
+        `verified_sha: ${headSha}`,
+        "gate_level: deep",
+        "gate_status: GREEN",
+      ].join("\n"),
+      authorAssociation: "OWNER",
+      createdAt: "2026-08-25T00:02:00Z",
+      url: "https://example.test/verification",
+    }],
+    specTransitions: [{
+      event: "ready_for_review",
+      trustedActor: true,
+      createdAt: "2026-08-25T00:01:00Z",
+    }],
+    openLinkedPrs: [31],
+    pattern: null,
+    hasReviewedSpec: true,
+    defaultGateLevel: "full",
+  };
+}
+
+test("trusted Ready authorizes an ordinary PR without event commit metadata", () => {
+  const result = validatePrState(ordinaryValidatorContext());
+
+  assert.deepEqual(result, { ok: true, errors: [] });
+});
+
+test("Ready trust, Draft revocation, and current verification SHA remain fail closed", async (t) => {
+  await t.test("untrusted Ready", () => {
+    const context = ordinaryValidatorContext();
+    context.specTransitions[0].trustedActor = false;
+    assert.match(validatePrState(context).errors.join(","), /spec-ready:untrusted-actor/);
+  });
+
+  await t.test("latest transition is Draft", () => {
+    const context = ordinaryValidatorContext();
+    context.pr.isDraft = true;
+    context.specTransitions.push({
+      event: "convert_to_draft",
+      trustedActor: true,
+      createdAt: "2026-08-25T00:03:00Z",
+    });
+    assert.match(validatePrState(context).errors.join(","), /spec-ready:pr-is-draft/);
+  });
+
+  await t.test("verification SHA is stale", () => {
+    const context = ordinaryValidatorContext();
+    context.pr.headSha = "b".repeat(40);
+    assert.match(validatePrState(context).errors.join(","), /verification:stale-sha/);
+  });
 });
 
 test("state script is valid shell and wired into Factory authorities", () => {

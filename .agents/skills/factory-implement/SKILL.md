@@ -13,7 +13,9 @@ pull request, or approval gate.
 Read `AGENTS.md`, the contract, charter, complete Issue discussion, trusted handoff, current labels, linked pull
 requests, Checks, and either the approved `design.md` or the explicitly selected Pattern.
 
-- Ordinary path: require a trusted Ready transition and no later Spec or governance drift.
+- Ordinary path: require a trusted Ready transition. Ready authorizes continuation but is not bound to event commit
+  metadata; the current Spec and complete diff remain the implementation authority. A later change requires a new Draft
+  cycle only when it changes the authorized product outcome or expands scope.
 - Pattern path: require one activation label, an enabled matching Pattern on the default branch, complete semantic match,
   and no expected governance-file changes.
 
@@ -62,8 +64,10 @@ completed result, material risk, exact Gate verdict, and links to verification e
 Hand the Issue, authority source, base revision, current head, and complete diff to a fresh independent Agent context.
 Do not provide the implementer's persuasive summary. The verifier follows `factory-verify` and reaches its own verdict.
 
-Fix a rejection on the same branch, rerun Gates, and request verification again. Stop after two consecutive rejections.
-Any commit after acceptance makes the verification stale.
+Fix a substantive implementation rejection on the same branch, rerun Gates, and request verification again. Stop after
+the same implementation problem causes two consecutive rejections. Validator metadata incompatibility, unavailable
+optional platform capabilities, and other workflow-recovery diagnostics do not consume this limit. Any commit after
+acceptance makes the verification stale.
 
 ## Complete the run
 
