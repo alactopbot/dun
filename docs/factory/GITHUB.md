@@ -9,13 +9,16 @@ GitHub 承载实时状态、Draft/Ready 方案决定、并发对象和最终证�
 满意时由人类合并。
 
 外部 Agent 运行 `node .factory/scripts/validate-pr-state.mjs --pr <编号>`，校验 PR 开放且唯一、可信
-handoff、Ready 操作者写权限、批准提交绑定、Spec 漂移、显式 Pattern 配置与路径、独立验证的当前 SHA、
+handoff、Ready 操作者写权限、当前 Spec 与授权范围、显式 Pattern 配置与路径、独立验证的当前 SHA、
 实际 Gate 结果和标签一致性。校验器复用已认证的 `gh`，也接受 `--repo owner/name` 和 `GH_TOKEN`。
 
-可信 Ready 后，Agent 把 Issue 转入实现状态；PR 的 Draft/Ready 直接表示方案审核状态。验证者发布的新
+可信 Ready 后，Agent 把 Issue 转入实现状态；PR 的 Draft/Ready 直接表示方案审核状态。Ready 事件只证明
+可信 owner 允许继续，不要求 GitHub 提供事件 `commit_id` 或附带 SHA；恢复后的 PR 可由可信 owner 再次
+执行 Draft → Ready 明确授权。验证者发布的新
 verdict 必须先移除旧 `factory:verified`，在包含当前 SHA、`gate_level` 和 `gate_status: GREEN` 的接受评论
 存在后再添加该标签并运行状态校验。普通需求至少运行 CHARTER 默认等级，纯文档可运行 fast，Factory 治理改动强制
-deep；Pattern 必须运行其配置的精确等级。项目已有 CI 可以继续作为项目自己的合并要求。
+deep；Pattern 必须运行其配置的精确等级。项目已有 CI 可以继续作为项目自己的合并要求；没有配置
+GitHub Checks 本身不是 Factory 错误。
 
 标签不是并发锁。首次仓库写操作运行 `claim.sh`，用 Issue 编号无强推地创建
 `issue/<issue-number>`；两个运行
