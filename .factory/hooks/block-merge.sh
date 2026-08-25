@@ -118,7 +118,11 @@ inspect_tokens() {
     for ((merge_index = subcommand_index + 1; merge_index < ${#words[@]}; merge_index++)); do
       case "${words[$merge_index]}" in --abort|--quit|--continue) return ;; esac
     done
-    current_branch="$(git "${git_options[@]}" branch --show-current 2>/dev/null || true)"
+    if [ "${#git_options[@]}" -gt 0 ]; then
+      current_branch="$(git "${git_options[@]}" branch --show-current 2>/dev/null || true)"
+    else
+      current_branch="$(git branch --show-current 2>/dev/null || true)"
+    fi
     block "direct git merge${current_branch:+ on $current_branch}"
   fi
 
@@ -133,7 +137,11 @@ inspect_tokens() {
 
   segment="${words[*]:$subcommand_index}"
   if printf '%s' "$segment" | grep -qE "$PROTECTED_DEST"; then block "push to a protected branch"; fi
-  current_branch="$(git "${git_options[@]}" branch --show-current 2>/dev/null || true)"
+  if [ "${#git_options[@]}" -gt 0 ]; then
+    current_branch="$(git "${git_options[@]}" branch --show-current 2>/dev/null || true)"
+  else
+    current_branch="$(git branch --show-current 2>/dev/null || true)"
+  fi
   if printf '%s' "$segment" | grep -qE '^push([[:space:]]+[^[:space:]]+)?[[:space:]]*$' && \
      printf '%s' "$current_branch" | grep -qE "$PROTECTED_BRANCH"; then
     block "push from a protected branch"
