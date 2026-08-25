@@ -10,12 +10,13 @@ async function request(pathname) {
   }, { waitUntil() {}, passThroughOnException() {} });
 }
 
-test("入口和公共参数化路由服务端渲染两只动物", async () => {
+test("入口和公共参数化路由服务端渲染三只动物", async () => {
   const entrance = await (await request("/")).text();
   assert.match(entrance, /href="\/exhibits\/triceratops"/i);
   assert.match(entrance, /href="\/exhibits\/stegosaurus"/i);
+  assert.match(entrance, /href="\/exhibits\/tyrannosaurus"/i);
 
-  for (const [slug, zh, en] of [["triceratops", "三角龙", "Triceratops"], ["stegosaurus", "剑龙", "Stegosaurus"]]) {
+  for (const [slug, zh, en] of [["triceratops", "三角龙", "Triceratops"], ["stegosaurus", "剑龙", "Stegosaurus"], ["tyrannosaurus", "霸王龙", "Tyrannosaurus rex"]]) {
     const response = await request(`/exhibits/${slug}`);
     assert.equal(response.status, 200);
     const html = await response.text();
@@ -35,6 +36,18 @@ test("入口和公共参数化路由服务端渲染两只动物", async () => {
   }
 
   assert.equal((await request("/exhibits/not-an-animal")).status, 404);
+});
+
+test("霸王龙页面保留经批准的双语事实和观察提示", async () => {
+  const html = await (await request("/exhibits/tyrannosaurus")).text();
+  for (const text of [
+    "先看看它的大头、短前肢和长尾巴，再慢慢打开事实卡片。",
+    "Look at its large head, short forelimbs, and long tail before opening the fact cards.",
+    "“Tyrannosaurus rex”的名字意为“暴君蜥蜴之王”",
+    "霸王龙生活在约 6800 万至 6600 万年前的晚白垩世，化石发现于北美。",
+    "它有尖锐、略向后弯曲并带锯齿的牙齿",
+    "离开屏幕后，找一找一边大、一边长，却仍显得平衡的形状。",
+  ]) assert.match(html, new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 });
 
 test("剑龙页面保留经批准的双语事实和观察提示", async () => {
