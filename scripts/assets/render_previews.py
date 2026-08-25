@@ -6,6 +6,7 @@ import os
 import sys
 
 import bpy
+from bpy_extras.object_utils import world_to_camera_view
 from mathutils import Vector
 
 
@@ -53,11 +54,36 @@ def add_environment(animal_id, portrait):
         obj.data.materials.append(material(f"stone-{index}", clay if index % 2 else foliage))
 
 
+def model_points(objects):
+    return [obj.matrix_world @ Vector(corner) for obj in objects if obj.type == "MESH" for corner in obj.bound_box]
+
+
 def model_bounds(objects):
-    points = [obj.matrix_world @ Vector(corner) for obj in objects if obj.type == "MESH" for corner in obj.bound_box]
+    points = model_points(objects)
     minimum = Vector((min(p.x for p in points), min(p.y for p in points), min(p.z for p in points)))
     maximum = Vector((max(p.x for p in points), max(p.y for p in points), max(p.z for p in points)))
     return minimum, maximum
+
+
+def enforce_camera_margin(camera, objects, target, margin=0.08):
+    """Move the camera back until every model bound is safely inside frame."""
+    scene = bpy.context.scene
+    points = model_points(objects)
+    for attempt in range(20):
+        bpy.context.view_layer.update()
+        projected = [world_to_camera_view(scene, camera, point) for point in points]
+        bounds = (
+            min(point.x for point in projected),
+            max(point.x for point in projected),
+            min(point.y for point in projected),
+            max(point.y for point in projected),
+        )
+        if bounds[0] >= margin and bounds[1] <= 1 - margin and bounds[2] >= margin and bounds[3] <= 1 - margin:
+            print(f"DUN_FRAMING=attempts:{attempt} bounds:{tuple(round(value, 4) for value in bounds)} margin:{margin}")
+            return
+        camera.location = target + (camera.location - target) * 1.12
+        look_at(camera, target)
+    raise SystemExit(f"model cannot be framed with margin {margin}: {bounds}")
 
 
 def setup_camera(objects, width, height, presentation):
@@ -76,8 +102,10 @@ def setup_camera(objects, width, height, presentation):
     framing_height = max(size.z * 1.65, size.x / aspect * horizontal_padding, 1.0)
     distance = (framing_height / 2) / math.tan(math.radians(presentation["cameraFov"]) / 2)
     direction = Vector(presentation["cameraDirection"]).normalized()
+    target = center + Vector((0, 0, size.z * 0.03))
     camera.location = center + direction * distance * presentation.get("cameraDistanceFactor", 1.75)
-    look_at(camera, center + Vector((0, 0, size.z * 0.03)))
+    look_at(camera, target)
+    enforce_camera_margin(camera, objects, target)
     print(f"DUN_CAMERA=size:{tuple(round(v, 3) for v in size)} center:{tuple(round(v, 3) for v in center)} location:{tuple(round(v, 3) for v in camera.location)}")
     return camera
 
@@ -119,6 +147,9 @@ def build_scene(model_path, animal_id, portrait, presentation):
     model_objects = list(bpy.context.scene.objects)
     add_environment(animal_id, portrait)
     width, height = ((720, 1280) if portrait else (1280, 720))
+    bpy.context.scene.render.resolution_x = width
+    bpy.context.scene.render.resolution_y = height
+    bpy.context.scene.render.resolution_percentage = 100
     camera = setup_camera(model_objects, width, height, presentation)
     add_lights(camera)
     return model_objects, width, height

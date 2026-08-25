@@ -40,3 +40,13 @@ test("公共查看器只创建一个画布且包含降级与生命周期契约",
   assert.match(source, /prefers-reduced-motion/);
   assert.doesNotMatch(source, /document\.(?:body|documentElement)\.style\.overflow/);
 });
+
+test("预览渲染按最终画幅 fail-closed 保留完整模型轮廓", async () => {
+  const source = await readFile(new URL("../scripts/assets/render_previews.py", import.meta.url), "utf8");
+  assert.match(source, /world_to_camera_view/);
+  assert.match(source, /def enforce_camera_margin/);
+  assert.match(source, /margin=0\.08/);
+  assert.match(source, /model cannot be framed with margin/);
+  assert.match(source, /scene\.render\.resolution_x = width/);
+  assert.match(source, /scene\.render\.resolution_y = height/);
+});

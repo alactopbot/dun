@@ -56,10 +56,14 @@ push 成功；`EXISTS` 或 `LOST` 表示另一个运行已拥有该需求。此�
 成功认领并完成前置检查后，通过状态脚本把 Issue 设为 `factory:in-progress`。普通需求立即在该分支创建 Draft Spec PR；Pattern 需求
 直接实现并创建普通 PR。任何时候已有分支或 PR 都必须恢复，不能新建第二套流程对象。
 
-默认分支在需求执行期间前进时，Agent 可以在 `issue/*` 等非受保护分支把 `origin/main`、`origin/master`
-或项目实际默认分支合入当前需求分支，解决冲突后重跑规定 Gate 和独立验证。`merge --abort`、`merge --quit`
-等恢复操作始终允许。Agent 不得在受保护分支发起本地 merge，也不得通过 GitHub PR merge 或 merge API
-完成产品合并。
+默认分支在需求执行期间前进时，Agent 只能运行
+`./.factory/scripts/sync-default-branch.sh <issue-number>` 把它同步进当前需求分支。脚本从 GitHub 动态读取
+实际默认分支，验证当前分支严格等于 `issue/<issue-number>`、工作区安全且 `origin` 可用，fetch 后只合并
+`origin/<default-branch>`。`--check` 只报告 `UP_TO_DATE` 或 `BEHIND`；执行模式稳定输出 `SYNCED`、
+`CONFLICT`、`RECOVERABLE` 或 `MISCONFIGURED` 及原因，供 Monitor 路由。禁止直接 `git merge` 其他 Issue/
+feature 分支，也禁止把 Issue 分支合入保护分支。`merge --abort`、`merge --quit`、`merge --continue` 是允许的
+恢复操作。普通代码冲突由 Agent 解决并重跑规定 Gate；只有冲突造成已批准范围、产品行为或历史决策不明确
+时才进入 `factory:needs-info`。GitHub PR merge 和 merge API 始终由 hook 阻止，最终产品合并仍由人类完成。
 
 ## 状态与 handoff
 
@@ -101,15 +105,20 @@ gate_level: <fast | full | deep>
 gate_status: GREEN
 ```
 
-发布新 verdict 前先移除旧 `factory:verified`；接受评论存在后再重新添加该标签，并由外部 Agent 运行
+发布新 verdict 前先移除旧 `factory:verified` 和 `factory:rejected`；每个接受或拒绝 verdict 都必须绑定
+被验证的完整 SHA。接受评论存在后再重新添加 `factory:verified`，拒绝则添加 `factory:rejected`，并由外部 Agent 运行
 `node .factory/scripts/validate-pr-state.mjs --pr <编号>`。真实实现问题导致的验证拒绝就在同一分支修正；
 同一实现问题连续两次拒绝后停止。validator 元数据兼容、可选平台能力缺失等恢复性问题不消耗拒绝次数。
-当前 SHA 的独立验证、实际 Gate 结果和状态校验都绿色后，通过状态脚本将 Issue 设为
-`factory:awaiting-review`。项目
+当当前 head 与最新可信拒绝 SHA 不同时，旧拒绝和标签自动视为 stale，校验器输出
+`route=REVERIFY_REQUIRED`；Monitor 清理旧 verdict 标签并给当前 head 派发新的独立 Verifier，不要求用户
+重复 Ready。只有同一当前 head 的拒绝才输出 `route=IMPLEMENTATION_REPAIR`。
+当前 SHA 的独立验证、实际 Gate 结果和状态校验都绿色后，将 Issue 设为 `factory:awaiting-review`。项目
 已有 CI 仍须满足自身合并规则。最终合并代表产品验收，Agent 不合并或发布。
 
 ## 停止条件
 
 一次澄清后仍有改变结果的歧义；认领失败且没有可恢复 PR；普通 PR 仍是 Draft；产品结果或授权范围变化；
 Pattern 不完整匹配或越界；需要未批准依赖、既有测试语义或承重路径；同一需求连续两次 Gate 失败或
-同一实现问题连续两次验证拒绝；等待人工决定超过章程阈值。停止时在 GitHub 留下可恢复证据。
+同一当前 head 的实现问题连续两次验证拒绝且无法在已批准 Spec 内修复；等待人工决定超过章程阈值。
+默认分支漂移、普通合并冲突、旧 SHA verdict、hook/validator 恢复性故障不得直接进入 `needs-info`。停止时
+在 GitHub 留下可恢复证据。

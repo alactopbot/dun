@@ -17,7 +17,7 @@ function runHook(cwd, command) {
   });
 }
 
-test("Factory hook distinguishes feature sync from product merge", async (t) => {
+test("Factory hook only permits default-branch sync through the controlled script", async (t) => {
   const fixture = mkdtempSync(join(tmpdir(), "dun-factory-hook-"));
   t.after(() => rmSync(fixture, { recursive: true, force: true }));
   assert.equal(spawnSync("git", ["init", "--quiet", "--initial-branch=main"], { cwd: fixture }).status, 0);
@@ -30,11 +30,15 @@ test("Factory hook distinguishes feature sync from product merge", async (t) => 
   chmodSync(hook, 0o755);
 
   const cases = [
-    ["issue/29", "git merge origin/main", 0],
-    ["issue/29", "git merge origin/master", 0],
+    ["issue/29", "./.factory/scripts/sync-default-branch.sh 29", 0],
+    ["issue/29", "./.factory/scripts/sync-default-branch.sh --check 29", 0],
+    ["issue/29", "git merge origin/main", 2],
+    ["issue/29", "git merge origin/master", 2],
     ["issue/29", "git merge unrelated-feature", 2],
     ["main", "git merge issue/29", 2],
     ["main", "git merge --abort", 0],
+    ["main", "git merge --quit", 0],
+    ["main", "git merge --continue", 0],
     ["issue/29", "gh pr merge 30", 2],
     ["issue/29", "bash -lc 'gh pr merge 30'", 2],
     ["issue/29", "gh api repos/example/dun/pulls/30/merge --method PUT", 2],

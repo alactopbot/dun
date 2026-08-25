@@ -15,8 +15,9 @@ handoff、Ready 操作者写权限、当前 Spec 与授权范围、显式 Patter
 可信 Ready 后，Agent 把 Issue 转入实现状态；PR 的 Draft/Ready 直接表示方案审核状态。Ready 事件只证明
 可信 owner 允许继续，不要求 GitHub 提供事件 `commit_id` 或附带 SHA；恢复后的 PR 可由可信 owner 再次
 执行 Draft → Ready 明确授权。验证者发布的新
-verdict 必须先移除旧 `factory:verified`，在包含当前 SHA、`gate_level` 和 `gate_status: GREEN` 的接受评论
-存在后再添加该标签并运行状态校验。普通需求至少运行 CHARTER 默认等级，纯文档可运行 fast，Factory 治理改动强制
+verdict 必须先移除旧 verdict 标签，在包含当前 SHA、`decision`、`gate_level` 和实际 `gate_status` 的可信评论
+存在后再添加对应标签并运行状态校验。旧 verdict SHA 与当前 head 不同时，校验器输出
+`route=REVERIFY_REQUIRED`，Monitor 自动派发当前 head 的独立验证；既有 Ready 仍有效。普通需求至少运行 CHARTER 默认等级，纯文档可运行 fast，Factory 治理改动强制
 deep；Pattern 必须运行其配置的精确等级。项目已有 CI 可以继续作为项目自己的合并要求；没有配置
 GitHub Checks 本身不是 Factory 错误。
 
@@ -35,8 +36,13 @@ GitHub Checks 本身不是 Factory 错误。
 默认分支必须要求 PR、禁止强推和 Agent 绕过。Hooks 只是纵深防御，不能代替 GitHub ruleset。使用附带
 的 Codex hook 适配时，首次安装或 hook 变化后运行
 `/hooks` 审阅并信任
-项目 hook。Hook 按实际 shell 命令和当前分支判断：允许默认分支合入非受保护需求分支以及 merge
-abort/quit，阻止受保护分支上的本地 merge、GitHub merge API、受保护分支 push 和所有 force push；Issue、
-PR 或评论正文仅提到这些命令不会触发阻止。实现分支使用确定性名称并禁止强推；已有 PR 时必须恢复而非新建。为每个启用的 Pattern
+项目 hook。Hook 按实际 shell 命令判断：默认分支同步只允许通过
+`.factory/scripts/sync-default-branch.sh`，直接 `git merge` 一律阻止，但允许 merge abort/quit/continue 恢复；
+GitHub merge API、受保护分支 push 和所有 force push 仍被阻止。Issue、PR 或评论正文仅提到这些命令不会
+触发阻止。实现分支使用确定性名称并禁止强推；已有 PR 时必须恢复而非新建。为每个启用的 Pattern
 另建与 `activation.issueLabel` 完全相同的标签；Pattern 配置通过普通人工 PR 进入默认分支后，后续
 Issue 才能使用该授权。
+
+`install.sh` 为保护目标仓库已有治理文件不会覆盖同名文件。升级已安装的 hook 时，应在目标仓库使用独立、
+可审核的治理 PR 对照上游版本同步 `.factory/hooks/block-merge.sh` 和相关契约；合入后重新运行 `/hooks`
+审阅并信任，不能把升级混入产品需求 PR。

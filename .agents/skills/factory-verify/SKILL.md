@@ -17,6 +17,8 @@ base, full diff, Checks, and the applicable authority:
 - Pattern path: the enabled Pattern selected by the Issue's unique activation label.
 
 Confirm the head SHA before running checks.
+If the latest trusted verdict names a different SHA, treat it as historical evidence only. It cannot accept or reject the
+current head, does not revoke the existing trusted Ready authorization, and requires a complete fresh verification.
 
 ## Verification procedure
 
@@ -36,8 +38,20 @@ Confirm the head SHA before running checks.
 ## Verdict
 
 List blocking findings with reproduction evidence before the summary. Before publishing a new verdict, remove any existing
-`factory:verified` label so stale acceptance cannot survive a new head or verdict. On rejection, add `factory:rejected`.
-On acceptance, first publish exactly one trusted comment bound to the current full SHA and the Gate result actually run:
+`factory:verified` label and any existing `factory:rejected` label so a prior SHA cannot remain the displayed current verdict. Every verdict,
+including rejection, must publish exactly one trusted comment bound to the current full SHA. A rejection uses
+`decision: rejected`, records the Gate level and actual status, and then adds `factory:rejected`:
+
+```text
+<!-- factory-verification -->
+requirement: REQ-<three-digit Issue number>
+decision: rejected
+verified_sha: <current full commit SHA>
+gate_level: <level actually run: fast | full | deep>
+gate_status: <GREEN | RED | MISCONFIGURED>
+```
+
+An acceptance publishes:
 
 ```text
 <!-- factory-verification -->
@@ -52,5 +66,6 @@ Then remove `factory:rejected`, add `factory:verified`, and run
 `node .factory/scripts/validate-pr-state.mjs --pr <pull-request-number>`. A non-green or misconfigured state result
 prevents completion until its evidence is resolved. Only a real authorization, implementation, Gate, scope, or stale-SHA
 risk is an independent rejection. Missing optional platform capabilities or validator metadata incompatibility is a
-recoverable workflow diagnostic: report it without consuming an implementation-rejection attempt. Do not merge, approve
-the product, or convert a Draft plan to Ready.
+recoverable workflow diagnostic: report it without consuming an implementation-rejection attempt. A later commit makes
+this verdict stale and must automatically route to a new independent verifier; never require another Ready transition
+unless the approved product outcome or scope changes. Do not merge, approve the product, or convert a Draft plan to Ready.

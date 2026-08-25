@@ -13,7 +13,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 import test from "node:test";
-import { validatePrState } from "../.factory/scripts/validate-pr-state.mjs";
+import { routePrState, validatePrState } from "../.factory/scripts/validate-pr-state.mjs";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));
 const stateScript = join(root, ".factory/scripts/set-issue-state.sh");
@@ -155,6 +155,7 @@ test("Ready trust, Draft revocation, and current verification SHA remain fail cl
     const context = ordinaryValidatorContext();
     context.pr.headSha = "b".repeat(40);
     assert.match(validatePrState(context).errors.join(","), /verification:stale-sha/);
+    assert.equal(routePrState(context), "REVERIFY_REQUIRED");
   });
 });
 
@@ -163,10 +164,12 @@ test("state script is valid shell and wired into Factory authorities", () => {
     ".factory/scripts/doctor.sh",
     ".factory/scripts/gates.sh",
     ".factory/scripts/set-issue-state.sh",
+    ".factory/scripts/sync-default-branch.sh",
   ]) {
     assert.equal(spawnSync("bash", ["-n", join(root, script)]).status, 0, `${script} must parse`);
   }
   assert.match(read(".factory/scripts/doctor.sh"), /set-issue-state\.sh/);
+  assert.match(read(".factory/scripts/doctor.sh"), /sync-default-branch\.sh/);
   assert.match(read("docs/factory/CONTRACT.md"), /set-issue-state\.sh/);
 
   for (const skill of ["factory-triage", "factory-spec", "factory-implement", "factory-monitor"]) {
@@ -191,6 +194,7 @@ test("doctor fails closed when the required state script is absent", (t) => {
     ".factory/scripts/claim.sh",
     ".factory/scripts/gates.sh",
     ".factory/scripts/prove-test.sh",
+    ".factory/scripts/sync-default-branch.sh",
     ".factory/scripts/validate-pr-state.mjs",
     ".factory/hooks/block-merge.sh",
     ".codex/hooks.json",
@@ -238,6 +242,18 @@ test("state update preserves ordinary labels and replaces all old states in one 
   assert.match(apiCalls[0], /labels\[\]=factory:in-progress/);
   assert.doesNotMatch(apiCalls[0], /labels\[\]=factory:needs-info/);
   assert.doesNotMatch(apiCalls[0], /labels\[\]=factory:wait-to-implement/);
+});
+
+test("state update works when no ordinary labels are preserved", (t) => {
+  const result = fakeGhRun(t, ["42", "in-progress"], {
+    labels: "factory:needs-info",
+  });
+
+  assert.equal(result.status, 0, result.stderr);
+  const apiCalls = result.calls.filter((call) => call.startsWith("api "));
+  assert.equal(apiCalls.length, 1);
+  assert.match(apiCalls[0], /labels\[\]=factory:in-progress/);
+  assert.doesNotMatch(apiCalls[0], /labels\[\]=factory:needs-info/);
 });
 
 test("setting the sole current state is idempotent and performs no PATCH", (t) => {

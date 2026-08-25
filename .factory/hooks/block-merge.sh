@@ -26,8 +26,8 @@ fi
 block() {
   echo "BLOCKED by factory hook: $1" >&2
   echo "" >&2
-  echo "The merge decision belongs to a human. See docs/factory/CHARTER.md." >&2
-  echo "Open a PR and stop; do not attempt an alternative route to merging." >&2
+  echo "Default-branch synchronization must use ./.factory/scripts/sync-default-branch.sh." >&2
+  echo "Product merge decisions still belong to a human. See docs/factory/CHARTER.md." >&2
   exit 2
 }
 
@@ -42,7 +42,6 @@ inspect_tokens() {
   local git_options=()
   [ "${#words[@]}" -gt 0 ] || return
 
-  # Skip simple environment assignments and common execution prefixes.
   while [ "$index" -lt "${#words[@]}" ] && [[ "${words[$index]}" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; do
     index=$((index + 1))
   done
@@ -50,9 +49,7 @@ inspect_tokens() {
   executable="${words[$index]##*/}"
   while true; do
     case "$executable" in
-      command|builtin|exec)
-        index=$((index + 1))
-        ;;
+      command|builtin|exec) index=$((index + 1)) ;;
       env)
         index=$((index + 1))
         while [ "$index" -lt "${#words[@]}" ] && \
@@ -62,9 +59,7 @@ inspect_tokens() {
         ;;
       sudo)
         index=$((index + 1))
-        while [ "$index" -lt "${#words[@]}" ] && [[ "${words[$index]}" = -* ]]; do
-          index=$((index + 1))
-        done
+        while [ "$index" -lt "${#words[@]}" ] && [[ "${words[$index]}" = -* ]]; do index=$((index + 1)); done
         ;;
       *) break ;;
     esac
@@ -72,8 +67,6 @@ inspect_tokens() {
     executable="${words[$index]##*/}"
   done
 
-  # Preserve detection through the common `bash -lc '<command>'` wrapper while
-  # still treating its quoted payload as shell code rather than ordinary text.
   if [ "$executable" = "bash" ] || [ "$executable" = "sh" ] || [ "$executable" = "zsh" ]; then
     local shell_index
     for ((shell_index = index + 1; shell_index < ${#words[@]}; shell_index++)); do
@@ -87,23 +80,17 @@ inspect_tokens() {
   fi
 
   if [ "$executable" = "gh" ]; then
-    if [ "${words[$((index + 1))]:-}" = "pr" ] && [ "${words[$((index + 2))]:-}" = "merge" ]; then
-      block "gh pr merge"
-    fi
+    if [ "${words[$((index + 1))]:-}" = "pr" ] && [ "${words[$((index + 2))]:-}" = "merge" ]; then block "gh pr merge"; fi
     if [ "${words[$((index + 1))]:-}" = "api" ]; then
       segment="${words[*]:$((index + 2))}"
-      if printf '%s' "$segment" | grep -qE 'mergePullRequest|/pulls/[^[:space:]]+/merge([?[:space:]]|$)'; then
-        block "GitHub merge API"
-      fi
+      if printf '%s' "$segment" | grep -qE 'mergePullRequest|/pulls/[^[:space:]]+/merge([?[:space:]]|$)'; then block "GitHub merge API"; fi
     fi
     return
   fi
 
   if [ "$executable" = "curl" ]; then
     segment="${words[*]:$((index + 1))}"
-    if printf '%s' "$segment" | grep -qE '/pulls/[^[:space:]]+/merge([?[:space:]]|$)'; then
-      block "GitHub merge API"
-    fi
+    if printf '%s' "$segment" | grep -qE '/pulls/[^[:space:]]+/merge([?[:space:]]|$)'; then block "GitHub merge API"; fi
     return
   fi
 
@@ -127,54 +114,26 @@ inspect_tokens() {
   subcommand="${words[$subcommand_index]}"
 
   if [ "$subcommand" = "merge" ]; then
-    local merge_index merge_source_seen=0
+    local merge_index
     for ((merge_index = subcommand_index + 1; merge_index < ${#words[@]}; merge_index++)); do
-      case "${words[$merge_index]}" in
-        --abort|--quit|--continue) return ;;
-        -m|--message|-s|--strategy|-X|--strategy-option)
-          merge_index=$((merge_index + 1))
-          ;;
-        --message=*|--strategy=*|--strategy-option=*|--no-*|--ff|--ff-only|--edit|--commit|--log|--log=*|--signoff|--verify-signatures|--gpg-sign|--gpg-sign=*|-*) ;;
-        main|master|origin/main|origin/master|refs/heads/main|refs/heads/master|refs/remotes/origin/main|refs/remotes/origin/master)
-          merge_source_seen=1
-          ;;
-        *) block "merge source is not the default branch: ${words[$merge_index]}" ;;
-      esac
+      case "${words[$merge_index]}" in --abort|--quit|--continue) return ;; esac
     done
-    if [ "${#git_options[@]}" -gt 0 ]; then
-      current_branch="$(git "${git_options[@]}" branch --show-current 2>/dev/null || true)"
-    else
-      current_branch="$(git branch --show-current 2>/dev/null || true)"
-    fi
-    if printf '%s' "$current_branch" | grep -qE "$PROTECTED_BRANCH"; then
-      block "git merge on protected branch $current_branch"
-    fi
-    [ "$merge_source_seen" -eq 1 ] || block "merge without an explicit default-branch source"
-    return
+    current_branch="$(git "${git_options[@]}" branch --show-current 2>/dev/null || true)"
+    block "direct git merge${current_branch:+ on $current_branch}"
   fi
 
   [ "$subcommand" = "push" ] || return
   local push_index
   for ((push_index = subcommand_index + 1; push_index < ${#words[@]}; push_index++)); do
     case "${words[$push_index]}" in
-      --force|--force=*|--force-with-lease|--force-with-lease=*|--force-if-includes|-f)
-        block "force push"
-        ;;
+      --force|--force=*|--force-with-lease|--force-with-lease=*|--force-if-includes|-f) block "force push" ;;
       +?*) block "force push (+refspec)" ;;
     esac
   done
 
-  # The destination of a refspec matters. This covers optional source halves
-  # and refs/heads prefixes, including deletion pushes to protected branches.
   segment="${words[*]:$subcommand_index}"
-  if printf '%s' "$segment" | grep -qE "$PROTECTED_DEST"; then
-    block "push to a protected branch"
-  fi
-  if [ "${#git_options[@]}" -gt 0 ]; then
-    current_branch="$(git "${git_options[@]}" branch --show-current 2>/dev/null || true)"
-  else
-    current_branch="$(git branch --show-current 2>/dev/null || true)"
-  fi
+  if printf '%s' "$segment" | grep -qE "$PROTECTED_DEST"; then block "push to a protected branch"; fi
+  current_branch="$(git "${git_options[@]}" branch --show-current 2>/dev/null || true)"
   if printf '%s' "$segment" | grep -qE '^push([[:space:]]+[^[:space:]]+)?[[:space:]]*$' && \
      printf '%s' "$current_branch" | grep -qE "$PROTECTED_BRANCH"; then
     block "push from a protected branch"
@@ -187,9 +146,7 @@ scan_command() {
 
   for ((index = 0; index < ${#source}; index++)); do
     char="${source:index:1}"
-    if [ "$escaped" -eq 1 ]; then
-      word="${word}${char}"; in_word=1; escaped=0; continue
-    fi
+    if [ "$escaped" -eq 1 ]; then word="${word}${char}"; in_word=1; escaped=0; continue; fi
     if [ "$quote" = "single" ]; then
       if [ "$char" = "'" ]; then quote=""; else word="${word}${char}"; fi
       in_word=1; continue
@@ -204,9 +161,7 @@ scan_command() {
       "\\") escaped=1; in_word=1 ;;
       "'") quote="single"; in_word=1 ;;
       '"') quote="double"; in_word=1 ;;
-      ' '|$'\t')
-        if [ "$in_word" -eq 1 ]; then words+=("$word"); word=""; in_word=0; fi
-        ;;
+      ' '|$'\t') if [ "$in_word" -eq 1 ]; then words+=("$word"); word=""; in_word=0; fi ;;
       ';'|'|'|'&'|'('|')'|$'\n')
         if [ "$in_word" -eq 1 ]; then words+=("$word"); word=""; in_word=0; fi
         inspect_tokens "${words[@]}"

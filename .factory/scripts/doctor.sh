@@ -23,6 +23,7 @@ required_files=(
   .factory/scripts/gates.sh
   .factory/scripts/prove-test.sh
   .factory/scripts/set-issue-state.sh
+  .factory/scripts/sync-default-branch.sh
   .factory/scripts/validate-pr-state.mjs
   .factory/hooks/block-merge.sh
   .codex/hooks.json
