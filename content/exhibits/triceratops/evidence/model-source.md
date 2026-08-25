@@ -1,12 +1,12 @@
 # Triceratops model source
 
-- Creator: Quaternius (`@Quaternius`)
-- Pack: Animated Dinosaur Pack
-- Official page: https://quaternius.com/packs/animateddinosaurs.html
-- Official Drive folder: https://drive.google.com/drive/folders/1u5Fhu3ziuRlGonW6bUI7uClqBGoSNeF6
-- File: `Triceratops.blend`, Drive ID `1pxvaW89pkg8tiXoqnCKiuw-BJzhZzBxK`
-- Retrieved: 2026-08-25; 1,049,080 bytes
-- Original SHA-256: `6eca99470d0f452bc8930ba5db40c642c6b17e9dd1567862b4c17fb052959bf9`
-- License file SHA-256: `83d8959f9fc56353ed571fbe2dc52e4bcd64508e2399501cd45ac2ce3df0bf8c`
+- Title: `Triceratops`
+- Creator: JZG (`JZG` on Sketchfab)
+- Official page: https://sketchfab.com/3d-models/triceratops-27fdbc94f05b4e0c844db6fd679b2265
+- Sketchfab UID: `27fdbc94f05b4e0c844db6fd679b2265`
+- Retrieved through the official page Download control: 2026-08-25
+- Downloaded file: `triceratops.glb`; 5,175,848 bytes
+- Original SHA-256: `94ce54a32b2e3fe5aa1d296db61f843c0b8a266430a70e00ce94537356fda0ef`
+- Runtime SHA-256: `659f6d9218da0f170d9f95e0a635fff456ee106808fc11e6e514ac9b85150a6a`
 
-The source was opened with Blender 5.2 LTS using `--disable-autoexec`. It contains one armature, one animal mesh, flat-color materials, an Idle clip, and five action clips. Stale unpacked image paths were not used by the visible mesh and were removed before export.
+The official downloadable GLB embeds the same title, creator profile, fixed Sketchfab URL, and `CC-BY-4.0` license in `asset.extras`. It is self-contained and contains 7,164 triangles, 2 draw calls, 5 embedded textures, no animation, camera, light, external URI, script, logo, text, or watermark node. The model is an artistic reconstruction, not a scientific source.

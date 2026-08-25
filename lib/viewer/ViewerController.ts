@@ -111,7 +111,7 @@ export class ViewerController {
     const distance = (vertical / 2) / Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2));
     const [blenderX, blenderY, blenderZ] = this.options.presentation.cameraDirection;
     const direction = new THREE.Vector3(blenderX, blenderZ, -blenderY).normalize();
-    this.camera.position.copy(this.controls.target).addScaledVector(direction, distance * 1.75);
+    this.camera.position.copy(this.controls.target).addScaledVector(direction, distance * (this.options.presentation.cameraDistanceFactor ?? 1.75));
     this.initialCamera.copy(this.camera.position);
     this.controls.minDistance = distance * this.options.presentation.minDistanceFactor;
     this.controls.maxDistance = distance * this.options.presentation.maxDistanceFactor;

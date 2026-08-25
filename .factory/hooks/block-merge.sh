@@ -131,7 +131,11 @@ inspect_tokens() {
     for ((merge_index = subcommand_index + 1; merge_index < ${#words[@]}; merge_index++)); do
       case "${words[$merge_index]}" in --abort|--quit) return ;; esac
     done
-    current_branch="$(git "${git_options[@]}" branch --show-current 2>/dev/null || true)"
+    if [ "${#git_options[@]}" -gt 0 ]; then
+      current_branch="$(git "${git_options[@]}" branch --show-current 2>/dev/null || true)"
+    else
+      current_branch="$(git branch --show-current 2>/dev/null || true)"
+    fi
     if printf '%s' "$current_branch" | grep -qE "$PROTECTED_BRANCH"; then
       block "git merge on protected branch $current_branch"
     fi

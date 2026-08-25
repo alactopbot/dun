@@ -12,6 +12,7 @@ from mathutils import Vector
 PALETTES = {
     "triceratops": ((0.79, 0.81, 0.72, 1), (0.31, 0.40, 0.32, 1), (0.71, 0.53, 0.36, 1)),
     "stegosaurus": ((0.84, 0.78, 0.66, 1), (0.35, 0.43, 0.31, 1), (0.61, 0.40, 0.29, 1)),
+    "tyrannosaurus": ((0.75, 0.78, 0.70, 1), (0.29, 0.37, 0.30, 1), (0.64, 0.46, 0.32, 1)),
 }
 
 
@@ -75,7 +76,7 @@ def setup_camera(objects, width, height, presentation):
     framing_height = max(size.z * 1.65, size.x / aspect * horizontal_padding, 1.0)
     distance = (framing_height / 2) / math.tan(math.radians(presentation["cameraFov"]) / 2)
     direction = Vector(presentation["cameraDirection"]).normalized()
-    camera.location = center + direction * distance * 1.75
+    camera.location = center + direction * distance * presentation.get("cameraDistanceFactor", 1.75)
     look_at(camera, center + Vector((0, 0, size.z * 0.03)))
     print(f"DUN_CAMERA=size:{tuple(round(v, 3) for v in size)} center:{tuple(round(v, 3) for v in center)} location:{tuple(round(v, 3) for v in camera.location)}")
     return camera

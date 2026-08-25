@@ -10,6 +10,25 @@ test("正式动物素材通过 fail-closed provenance、哈希和预算校验", 
   assert.equal(report.assets, 18);
 });
 
+test("三只运行时模型固定为批准的 Sketchfab CC BY 4.0 来源", async () => {
+  const expected = {
+    triceratops: ["27fdbc94f05b4e0c844db6fd679b2265", "JZG"],
+    stegosaurus: ["9776fff241a54639b184d25a2777f63f", "Billy Jackman"],
+    tyrannosaurus: ["6465a297fa784598adc49f6e0042d449", "Marcel Schanz"],
+  };
+  for (const [animal, [uid, creator]] of Object.entries(expected)) {
+    const manifest = JSON.parse(await readFile(new URL(`../content/exhibits/${animal}/asset-manifest.json`, import.meta.url), "utf8"));
+    const model = manifest.assets.find(({ type }) => type === "model");
+    assert.equal(model.sketchfabUid, uid);
+    assert.equal(model.creator, creator);
+    assert.equal(model.license, "CC-BY-4.0");
+    assert.equal(model.licenseUrl, "https://creativecommons.org/licenses/by/4.0/");
+    assert.equal(model.redistributionApproved, true);
+    assert.match(model.source, new RegExp(uid));
+    assert.doesNotMatch(JSON.stringify(model), /Quaternius/i);
+  }
+});
+
 test("公共查看器只创建一个画布且包含降级与生命周期契约", async () => {
   const source = await readFile(new URL("../lib/viewer/ViewerController.ts", import.meta.url), "utf8");
   assert.match(source, /WebGLRenderer/);

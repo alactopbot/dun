@@ -1,8 +1,7 @@
-LowPoly Models by @Quaternius
+Triceratops by JZG on Sketchfab
+https://sketchfab.com/3d-models/triceratops-27fdbc94f05b4e0c844db6fd679b2265
 
-License:
-CC0 1.0 Universal (CC0 1.0)
-Public Domain Dedication
-https://creativecommons.org/publicdomain/zero/1.0/
+Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0):
+https://creativecommons.org/licenses/by/4.0/
 
-Copied from the official pack License.txt retrieved 2026-08-25.
+License and attribution recorded from the official model page and the official downloadable GLB asset.extras on 2026-08-25. DUN translated the model to center and ground it without changing geometry or materials, then generated new hash-bound museum preview images.
