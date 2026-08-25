@@ -127,9 +127,19 @@ inspect_tokens() {
   subcommand="${words[$subcommand_index]}"
 
   if [ "$subcommand" = "merge" ]; then
-    local merge_index
+    local merge_index merge_source_seen=0
     for ((merge_index = subcommand_index + 1; merge_index < ${#words[@]}; merge_index++)); do
-      case "${words[$merge_index]}" in --abort|--quit) return ;; esac
+      case "${words[$merge_index]}" in
+        --abort|--quit|--continue) return ;;
+        -m|--message|-s|--strategy|-X|--strategy-option)
+          merge_index=$((merge_index + 1))
+          ;;
+        --message=*|--strategy=*|--strategy-option=*|--no-*|--ff|--ff-only|--edit|--commit|--log|--log=*|--signoff|--verify-signatures|--gpg-sign|--gpg-sign=*|-*) ;;
+        main|master|origin/main|origin/master|refs/heads/main|refs/heads/master|refs/remotes/origin/main|refs/remotes/origin/master)
+          merge_source_seen=1
+          ;;
+        *) block "merge source is not the default branch: ${words[$merge_index]}" ;;
+      esac
     done
     if [ "${#git_options[@]}" -gt 0 ]; then
       current_branch="$(git "${git_options[@]}" branch --show-current 2>/dev/null || true)"
@@ -139,6 +149,7 @@ inspect_tokens() {
     if printf '%s' "$current_branch" | grep -qE "$PROTECTED_BRANCH"; then
       block "git merge on protected branch $current_branch"
     fi
+    [ "$merge_source_seen" -eq 1 ] || block "merge without an explicit default-branch source"
     return
   fi
 
@@ -159,7 +170,11 @@ inspect_tokens() {
   if printf '%s' "$segment" | grep -qE "$PROTECTED_DEST"; then
     block "push to a protected branch"
   fi
-  current_branch="$(git "${git_options[@]}" branch --show-current 2>/dev/null || true)"
+  if [ "${#git_options[@]}" -gt 0 ]; then
+    current_branch="$(git "${git_options[@]}" branch --show-current 2>/dev/null || true)"
+  else
+    current_branch="$(git branch --show-current 2>/dev/null || true)"
+  fi
   if printf '%s' "$segment" | grep -qE '^push([[:space:]]+[^[:space:]]+)?[[:space:]]*$' && \
      printf '%s' "$current_branch" | grep -qE "$PROTECTED_BRANCH"; then
     block "push from a protected branch"

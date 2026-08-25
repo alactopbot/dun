@@ -32,6 +32,7 @@ test("Factory hook distinguishes feature sync from product merge", async (t) => 
   const cases = [
     ["issue/29", "git merge origin/main", 0],
     ["issue/29", "git merge origin/master", 0],
+    ["issue/29", "git merge unrelated-feature", 2],
     ["main", "git merge issue/29", 2],
     ["main", "git merge --abort", 0],
     ["issue/29", "gh pr merge 30", 2],
@@ -40,6 +41,7 @@ test("Factory hook distinguishes feature sync from product merge", async (t) => 
     ["issue/29", "git push origin HEAD:main", 2],
     ["issue/29", "git push --force-with-lease origin issue/29", 2],
     ["issue/29", "git push origin HEAD:refs/heads/issue/29", 0],
+    ["main", "git push", 2],
     ["issue/29", "gh issue create --body 'mentions git merge origin/main and gh pr merge 30'", 0],
   ];
 
