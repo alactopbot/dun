@@ -18,8 +18,9 @@ Gate：实现阶段 `deep`；本次仅 Spec 的 PR 使用 `fast`
 - 三个展品在桌面 Web 满足静态素材预算和浏览器加载/交互检查；移动端保持响应式，并在低性能、无
   WebGL 或模型失败时仍可阅读完整展品和完成导航；
 - `./.factory/scripts/gates.sh deep` 为 GREEN，当前 PR head 通过独立验证。
-- 当前需求分支包含 main 上已交付的三只动物；Factory hook 允许非受保护需求分支同步默认分支，同时
-  继续阻止受保护分支 merge、产品 PR merge、受保护分支 push 与 force push。
+- 当前需求分支包含 main 上已交付的三只动物；Factory 提供唯一受控脚本把 GitHub 实际默认分支同步到
+  确定性的 Issue 分支，直接 merge、产品 PR merge、受保护分支 push 与 force push 继续被阻止；旧 SHA
+  的验证结论自动视为历史证据并把新 head 路由到独立复验，不再误进人工阻塞。
 
 ## 2. 范围决定
 
@@ -34,7 +35,8 @@ Gate：实现阶段 `deep`；本次仅 Spec 的 PR 使用 `fast`
 - 不增加声音、自动播放、攻击/奔跑动作、评分、竞争、惊吓效果或运行时 AI。
 - 不重写公共 Three.js 展示器、schema 或 catalog；只做承载真实来源数据和新模型所必需的最小修改。
 - 不创建或扩大 Factory Pattern，不修改技术计划或项目许可证。Factory 治理修改仅限解决本需求已经
-  触发的 base→feature 分支同步误拦截，不扩大 Agent 的产品合并或发布权限。
+  触发的默认分支同步、旧 SHA verdict、自恢复路由和 macOS Bash 3.2 状态切换问题，不扩大 Agent 的产品
+  合并、发布、需求授权或 Pattern 权限。
 
 ## 4. 用户可见体验
 
@@ -106,12 +108,22 @@ Gate：实现阶段 `deep`；本次仅 Spec 的 PR 使用 `fast`
 - `app/exhibits/[slug]/page.tsx` 与 `lib/exhibits/**`：让来源面板从 manifest/provenance 读取真实模型标题、作者、来源、许可与修改摘要，移除 Quaternius 硬编码；属于承重路径。
 - `scripts/assets/**`：仅在现有校验无法 fail closed 检查 CC BY 必需字段、固定 UID、署名或派生哈希时扩展。
 - `tests/**`：增加模型来源、许可、UID、credits、哈希、预算、静态模型和回退回归；测试属于承重范围。
-- `.factory/hooks/block-merge.sh`、`docs/factory/{CONTRACT,GITHUB}.md`、`tests/factory-hook.test.mjs`：允许非
-  受保护需求分支同步默认分支，继续 fail closed 阻止产品合并、受保护分支写入与强推；属于承重范围。
+- `.factory/hooks/block-merge.sh` 与 `.factory/scripts/sync-default-branch.sh`：直接 `git merge` 继续被拦截；
+  唯一受控脚本动态读取 GitHub 实际默认分支，校验 clean worktree、`issue/<number>` 与 `origin` 后只把
+  `origin/<default>` 同步到当前 Issue 分支，并输出稳定的 `UP_TO_DATE`、`BEHIND`、`SYNCED`、`CONFLICT`、
+  `RECOVERABLE` 或 `MISCONFIGURED` 路由；属于承重范围。
+- `.factory/scripts/validate-pr-state.mjs`：验证 verdict 绑定精确 SHA；旧 verdict SHA 与当前 head 不同时输出
+  `REVERIFY_REQUIRED`，当前 head 被拒绝才输出 `IMPLEMENTATION_REPAIR`；属于承重范围。
+- `.agents/skills/factory-{implement,monitor,verify}/SKILL.md`：实现前检查默认分支漂移，普通冲突和旧 verdict
+  由 Agent 自恢复，Monitor 清理 stale label 并派发新 head 独立复验，Verifier 不沿用旧 SHA 结论；属于承重范围。
+- `.factory/scripts/doctor.sh`、`.factory/scripts/set-issue-state.sh`：doctor 要求受控同步脚本存在；状态脚本在
+  没有普通标签时兼容 macOS Bash 3.2，仍以单次 PATCH 精确替换 Factory 状态；属于承重范围。
+- `docs/factory/{CONTRACT,GITHUB}.md`、`tests/factory-{hook,governance}.test.mjs`：同步上述边界、状态机和
+  fail-closed 回归；属于承重范围。
 
 不新增依赖，不修改 `package.json`、lockfile、`docs/MUSEUM_TECHNICAL_PLAN.md`、`LICENSE`、`CONTENT-LICENSE.md`、
-除上述 hook 外的 `.factory/**`、`.agents/**`、`.codex/**`、`AGENTS.md` 或发布配置。实现若证明必须越出
-以上范围、改变依赖或既有产品/测试语义，先把同一 PR 转回 Draft 审核。
+除上述明确列出的治理文件外的 `.factory/**`、`.agents/**`、`.codex/**`、`AGENTS.md` 或发布配置。实现若
+证明必须越出以上范围、改变依赖或既有产品/测试语义，先把同一 PR 转回 Draft 审核。
 
 ## 8. 必须保持的不变量
 
@@ -121,13 +133,13 @@ Gate：实现阶段 `deep`；本次仅 Spec 的 PR 使用 `fast`
 - 单页一个 Canvas/Renderer；不锁定全局滚动；键盘、200% 缩放、响应式和减少动态效果保持可用。
 - 第三方模型必须允许修改、商业使用和网页再分发；许可、作者、Sketchfab 来源、修改和哈希完整可追溯。
 - 代码继续使用 AGPL-3.0；DUN 原创背景和派生图像继续使用 CC BY-SA 4.0；三个第三方模型及其修改保留 CC BY 4.0。
-- feature 分支同步不能获得向受保护分支写入、强推、调用 GitHub merge API 或完成产品合并的权限；仅在
-  PR 最终验证前吸收已批准的默认分支历史。
+- 默认分支同步不能获得合并其他 Issue/feature 分支、向受保护分支写入、强推、调用 GitHub merge API
+  或完成产品合并的权限；旧 SHA verdict 不能接受或拒绝新 head，可信 Ready 仅在产品结果或范围未变化时保留。
 
 ## 9. 实现顺序
 
-1. 用回归测试证明旧 hook 会误拦截 feature 分支同步和正文命令文本；修复 hook 后同步当前 main，并保持
-   产品合并、受保护分支与 force push 阻止边界。
+1. 用回归测试证明直接 merge、任意来源合并和正文误判边界；新增受控默认分支同步脚本，保持产品合并、
+   受保护分支与 force push 阻止边界，并让 monitor/validator 对旧 SHA verdict 自动路由复验。
 2. 增加失败测试，证明当前 manifest/credits 仍指向 Quaternius、当前 poster 与旧模型哈希绑定。
 3. 从三个固定 Sketchfab 页面下载归档并保存许可、作者、UID、原始文件和 SHA-256 证据；先做权利与内容审查，任一失败即转回 Draft，不能留下只迁移部分馆藏的结果。
 4. 在隔离 Blender 流水线中规范化、清理和优化三只模型；运行现有 inspect、预算和 Khronos Validator。
@@ -141,8 +153,12 @@ Gate：实现阶段 `deep`；本次仅 Spec 的 PR 使用 `fast`
 
 ### 10.1 自动与资产测试
 
-- hook 测试覆盖：feature 分支允许 `git merge origin/main`，受保护分支 merge 被阻止，abort/quit 可恢复，
-  PR merge/API、受保护分支 push、所有 force push 继续被阻止，Issue/PR/comment 正文提到命令不误判。
+- hook 与治理测试覆盖：受控同步脚本可调用，直接 `git merge origin/main`、其他 feature 来源和受保护分支
+  merge 均被阻止，abort/quit/continue 可恢复；PR merge/API、受保护分支 push、所有 force push 继续被
+  阻止，Issue/PR/comment 正文提到命令不误判。
+- 同步脚本动态读取默认分支并对错误分支、dirty worktree、缺失 origin、fetch 失败和普通冲突给出稳定状态；
+  validator 对旧 SHA 拒绝返回 `REVERIFY_REQUIRED`，对当前 SHA 拒绝返回 `IMPLEMENTATION_REPAIR`。
+- 状态脚本在 Issue 只有 Factory 状态、没有任何普通标签时仍可在 macOS Bash 3.2 下完成单次 PATCH。
 - manifest 对缺失/错误 UID、作者、详情页、CC BY 4.0、署名、原始哈希、运行时哈希和再分发结论 fail closed。
 - 只允许本 Spec 固定的三个 UID；仍引用 Quaternius、未知 Sketchfab UID、NC/ND/Editorial/view-only 或品牌提取来源时失败。
 - GLB 为自包含 glTF 2.0，不含外部资源、相机、灯光、文字/Logo 节点；尺寸、三角形、纹理和 draw call 在预算内。
@@ -166,4 +182,6 @@ Gate：实现阶段 `deep`；本次仅 Spec 的 PR 使用 `fast`
 - 新模型的材质与既有背景可能不协调；先调整 DUN 灯光/presentation，只有必要时才重做背景，且不得改变科学事实。
 - hook 解析器若漏拦截真实合并命令或误拦截普通正文，会削弱治理或再次阻塞恢复；用受保护/非受保护分支、
   shell wrapper、API、push 与正文用例回归，GitHub ruleset 继续作为最终保护边界。
+- 同步脚本或 stale-verdict 分类若错误，可能再次卡住恢复或把旧结论错误套到新 head；以动态默认分支、
+  精确 SHA、稳定 route 和 fail-closed 测试约束，真正的产品合并仍只由人工完成。
 - 回滚以模型、manifest、provenance、presentation、poster、thumbnail 和 credits 为一个原子单元恢复到上一组已验证资产；不得留下混合作者、旧哈希或失配派生图。
