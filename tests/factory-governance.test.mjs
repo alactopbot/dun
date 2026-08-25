@@ -139,7 +139,7 @@ test("doctor fails closed when the required state script is absent", (t) => {
     env: { ...process.env, PATH: `${fakeBin}:${process.env.PATH}` },
   });
   assert.equal(result.status, 1);
-  assert.match(result.stdout, /FAIL  \.factory\/scripts\/set-issue-state\.sh is missing/);
+  assert.match(result.stdout, /FAIL {2}\.factory\/scripts\/set-issue-state\.sh is missing/);
   assert.match(result.stdout, /FACTORY_DOCTOR: failures=1/);
 });
 
