@@ -93,9 +93,7 @@ Pattern 权限。
 实现者先建立旧行为失败、新行为通过的测试或等价证据，再完成整个需求。依赖、既有测试语义、产品
 结论或普通 Spec 范围改变时回到同一 Draft PR；Pattern 越界时停止并转普通 Spec。
 
-运行规定等级 `./.factory/scripts/gates.sh`。Gate 只运行该等级在 `.factory/gates.conf` 中明确要求的检查；
-初始策略三个等级都只要求 build，额外检查必须由人类按真实交付需要逐步加入，不能因项目中碰巧存在命令
-就自动影响 verdict。必需 Gate 缺失、跳过或 `MISCONFIGURED` 都不算绿色。随后
+运行规定等级 `./.factory/scripts/gates.sh`。必需 Gate 缺失、跳过或 `MISCONFIGURED` 都不算绿色。随后
 交给不带实现解释的独立 Agent 上下文使用 `factory-verify` 冷读验证。接受评论必须绑定当前完整 SHA：
 
 ```text

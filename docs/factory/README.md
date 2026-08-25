@@ -4,7 +4,7 @@
 
 | 路径 | 作用 |
 |---|---|
-| [`.factory/patterns/`](../../.factory/patterns/README.md) | Pattern 构建指南与用户显式启用的固定需求授权 |
+| `.factory/patterns/*.json` | 用户显式启用的固定需求授权 |
 | `docs/factory/CHARTER.md` | 人类批准的风险与产品边界 |
 | `docs/factory/CONTRACT.md` | Agent 执行契约 |
 | `docs/requirements/REQ-*/` | 普通需求经过人工 Ready 的统一 Spec |
@@ -26,9 +26,6 @@ verified PR。GitHub 是实时状态。
 独立验证评论记录实际执行的 Gate 等级和绿色结果。普通需求至少使用 CHARTER 默认等级；仅修改 `docs/**` 和
 `README.md` 的需求可使用 fast；Factory 治理改动强制 deep；Pattern 使用其配置的精确等级。评论和标签
 写入后，外部 Agent 运行 `node .factory/scripts/validate-pr-state.mjs --pr <编号>` 确认实时状态一致。
-
-三个等级初始都只运行 build。等级保留为后续策略扩展点；只有人类明确加入 `.factory/gates.conf` 的检查才
-执行和影响 verdict，避免 lint、测试或复杂分析因“能够检测到”就自动拖慢日常迭代。
 
 定时运行时先使用 `factory-monitor`，再根据状态选择 triage、spec 或 implement。每次最多推进一个完整
 需求；首次写仓库前由 `claim.sh` 原子认领确定性分支，没有可执行工作时不创建提交。
