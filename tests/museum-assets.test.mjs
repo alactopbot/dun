@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import { fitProjectedBox, projectedBoxFits } from "../lib/viewer/fitCamera.js";
 
 test("正式动物素材通过 fail-closed provenance、哈希和预算校验", async () => {
   const { validateMuseumAssets } = await import("../scripts/assets/validate.mjs");
@@ -39,6 +42,33 @@ test("公共查看器只创建一个画布且包含降级与生命周期契约",
   assert.match(source, /dispose\(\)/);
   assert.match(source, /prefers-reduced-motion/);
   assert.doesNotMatch(source, /document\.(?:body|documentElement)\.style\.overflow/);
+});
+
+test("公共查看器按最终纵向画布投影完整霸王龙边界", async () => {
+  globalThis.ProgressEvent ??= class ProgressEvent {};
+  globalThis.self ??= globalThis;
+  globalThis.createImageBitmap ??= async () => ({ width: 1, height: 1, close() {} });
+  const bytes = await readFile(new URL("../public/museum/animals/tyrannosaurus/model/model.glb", import.meta.url));
+  const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+  const gltf = await new GLTFLoader().parseAsync(buffer, "");
+  const box = new THREE.Box3().setFromObject(gltf.scene);
+  const size = box.getSize(new THREE.Vector3());
+  const presentation = JSON.parse(await readFile(new URL("../content/exhibits/tyrannosaurus/presentation.json", import.meta.url), "utf8"));
+  const camera = new THREE.PerspectiveCamera(presentation.cameraFov, 360 / 848.34, 0.01, 100);
+  const center = box.getCenter(new THREE.Vector3());
+  const target = new THREE.Vector3(center.x, box.min.y + size.y * presentation.targetHeightRatio, center.z);
+  const [blenderX, blenderY, blenderZ] = presentation.cameraDirection;
+  const direction = new THREE.Vector3(blenderX, blenderZ, -blenderY).normalize();
+  const vertical = Math.max(size.y * 1.65, size.x / camera.aspect * 0.9);
+  const oldDistance = (vertical / 2) / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * (presentation.cameraDistanceFactor ?? 1.75);
+  camera.position.copy(target).addScaledVector(direction, oldDistance);
+  camera.lookAt(target);
+  camera.updateProjectionMatrix();
+  assert.equal(projectedBoxFits(camera, box), false, "旧的单轴距离估算应暴露斜向投影裁切");
+
+  const distance = fitProjectedBox(camera, box, target, direction, oldDistance);
+  assert.ok(distance > oldDistance);
+  assert.equal(projectedBoxFits(camera, box), true);
 });
 
 test("预览渲染按最终画幅 fail-closed 保留完整模型轮廓", async () => {

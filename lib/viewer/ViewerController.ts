@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { Presentation } from "../exhibits/schema";
+import { fitProjectedBox } from "./fitCamera.js";
 
 type ViewerOptions = Readonly<{ modelUrl: string; presentation: Presentation; onReady: () => void; onError: (message: string) => void }>;
 
@@ -105,17 +106,23 @@ export class ViewerController {
     const size = box.getSize(new THREE.Vector3());
     const center = box.getCenter(new THREE.Vector3());
     this.controls.target.set(center.x, box.min.y + size.y * this.options.presentation.targetHeightRatio, center.z);
-    const aspect = Math.max(this.container.clientWidth / Math.max(this.container.clientHeight, 1), 0.4);
+    const aspect = Math.max(this.container.clientWidth, 1) / Math.max(this.container.clientHeight, 1);
+    this.camera.aspect = aspect;
     const horizontalPadding = aspect < 1 ? 0.9 : 1.35;
     const vertical = Math.max(size.y * 1.65, size.x / aspect * horizontalPadding);
     const distance = (vertical / 2) / Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2));
     const [blenderX, blenderY, blenderZ] = this.options.presentation.cameraDirection;
     const direction = new THREE.Vector3(blenderX, blenderZ, -blenderY).normalize();
-    this.camera.position.copy(this.controls.target).addScaledVector(direction, distance * (this.options.presentation.cameraDistanceFactor ?? 1.75));
+    const fittedDistance = fitProjectedBox(
+      this.camera,
+      box,
+      this.controls.target,
+      direction,
+      distance * (this.options.presentation.cameraDistanceFactor ?? 1.75),
+    );
     this.initialCamera.copy(this.camera.position);
-    this.controls.minDistance = distance * this.options.presentation.minDistanceFactor;
-    this.controls.maxDistance = distance * this.options.presentation.maxDistanceFactor;
-    this.camera.near = Math.max(distance / 100, 0.01); this.camera.far = distance * 20; this.camera.updateProjectionMatrix();
+    this.controls.minDistance = fittedDistance * this.options.presentation.minDistanceFactor;
+    this.controls.maxDistance = fittedDistance * this.options.presentation.maxDistanceFactor;
     this.controls.update();
   }
 
