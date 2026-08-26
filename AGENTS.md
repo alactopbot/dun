@@ -27,13 +27,9 @@ npm run dev
 
 ## Issue Agent Factory
 
-Before requirement work, read `docs/factory/CONTRACT.md` and `docs/factory/CHARTER.md`, then use the applicable workflow
-under `.agents/skills/`.
+Before requirement work, read `docs/factory/CONTRACT.md` and use `factory-run`. One complete requirement uses one Issue,
+the deterministic `issue/<number>` branch, one Spec, and one pull request.
 
-GitHub is the live state; chat history is not authorization. One complete requirement uses one Issue, one deterministic
-branch, and one pull request. Ordinary work requires a reviewed Spec. Only a Pattern that users have enabled and selected
-with the Issue's unique activation label may skip per-Issue plan review.
-
-Do not create or expand Pattern authority, split internal work into extra process objects, merge, or publish. Run
-`./.factory/scripts/gates.sh <fast|full|deep>` for the deterministic verdict; a required skip or misconfiguration is not
-green.
+Do not implement while the pull request is Draft. A trusted human selecting **Ready for review** authorizes
+implementation. Verify the current head with `./.factory/scripts/gates.sh`; later commits require verification again.
+Agents do not merge pull requests.
