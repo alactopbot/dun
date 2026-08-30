@@ -9,11 +9,11 @@ test("正式动物素材通过 fail-closed provenance、哈希和预算校验", 
   const { validateMuseumAssets } = await import("../scripts/assets/validate.mjs");
   const report = await validateMuseumAssets();
   assert.deepEqual(report.errors, []);
-  assert.equal(report.animals, 3);
-  assert.equal(report.assets, 18);
+  assert.equal(report.animals, 4);
+  assert.equal(report.assets, 24);
 });
 
-test("三只运行时模型固定为批准的 Sketchfab CC BY 4.0 来源", async () => {
+test("三只恐龙运行时模型固定为批准的 Sketchfab CC BY 4.0 来源", async () => {
   const expected = {
     triceratops: ["27fdbc94f05b4e0c844db6fd679b2265", "JZG"],
     stegosaurus: ["9776fff241a54639b184d25a2777f63f", "Billy Jackman"],
@@ -30,6 +30,17 @@ test("三只运行时模型固定为批准的 Sketchfab CC BY 4.0 来源", async
     assert.match(model.source, new RegExp(uid));
     assert.doesNotMatch(JSON.stringify(model), /Quaternius/i);
   }
+});
+
+test("剑齿虎运行时模型固定为 DUN 原创 CC BY-SA 4.0 来源", async () => {
+  const manifest = JSON.parse(await readFile(new URL("../content/exhibits/smilodon/asset-manifest.json", import.meta.url), "utf8"));
+  const model = manifest.assets.find(({ type }) => type === "model");
+  assert.equal(model.creator, "DUN project");
+  assert.equal(model.license, "CC-BY-SA-4.0");
+  assert.equal(model.licenseUrl, "https://creativecommons.org/licenses/by-sa/4.0/");
+  assert.equal(model.redistributionApproved, true);
+  assert.equal(model.sketchfabUid, undefined);
+  assert.equal(model.originalSha256, "c8b558967f631818018aa974129f311c0bae53e0c32d971084cd945ec8be1f9f");
 });
 
 test("公共查看器只创建一个画布且包含降级与生命周期契约", async () => {
