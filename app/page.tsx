@@ -1,12 +1,12 @@
 const rooms = [
-  { icon: "◒", title: "大地展厅", subtitle: "LAND", text: "从三角龙、剑龙和霸王龙开始，观察角、背板与身体形状。", links: [["三角龙", "/exhibits/triceratops"], ["剑龙", "/exhibits/stegosaurus"], ["霸王龙", "/exhibits/tyrannosaurus"]] },
+  { icon: "◒", title: "大地展厅", subtitle: "LAND", text: "从三角龙、剑龙、霸王龙和剑齿虎开始，观察角、背板、身体形状和长牙。", links: [["三角龙", "/exhibits/triceratops"], ["剑龙", "/exhibits/stegosaurus"], ["霸王龙", "/exhibits/tyrannosaurus"], ["剑齿虎", "/exhibits/smilodon"]] },
   { icon: "≈", title: "远古海洋", subtitle: "OCEAN", text: "潜入蓝色深处，认识曾经生活在海里的巨兽。", links: undefined },
   { icon: "⌁", title: "天空之上", subtitle: "SKY", text: "抬头看看，翼龙怎样借助风飞过史前世界。", links: undefined },
 ];
 
 const promises = [
   ["01", "一起观察", "不急着给答案，先和孩子说出你们看到了什么。"],
-  ["02", "轻轻聆听", "没有自动播放，由孩子决定什么时候听一小段故事。"],
+  ["02", "轻轻诂听", "没有自动播放，由孩子决定什么时候听一小段故事。"],
   ["03", "带着问题离开", "每次参观只留一个问题，让好奇心延续到屏幕之外。"],
 ];
 
@@ -35,7 +35,7 @@ export default function Home() {
             <div className="dino-horn horn-one" /><div className="dino-horn horn-two" /><div className="dino-eye" />
           </div>
           <div className="ground-line" />
-          <div className="specimen-label"><span>今日相遇</span><strong>三角龙</strong><small>TRICERATOPS · 晚白垩世</small></div>
+          <div className="specimen-label"><span>今日相遇</span><strong>三角龙</strong><small>TRICERATOPS · 晚白亓世</small></div>
         </div>
       </section>
 
