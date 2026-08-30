@@ -19,6 +19,9 @@ export default async function ExhibitPage({ params }: { params: Promise<{ slug: 
   const previous = museumCatalog[(index - 1 + museumCatalog.length) % museumCatalog.length];
   const next = museumCatalog[(index + 1) % museumCatalog.length];
   const model = animal.manifest.assets.find(({ type }) => type === "model")!;
+  const licenseLabel = model.license === "CC-BY-SA-4.0" ? "CC BY-SA 4.0" : "CC BY 4.0";
+  const licenseHref = model.licenseUrl ?? (model.license === "CC-BY-SA-4.0" ? "https://creativecommons.org/licenses/by-sa/4.0/" : "https://creativecommons.org/licenses/by/4.0/");
+  const modelName = model.sketchfabUid ? `${model.title}（Sketchfab）` : model.title;
   return <main className={styles.page} id="content">
     <a className={styles.skipLink} href="#exhibit">跳到展品内容</a>
     <header className={styles.topbar}><Link className={styles.returnLink} href="/">← 返回博物馆</Link></header>
@@ -41,8 +44,8 @@ export default async function ExhibitPage({ params }: { params: Promise<{ slug: 
       </section>
       <details className={styles.sourcePanel} data-source-credit><summary>来源与创作说明</summary>
         <ul className={styles.sourceList}>{animal.sources.map((source) => <li key={source.id}><cite lang="en">{source.title}</cite> · <span lang="en">{source.publisher}</span><br />定位：<span lang="en">{source.locator}</span><br />查阅日期：{source.accessedOn}<br />{source.supports}<br /><a data-source-link href={source.url} target="_blank" rel="noreferrer">查看机构原页</a></li>)}</ul>
-        <p>模型：{model.creator} · <a href={model.source} target="_blank" rel="noreferrer">{model.title}（Sketchfab）</a> · CC BY 4.0。{model.modifications}</p>
-        <p>署名：{model.attribution}。许可证：<a href={model.licenseUrl} target="_blank" rel="noreferrer">Creative Commons Attribution 4.0</a>。</p>
+        <p>模型：{model.creator} · {model.source ? <a href={model.source} target="_blank" rel="noreferrer">{modelName}</a> : modelName} · {licenseLabel}。{model.modifications}</p>
+        <p>署名：{model.attribution}。许可证：<a href={licenseHref} target="_blank" rel="noreferrer">{licenseLabel === "CC BY-SA 4.0" ? "Creative Commons Attribution-ShareAlike 4.0" : "Creative Commons Attribution 4.0"}</a>。</p>
         <p>运行时模型 SHA-256：<code>{model.runtimeSha256}</code></p>
         <p>环境、poster 与缩略图：DUN 项目程序化创作 · CC BY-SA 4.0；不作为科学证据。</p>
         {animal.slug === "triceratops" ? <p>迁移前静态图像：DUN 项目（使用 OpenAI 图像生成工具创作） · CC BY-SA 4.0；保留于 <code>/media/triceratops/exhibit.webp</code> 作为降级参考。</p> : null}
