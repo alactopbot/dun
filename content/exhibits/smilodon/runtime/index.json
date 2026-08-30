@@ -3,7 +3,11 @@
     "model.glb.b64.0",
     "model.glb.b64.1",
     "model.glb.b64.2",
-    "model.glb.b64.3",
+    "model.glb.b64.3.p0",
+    "model.glb.b64.3.p1",
+    "model.glb.b64.3.p2",
+    "model.glb.b64.3.p3",
+    "model.glb.b64.3.p4",
     "model.glb.b64.4",
     "model.glb.b64.5"
   ],
@@ -13,7 +17,11 @@
     "landscape.webp.b64.2"
   ],
   "public/museum/animals/smilodon/backgrounds/portrait.webp": [
-    "portrait.webp.b64.0",
+    "portrait.webp.b64.0.p0",
+    "portrait.webp.b64.0.p1",
+    "portrait.webp.b64.0.p2",
+    "portrait.webp.b64.0.p3",
+    "portrait.webp.b64.0.p4",
     "portrait.webp.b64.1"
   ],
   "public/museum/animals/smilodon/images/poster-landscape.webp": [
@@ -22,7 +30,11 @@
     "poster-landscape.webp.b64.2"
   ],
   "public/museum/animals/smilodon/images/poster-portrait.webp": [
-    "poster-portrait.webp.b64.0",
+    "poster-portrait.webp.b64.0.p0",
+    "poster-portrait.webp.b64.0.p1",
+    "poster-portrait.webp.b64.0.p2",
+    "poster-portrait.webp.b64.0.p3",
+    "poster-portrait.webp.b64.0.p4",
     "poster-portrait.webp.b64.1",
     "poster-portrait.webp.b64.2"
   ],
