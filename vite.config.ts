@@ -7,6 +7,7 @@ const localBindingConfig = {
 };
 
 export default defineConfig(async () => {
+  await import("./scripts/assets/materialize-generated.mjs");
   // Keep Wrangler and Miniflare state project-local. These are non-secret tool
   // settings; application environment belongs in ignored `.env*` files.
   process.env.WRANGLER_WRITE_LOGS ??= "false";
