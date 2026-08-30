@@ -1,0 +1,32 @@
+{
+  "public/museum/animals/smilodon/model/model.glb": [
+    "model.glb.b64.0",
+    "model.glb.b64.1",
+    "model.glb.b64.2",
+    "model.glb.b64.3",
+    "model.glb.b64.4",
+    "model.glb.b64.5"
+  ],
+  "public/museum/animals/smilodon/backgrounds/landscape.webp": [
+    "landscape.webp.b64.0",
+    "landscape.webp.b64.1",
+    "landscape.webp.b64.2"
+  ],
+  "public/museum/animals/smilodon/backgrounds/portrait.webp": [
+    "portrait.webp.b64.0",
+    "portrait.webp.b64.1"
+  ],
+  "public/museum/animals/smilodon/images/poster-landscape.webp": [
+    "poster-landscape.webp.b64.0",
+    "poster-landscape.webp.b64.1",
+    "poster-landscape.webp.b64.2"
+  ],
+  "public/museum/animals/smilodon/images/poster-portrait.webp": [
+    "poster-portrait.webp.b64.0",
+    "poster-portrait.webp.b64.1",
+    "poster-portrait.webp.b64.2"
+  ],
+  "public/museum/animals/smilodon/images/thumbnail.webp": [
+    "thumbnail.webp.b64"
+  ]
+}
