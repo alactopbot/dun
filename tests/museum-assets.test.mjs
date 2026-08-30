@@ -9,8 +9,8 @@ test("正式动物素材通过 fail-closed provenance、哈希和预算校验", 
   const { validateMuseumAssets } = await import("../scripts/assets/validate.mjs");
   const report = await validateMuseumAssets();
   assert.deepEqual(report.errors, []);
-  assert.equal(report.animals, 3);
-  assert.equal(report.assets, 18);
+  assert.equal(report.animals, 4);
+  assert.equal(report.assets, 24);
 });
 
 test("三只运行时模型固定为批准的 Sketchfab CC BY 4.0 来源", async () => {
