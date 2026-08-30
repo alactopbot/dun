@@ -10,11 +10,12 @@ async function request(pathname) {
   }, { waitUntil() {}, passThroughOnException() {} });
 }
 
-test("入口和公共参数化路由服务端渲染三只动物", async () => {
+test("入口和公共参数化路由服务端渲染四只动物", async () => {
   const entrance = await (await request("/")).text();
   assert.match(entrance, /href="\/exhibits\/triceratops"/i);
   assert.match(entrance, /href="\/exhibits\/stegosaurus"/i);
   assert.match(entrance, /href="\/exhibits\/tyrannosaurus"/i);
+  assert.match(entrance, /href="\/exhibits\/smilodon"/i);
 
   for (const [slug, zh, en] of [["triceratops", "三角龙", "Triceratops"], ["stegosaurus", "剑龙", "Stegosaurus"], ["tyrannosaurus", "霸王龙", "Tyrannosaurus rex"]]) {
     const response = await request(`/exhibits/${slug}`);
@@ -35,6 +36,17 @@ test("入口和公共参数化路由服务端渲染三只动物", async () => {
     assert.match(html, /CC BY 4\.0/);
     assert.doesNotMatch(html, /Quaternius/);
   }
+
+  const smilodonResponse = await request("/exhibits/smilodon");
+  assert.equal(smilodonResponse.status, 200);
+  const smilodon = await smilodonResponse.text();
+  assert.match(smilodon, /<h1[^>]*>[^<]*剑齿虎/i);
+  assert.match(smilodon, /Smilodon fatalis/);
+  assert.match(smilodon, /data-animal-stage/);
+  assert.match(smilodon, /CC BY-SA 4\.0/);
+  assert.match(smilodon, /DUN project/);
+  assert.doesNotMatch(smilodon, /Sketchfab/);
+  assert.doesNotMatch(smilodon, /Quaternius/);
 
   assert.equal((await request("/exhibits/not-an-animal")).status, 404);
 });
@@ -60,5 +72,17 @@ test("剑龙页面保留经批准的双语事实和观察提示", async () => {
     "它生活在约 1.52 亿至 1.45 亿年前的晚侏罗世，用四条腿行走。",
     "科学家仍不确定这些骨板的用途",
     "离开屏幕后，找一找从小到大排列的形状。",
+  ]) assert.match(html, new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+});
+
+test("剑齿虎页面保留经批准的双语事实和观察提示", async () => {
+  const html = await (await request("/exhibits/smilodon")).text();
+  for (const text of [
+    "先看看它的长牙、短尾巴和强壮的前腿，再慢慢打开事实卡片。",
+    "Look at its long teeth, short tail, and strong front legs before opening the fact cards.",
+    "人们常叫它“剑齿虎”，但它并不是真正的老虎",
+    "剑齿虎生活在北美和南美，大约在一万年前消失",
+    "它上颌有两颗特别长的犬齿",
+    "离开屏幕后，找一找又长又弯的形状。",
   ]) assert.match(html, new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 });
