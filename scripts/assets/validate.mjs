@@ -7,9 +7,10 @@ import { validateBytes as validateGltfBytes, version as gltfValidatorVersion } f
 const root = resolve(fileURLToPath(new URL("../../", import.meta.url)));
 const sha256 = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const approvedModels = {
-  triceratops: { uid: "27fdbc94f05b4e0c844db6fd679b2265", creator: "JZG", originalSha256: "94ce54a32b2e3fe5aa1d296db61f843c0b8a266430a70e00ce94537356fda0ef" },
-  stegosaurus: { uid: "9776fff241a54639b184d25a2777f63f", creator: "Billy Jackman", originalSha256: "67a73c5e4fcbf68db94be467f52ef0aef5ad8c29dba647476471253b7988dbc2" },
-  tyrannosaurus: { uid: "6465a297fa784598adc49f6e0042d449", creator: "Marcel Schanz", originalSha256: "6d2dee6ffe15e8ea30a87d71a466c14db68220c97f1bed6a8800532196a64705" },
+  triceratops: { kind: "sketchfab", uid: "27fdbc94f05b4e0c844db6fd679b2265", creator: "JZG", originalSha256: "94ce54a32b2e3fe5aa1d296db61f843c0b8a266430a70e00ce94537356fda0ef" },
+  stegosaurus: { kind: "sketchfab", uid: "9776fff241a54639b184d25a2777f63f", creator: "Billy Jackman", originalSha256: "67a73c5e4fcbf68db94be467f52ef0aef5ad8c29dba647476471253b7988dbc2" },
+  tyrannosaurus: { kind: "sketchfab", uid: "6465a297fa784598adc49f6e0042d449", creator: "Marcel Schanz", originalSha256: "6d2dee6ffe15e8ea30a87d71a466c14db68220c97f1bed6a8800532196a64705" },
+  smilodon: { kind: "dun", creator: "DUN project", license: "CC-BY-SA-4.0", originalSha256: "c8b558967f631818018aa974129f311c0bae53e0c32d971084cd945ec8be1f9f" },
 };
 
 async function inspectGlb(bytes, errors, label) {
@@ -42,6 +43,7 @@ async function inspectGlb(bytes, errors, label) {
 }
 
 export async function validateMuseumAssets() {
+  await import("./materialize-generated.mjs");
   const errors = [];
   const exhibitsDir = resolve(root, "content/exhibits");
   const animals = (await readdir(exhibitsDir, { withFileTypes: true })).filter((entry) => entry.isDirectory());
@@ -71,7 +73,12 @@ export async function validateMuseumAssets() {
       if (asset.type === "model") {
         if (!asset.originalSha256 || bytes.length > 20 * 1024 * 1024) errors.push(`${asset.path}: model provenance or budget failure`);
         const approved = approvedModels[animal.name];
-        if (!approved || asset.sketchfabUid !== approved.uid || asset.creator !== approved.creator || asset.originalSha256 !== approved.originalSha256 || asset.license !== "CC-BY-4.0" || asset.licenseUrl !== "https://creativecommons.org/licenses/by/4.0/" || !asset.source?.includes(approved.uid) || !asset.title || !asset.attribution || !asset.modifications || !/^\d{4}-\d{2}-\d{2}$/.test(asset.downloadedAt ?? "")) errors.push(`${asset.path}: unapproved or incomplete Sketchfab provenance`);
+        if (!approved) errors.push(`${asset.path}: unapproved or incomplete Sketchfab provenance`);
+        else if (approved.kind === "sketchfab") {
+          if (asset.sketchfabUid !== approved.uid || asset.creator !== approved.creator || asset.originalSha256 !== approved.originalSha256 || asset.license !== "CC-BY-4.0" || asset.licenseUrl !== "https://creativecommons.org/licenses/by/4.0/" || !asset.source?.includes(approved.uid) || !asset.title || !asset.attribution || !asset.modifications || !/^\d{4}-\d{2}-\d{2}$/.test(asset.downloadedAt ?? "")) errors.push(`${asset.path}: unapproved or incomplete Sketchfab provenance`);
+        } else if (approved.kind === "dun") {
+          if (asset.creator !== approved.creator || asset.license !== approved.license || asset.originalSha256 !== approved.originalSha256 || asset.licenseUrl !== "https://creativecommons.org/licenses/by-sa/4.0/" || asset.sketchfabUid || asset.source || !asset.title || !asset.attribution || !asset.modifications || !/^\d{4}-\d{2}-\d{2}$/.test(asset.downloadedAt ?? "")) errors.push(`${asset.path}: unapproved or incomplete DUN provenance`);
+        }
         await inspectGlb(bytes, errors, asset.path);
       }
     }
