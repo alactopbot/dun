@@ -1,5 +1,5 @@
 const rooms = [
-  { icon: "◒", title: "大地展厅", subtitle: "LAND", text: "从三角龙、剑龙和霸王龙开始，观察角、背板与身体形状。", links: [["三角龙", "/exhibits/triceratops"], ["剑龙", "/exhibits/stegosaurus"], ["霸王龙", "/exhibits/tyrannosaurus"]] },
+  { icon: "◒", title: "大地展厅", subtitle: "LAND", text: "从三角龙、剑龙、霸王龙和剑齿虎开始，观察角、背板、身体形状与长牙。", links: [["三角龙", "/exhibits/triceratops"], ["剑龙", "/exhibits/stegosaurus"], ["霸王龙", "/exhibits/tyrannosaurus"], ["剑齿虎", "/exhibits/smilodon"]] },
   { icon: "≈", title: "远古海洋", subtitle: "OCEAN", text: "潜入蓝色深处，认识曾经生活在海里的巨兽。", links: undefined },
   { icon: "⌁", title: "天空之上", subtitle: "SKY", text: "抬头看看，翼龙怎样借助风飞过史前世界。", links: undefined },
 ];
@@ -35,14 +35,14 @@ export default function Home() {
             <div className="dino-horn horn-one" /><div className="dino-horn horn-two" /><div className="dino-eye" />
           </div>
           <div className="ground-line" />
-          <div className="specimen-label"><span>今日相遇</span><strong>三角龙</strong><small>TRICERATOPS · 晚白垩世</small></div>
+          <div className="specimen-label"><span>今日相遇</span><strong>三角龙</strong><small>TRICERATOPS · 晚白亚世</small></div>
         </div>
       </section>
 
       <section className="rooms section" id="museum">
         <div className="section-heading"><p className="eyebrow">THREE ROOMS, ENDLESS QUESTIONS</p><h2>从哪里开始探索？</h2></div>
         <div className="room-grid">
-          {rooms.map((room) => <article className="room-card" key={room.title}><div className="room-icon" aria-hidden="true">{room.icon}</div><p>{room.subtitle}</p><h3>{room.title}</h3><span>{room.text}</span>{room.links ? <div className="exhibit-links">{room.links.map(([name, href]) => <a className="coming" href={href} key={href}>参观{name}展品 →</a>)}</div> : <span className="coming">逐步开放</span>}</article>)}
+          {rooms.map((room) => <article className="room-card" key={room.title}><div className="room-icon" aria-hidden="true">{room.icon}</div><p>{room.subtitle}</p><h3>{room.title}</h3><span>{room.text}</span>{room.links ? <div className="exhibit-links">{room.links.map(([name, href]) => <a className="coming" href={href} key={href}>参观{name}展品 →</a>)}</div> : <span className="coming">逐步开放</span>)}</article>)}
         </div>
       </section>
 
