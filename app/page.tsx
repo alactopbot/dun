@@ -6,7 +6,7 @@ const rooms = [
 
 const promises = [
   ["01", "一起观察", "不急着给答案，先和孩子说出你们看到了什么。"],
-  ["02", "轻轻诂听", "没有自动播放，由孩子决定什么时候听一小段故事。"],
+  ["02", "轻轻聆听", "没有自动播放，由孩子决定什么时候听一小段故事。"],
   ["03", "带着问题离开", "每次参观只留一个问题，让好奇心延续到屏幕之外。"],
 ];
 
@@ -35,7 +35,7 @@ export default function Home() {
             <div className="dino-horn horn-one" /><div className="dino-horn horn-two" /><div className="dino-eye" />
           </div>
           <div className="ground-line" />
-          <div className="specimen-label"><span>今日相遇</span><strong>三角龙</strong><small>TRICERATOPS · 晚白亓世</small></div>
+          <div className="specimen-label"><span>今日相遇</span><strong>三角龙</strong><small>TRICERATOPS · 晚白垩世</small></div>
         </div>
       </section>
 
