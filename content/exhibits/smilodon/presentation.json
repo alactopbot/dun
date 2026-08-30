@@ -1,0 +1,9 @@
+{
+  "cameraFov": 38,
+  "cameraDirection": [0.7, -1, 0.32],
+  "cameraDistanceFactor": 1.9,
+  "targetHeightRatio": 0.48,
+  "minDistanceFactor": 0.72,
+  "maxDistanceFactor": 2.8,
+  "autoRotateRadiansPerSecond": 0.035
+}
