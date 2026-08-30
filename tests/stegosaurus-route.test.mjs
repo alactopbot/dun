@@ -10,13 +10,19 @@ async function request(pathname) {
   }, { waitUntil() {}, passThroughOnException() {} });
 }
 
-test("入口和公共参数化路由服务端渲染三只动物", async () => {
+test("入口和公共参数化路由服务端渲染已发布动物", async () => {
   const entrance = await (await request("/")).text();
   assert.match(entrance, /href="\/exhibits\/triceratops"/i);
   assert.match(entrance, /href="\/exhibits\/stegosaurus"/i);
   assert.match(entrance, /href="\/exhibits\/tyrannosaurus"/i);
+  assert.match(entrance, /href="\/exhibits\/smilodon"/i);
 
-  for (const [slug, zh, en] of [["triceratops", "三角龙", "Triceratops"], ["stegosaurus", "剑龙", "Stegosaurus"], ["tyrannosaurus", "霸王龙", "Tyrannosaurus rex"]]) {
+  for (const [slug, zh, en, sketchfab] of [
+    ["triceratops", "三角龙", "Triceratops", true],
+    ["stegosaurus", "剑龙", "Stegosaurus", true],
+    ["tyrannosaurus", "霸王龙", "Tyrannosaurus rex", true],
+    ["smilodon", "剑齿虎", "Smilodon", false],
+  ]) {
     const response = await request(`/exhibits/${slug}`);
     assert.equal(response.status, 200);
     const html = await response.text();
@@ -31,8 +37,13 @@ test("入口和公共参数化路由服务端渲染三只动物", async () => {
     assert.match(html, /缩小/);
     assert.match(html, /恢复初始视角/);
     assert.match(html, /aria-current="page"/);
-    assert.match(html, /Sketchfab/);
-    assert.match(html, /CC BY 4\.0/);
+    if (sketchfab) {
+      assert.match(html, /Sketchfab/);
+      assert.match(html, /CC BY 4\.0/);
+    } else {
+      assert.doesNotMatch(html, /Sketchfab/);
+      assert.match(html, /CC BY-SA 4\.0/);
+    }
     assert.doesNotMatch(html, /Quaternius/);
   }
 
@@ -60,5 +71,17 @@ test("剑龙页面保留经批准的双语事实和观察提示", async () => {
     "它生活在约 1.52 亿至 1.45 亿年前的晚侏罗世，用四条腿行走。",
     "科学家仍不确定这些骨板的用途",
     "离开屏幕后，找一找从小到大排列的形状。",
+  ]) assert.match(html, new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
+});
+
+test("剑齿虎页面保留经批准的双语事实和观察提示", async () => {
+  const html = await (await request("/exhibits/smilodon")).text();
+  for (const text of [
+    "先看看它的长牙和壮壮的身体，再慢慢打开事实卡片。",
+    "Look at its long teeth and sturdy body before opening the fact cards.",
+    "人们常叫它剑齿虎，科学家叫它 Smilodon。它的上门牙像一把长长的刀；它是一种猫科动物，并不是今天的老虎。",
+    "它有两颗很长、像短剑一样的上门牙；其中一种剑齿虎的犬齿大约有 18 厘米长。",
+    "它生活在冰河时期的美洲，大约 250 万年前到 1 万多年前。",
+    "离开屏幕后，找一找又长又弯的形状。",
   ]) assert.match(html, new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
 });
