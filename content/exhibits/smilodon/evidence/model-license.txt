@@ -1,0 +1,7 @@
+Smilodon by DUN project
+Original quiet low-poly reconstruction created for the DUN museum.
+
+Licensed under Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0):
+https://creativecommons.org/licenses/by-sa/4.0/
+
+License and attribution recorded from the original Blender export asset.extras on 2026-08-30. DUN centered and grounded the model without adding third-party geometry, then generated new hash-bound museum preview images.
