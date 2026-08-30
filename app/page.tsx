@@ -1,5 +1,5 @@
 const rooms = [
-  { icon: "◒", title: "大地展厅", subtitle: "LAND", text: "从三角龙、剑龙和霸王龙开始，观察角、背板与身体形状。", links: [["三角龙", "/exhibits/triceratops"], ["剑龙", "/exhibits/stegosaurus"], ["霸王龙", "/exhibits/tyrannosaurus"]] },
+  { icon: "◒", title: "大地展厅", subtitle: "LAND", text: "从三角龙、剑龙、霸王龙和剑齿虎开始，观察角、背板、身体形状和长牙。", links: [["三角龙", "/exhibits/triceratops"], ["剑龙", "/exhibits/stegosaurus"], ["霸王龙", "/exhibits/tyrannosaurus"], ["剑齿虎", "/exhibits/smilodon"]] },
   { icon: "≈", title: "远古海洋", subtitle: "OCEAN", text: "潜入蓝色深处，认识曾经生活在海里的巨兽。", links: undefined },
   { icon: "⌁", title: "天空之上", subtitle: "SKY", text: "抬头看看，翼龙怎样借助风飞过史前世界。", links: undefined },
 ];
