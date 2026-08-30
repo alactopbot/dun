@@ -1,9 +1,10 @@
 import { stegosaurusExhibit } from "../../content/exhibits/stegosaurus/exhibit";
+import { smilodonExhibit } from "../../content/exhibits/smilodon/exhibit";
 import { triceratopsExhibit } from "../../content/exhibits/triceratops/exhibit";
 import { tyrannosaurusExhibit } from "../../content/exhibits/tyrannosaurus/exhibit";
 import { validateAnimal, type MuseumAnimal } from "./schema";
 
-export const museumCatalog = [triceratopsExhibit, stegosaurusExhibit, tyrannosaurusExhibit] as const satisfies readonly MuseumAnimal[];
+export const museumCatalog = [triceratopsExhibit, stegosaurusExhibit, tyrannosaurusExhibit, smilodonExhibit] as const satisfies readonly MuseumAnimal[];
 for (const animal of museumCatalog) {
   const errors = validateAnimal(animal);
   if (errors.length) throw new Error(`${animal.slug} catalog validation failed: ${errors.join("; ")}`);
