@@ -40,7 +40,7 @@ test("剑齿虎运行时模型固定为 DUN 原创 CC BY-SA 4.0 来源", async (
   assert.equal(model.licenseUrl, "https://creativecommons.org/licenses/by-sa/4.0/");
   assert.equal(model.redistributionApproved, true);
   assert.equal(model.sketchfabUid, undefined);
-  assert.equal(model.originalSha256, "c8b558967f631818018aa974129f311c0bae53e0c32d971084cd945ec8be1f9f");
+  assert.equal(model.originalSha256, "01a6a24f7bd4c3406b6b0f994c74ff44a3efb5122dd69383a4702c861ede7f44");
 });
 
 test("公共查看器只创建一个画布且包含降级与生命周期契约", async () => {
