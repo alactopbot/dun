@@ -1,0 +1,92 @@
+{
+  "animalId": "smilodon",
+  "presentationSha256": "f965e6edbd8706ad0c8c38ab783cc3ff70f46156b6229b0d8c60371426fd5834",
+  "assets": [
+    {
+      "type": "model",
+      "path": "public/museum/animals/smilodon/model/model.glb",
+      "url": "/museum/animals/smilodon/model/model.glb?v=c8b558967f63",
+      "bytes": 13312,
+      "runtimeSha256": "c8b558967f631818018aa974129f311c0bae53e0c32d971084cd945ec8be1f9f",
+      "originalSha256": "c8b558967f631818018aa974129f311c0bae53e0c32d971084cd945ec8be1f9f",
+      "license": "CC-BY-SA-4.0",
+      "creator": "DUN project",
+      "title": "Smilodon",
+      "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "attribution": "Smilodon by DUN project, licensed CC BY-SA 4.0",
+      "modifications": "Original DUN low-poly reconstruction for the quiet museum stage; not a fossil scan. DUN generated hash-bound posters and backgrounds from the same presentation.",
+      "downloadedAt": "2026-08-30",
+      "redistributionApproved": true
+    },
+    {
+      "type": "background",
+      "variant": "landscape",
+      "path": "public/museum/animals/smilodon/backgrounds/landscape.webp",
+      "url": "/museum/animals/smilodon/backgrounds/landscape.webp?v=394089799c98",
+      "bytes": 5650,
+      "width": 1280,
+      "height": 720,
+      "runtimeSha256": "394089799c986cb97402426121d1f87f50d454852d616afc147212fbd0e938cb",
+      "license": "CC-BY-SA-4.0",
+      "creator": "DUN project",
+      "redistributionApproved": true
+    },
+    {
+      "type": "background",
+      "variant": "portrait",
+      "path": "public/museum/animals/smilodon/backgrounds/portrait.webp",
+      "url": "/museum/animals/smilodon/backgrounds/portrait.webp?v=9d453d78e270",
+      "bytes": 4648,
+      "width": 720,
+      "height": 1280,
+      "runtimeSha256": "9d453d78e2701cd0d2f94c170efc0d36054f5eaa898856adff2a41c8c8ef54d5",
+      "license": "CC-BY-SA-4.0",
+      "creator": "DUN project",
+      "redistributionApproved": true
+    },
+    {
+      "type": "poster",
+      "variant": "landscape",
+      "path": "public/museum/animals/smilodon/images/poster-landscape.webp",
+      "url": "/museum/animals/smilodon/images/poster-landscape.webp?v=8409692b1117",
+      "bytes": 7164,
+      "width": 1280,
+      "height": 720,
+      "runtimeSha256": "8409692b11170c6244f7fad319918f1d2ef719d9195f3cb2e3093dc60b1acc79",
+      "modelSha256": "c8b558967f631818018aa974129f311c0bae53e0c32d971084cd945ec8be1f9f",
+      "presentationSha256": "f965e6edbd8706ad0c8c38ab783cc3ff70f46156b6229b0d8c60371426fd5834",
+      "license": "CC-BY-SA-4.0",
+      "creator": "DUN project",
+      "redistributionApproved": true
+    },
+    {
+      "type": "poster",
+      "variant": "portrait",
+      "path": "public/museum/animals/smilodon/images/poster-portrait.webp",
+      "url": "/museum/animals/smilodon/images/poster-portrait.webp?v=eb36b08f4b04",
+      "bytes": 6162,
+      "width": 720,
+      "height": 1280,
+      "runtimeSha256": "eb36b08f4b0485ba1060b0994ed1108675f8f33f8f7405668a46569fe22a0aab",
+      "modelSha256": "c8b558967f631818018aa974129f311c0bae53e0c32d971084cd945ec8be1f9f",
+      "presentationSha256": "f965e6edbd8706ad0c8c38ab783cc3ff70f46156b6229b0d8c60371426fd5834",
+      "license": "CC-BY-SA-4.0",
+      "creator": "DUN project",
+      "redistributionApproved": true
+    },
+    {
+      "type": "thumbnail",
+      "path": "public/museum/animals/smilodon/images/thumbnail.webp",
+      "url": "/museum/animals/smilodon/images/thumbnail.webp?v=a051b33e11fe",
+      "bytes": 1990,
+      "width": 320,
+      "height": 320,
+      "runtimeSha256": "a051b33e11fec938815b8d12567383028c7539665894feabe2982c109fa1da43",
+      "modelSha256": "c8b558967f631818018aa974129f311c0bae53e0c32d971084cd945ec8be1f9f",
+      "presentationSha256": "f965e6edbd8706ad0c8c38ab783cc3ff70f46156b6229b0d8c60371426fd5834",
+      "license": "CC-BY-SA-4.0",
+      "creator": "DUN project",
+      "redistributionApproved": true
+    }
+  ]
+}

@@ -6,7 +6,7 @@ export type RuntimeAsset = Readonly<{ type: AssetType; variant?: "landscape" | "
 export type AssetManifest = Readonly<{ animalId: string; presentationSha256: string; assets: readonly RuntimeAsset[] }>;
 export type Presentation = Readonly<{ cameraFov: number; cameraDirection: readonly [number, number, number]; cameraDistanceFactor?: number; targetHeightRatio: number; minDistanceFactor: number; maxDistanceFactor: number; autoRotateRadiansPerSecond: number }>;
 export type MuseumAnimal = Readonly<{
-  slug: "triceratops" | "stegosaurus" | "tyrannosaurus"; status: "published"; name: LocalizedText; scientificName: string;
+  slug: "triceratops" | "stegosaurus" | "tyrannosaurus" | "smilodon"; status: "published"; name: LocalizedText; scientificName: string;
   introduction: LocalizedText; stageAlt: LocalizedText; adultNote: LocalizedText;
   prompts: readonly Readonly<{ id: string; prompt: LocalizedText }>[];
   facts: readonly Readonly<{ id: string; text: LocalizedText; sourceIds: readonly string[]; evidence: EvidenceLevel }>[];
